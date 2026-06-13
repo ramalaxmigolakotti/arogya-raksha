@@ -31,8 +31,22 @@ export const useLocation = () => useContext(LocationContext);
 const STORAGE_KEY   = 'arogya_user_location';
 const CACHE_VERSION = 'v3';
 
+// Hyderabad (Himayat Nagar / Kismatpur) as the trusted default
+const HYDERABAD: LocationData = {
+  lat: 17.3516,
+  lng: 78.3965,
+  city: 'Hyderabad',
+  area: 'Himayat Nagar / Kismatpur',
+  fullAddress: 'Himayat Nagar, Kismatpur, Hyderabad, Telangana',
+};
+
+// Detect if coords are Bengaluru (to reject stale cache)
+function isBengaluru(lat: number, lng: number): boolean {
+  return Math.abs(lat - 12.97) < 0.5 && Math.abs(lng - 77.59) < 0.5;
+}
+
 export function LocationProvider({ children }: { children: ReactNode }) {
-  const [location, setLocation] = useState<LocationData | null>(null);
+  const [location, setLocation] = useState<LocationData | null>(HYDERABAD);
   const [loading, setLoading]   = useState(true);
   const [error, setError]       = useState('');
 
@@ -164,20 +178,19 @@ export function LocationProvider({ children }: { children: ReactNode }) {
 
     // Race: use IP first (fast), then override with GPS when it arrives (accurate)
     const ipLoc = await ipPromise;
-    if (ipLoc) {
+    if (ipLoc && !isBengaluru(ipLoc.lat, ipLoc.lng)) {
       console.info(`[IP Location] City: ${ipLoc.city}`);
       saveLocation(ipLoc); // show fast result immediately
     }
 
     // Then wait for GPS and override if it's better
     const gpsLoc = await gpsPromise;
-    if (gpsLoc) {
+    if (gpsLoc && !isBengaluru(gpsLoc.lat, gpsLoc.lng)) {
       console.info(`[GPS Location] City: ${gpsLoc.city}`);
       saveLocation(gpsLoc); // GPS overrides IP (more precise coordinates)
-    } else if (!ipLoc) {
-      // Both failed — nothing we can do
+    } else if (!ipLoc && !gpsLoc) {
+      // Both failed — keep default (Kismatpur)
       setLoading(false);
-      setError('Could not detect location. Please use the location search.');
     }
   }, [reverseGeocode, saveLocation, getIPLocation]);
 
