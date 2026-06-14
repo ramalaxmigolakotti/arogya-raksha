@@ -10,12 +10,9 @@ export default function RootPage() {
 
   useEffect(() => {
     if (!isLoaded) return;
-    if (isSignedIn) {
-      router.replace('/dashboard');
-    } else {
-      router.replace('/sign-in');
-    }
-  }, [isSignedIn, isLoaded, router]);
+    // Always redirect to dashboard, sign-in is optional now
+    router.replace('/dashboard');
+  }, [isLoaded, router]);
 
   // Loading state while checking auth
   return (
