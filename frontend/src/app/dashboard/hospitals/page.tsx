@@ -586,33 +586,18 @@ export default function Hospitals() {
   }, []);
 
   // ── Geolocation ──────────────────────────────────────────────────────────
+  const { location: globalLocation } = useLocation();
+
   useEffect(() => {
-    const saved = localStorage.getItem('arogya_user_location');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed.lat && parsed.lng) {
-          setUserLocation({ lat: parsed.lat, lng: parsed.lng });
-          setLocationAddress(parsed.address || '');
-          setLocationStatus('granted');
-          fetchNearbyHospitals(parsed.lat, parsed.lng, 5000);
-          return;
-        }
-      } catch { /* ignore */ }
+    if (globalLocation) {
+      setUserLocation({ lat: globalLocation.lat, lng: globalLocation.lng });
+      setLocationAddress(globalLocation.fullAddress || globalLocation.city);
+      setLocationStatus('granted');
+      fetchNearbyHospitals(globalLocation.lat, globalLocation.lng, searchRadius, facilityFilter);
+    } else {
+      setLocationStatus('loading');
     }
-    if (!navigator.geolocation) { setLocationStatus('denied'); useFallback(); return; }
-    navigator.geolocation.getCurrentPosition(
-      pos => {
-        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        setUserLocation(loc); setLocationStatus('granted');
-        reverseGeocode(loc.lat, loc.lng);
-        fetchNearbyHospitals(loc.lat, loc.lng, 5000);
-        updateGlobalLocation(loc.lat, loc.lng);
-      },
-      () => { setLocationStatus('denied'); useFallback(); },
-      { enableHighAccuracy: true, timeout: 30000, maximumAge: 60000 }
-    );
-  }, []);
+  }, [globalLocation, searchRadius, facilityFilter]);
 
   function useFallback() {
     const fb = { lat: 17.3850, lng: 78.4867 }; // Hyderabad
