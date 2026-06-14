@@ -1,0 +1,182 @@
+{
+  "name": "Liver Disease Risk",
+  "description": "Based on 1700 patient records. Predicts liver disease risk from lifestyle factors.",
+  "totalPatients": 1700,
+  "fields": [
+    {
+      "key": "age",
+      "label": "Age",
+      "type": "number",
+      "min": 18,
+      "max": 90,
+      "unit": "years"
+    },
+    {
+      "key": "gender",
+      "label": "Gender",
+      "type": "select",
+      "options": [
+        "Male",
+        "Female"
+      ]
+    },
+    {
+      "key": "bmi",
+      "label": "BMI",
+      "type": "number",
+      "min": 15,
+      "max": 50
+    },
+    {
+      "key": "alcohol",
+      "label": "Alcohol Consumption (drinks/week)",
+      "type": "number",
+      "min": 0,
+      "max": 20
+    },
+    {
+      "key": "smoking",
+      "label": "Smoking",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "key": "diabetes",
+      "label": "Diabetes?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "key": "hypertension",
+      "label": "Hypertension?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "key": "physicalActivity",
+      "label": "Physical Activity (hrs/week)",
+      "type": "number",
+      "min": 0,
+      "max": 20
+    }
+  ],
+  "riskFactors": {
+    "byAge": {
+      "20-34": {
+        "total": 403,
+        "positive": 183,
+        "rate": 45.4
+      },
+      "35-44": {
+        "total": 262,
+        "positive": 119,
+        "rate": 45.4
+      },
+      "45-54": {
+        "total": 308,
+        "positive": 169,
+        "rate": 54.9
+      },
+      "55-64": {
+        "total": 261,
+        "positive": 177,
+        "rate": 67.8
+      },
+      "65+": {
+        "total": 466,
+        "positive": 288,
+        "rate": 61.8
+      }
+    },
+    "byBMI": {
+      "Underweight": {
+        "total": 243,
+        "positive": 97,
+        "rate": 39.9
+      },
+      "Normal": {
+        "total": 400,
+        "positive": 185,
+        "rate": 46.3
+      },
+      "Overweight": {
+        "total": 360,
+        "positive": 215,
+        "rate": 59.7
+      },
+      "Obese": {
+        "total": 697,
+        "positive": 439,
+        "rate": 63
+      }
+    },
+    "byAlcohol": {
+      "None (0)": {
+        "total": 83,
+        "positive": 28,
+        "rate": 33.7
+      },
+      "Low (1-5)": {
+        "total": 448,
+        "positive": 161,
+        "rate": 35.9
+      },
+      "Moderate (5-10)": {
+        "total": 411,
+        "positive": 173,
+        "rate": 42.1
+      },
+      "Heavy (10+)": {
+        "total": 758,
+        "positive": 574,
+        "rate": 75.7
+      }
+    },
+    "bySmoking": {
+      "yes": {
+        "total": 496,
+        "positive": 350,
+        "rate": 70.6
+      },
+      "no": {
+        "total": 1204,
+        "positive": 586,
+        "rate": 48.7
+      }
+    },
+    "byDiabetes": {
+      "yes": {
+        "total": 242,
+        "positive": 165,
+        "rate": 68.2
+      },
+      "no": {
+        "total": 1458,
+        "positive": 771,
+        "rate": 52.9
+      }
+    },
+    "byHypertension": {
+      "yes": {
+        "total": 263,
+        "positive": 197,
+        "rate": 74.9
+      },
+      "no": {
+        "total": 1437,
+        "positive": 739,
+        "rate": 51.4
+      }
+    }
+  },
+  "baseRate": 55.1
+}

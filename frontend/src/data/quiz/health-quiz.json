@@ -1,0 +1,61 @@
+{
+  "categories": [
+    {
+      "id": "nutrition",
+      "name": "Nutrition & Diet",
+      "icon": "🥗",
+      "questions": [
+        {
+          "question": "Which vitamin is produced when human skin is exposed to sunlight?",
+          "options": ["Vitamin A", "Vitamin B", "Vitamin C", "Vitamin D"],
+          "answer": 3,
+          "explanation": "Vitamin D is synthesized in the skin when exposed to UVB rays from sunlight."
+        },
+        {
+          "question": "Which mineral is essential for strong bones and teeth?",
+          "options": ["Iron", "Calcium", "Zinc", "Potassium"],
+          "answer": 1,
+          "explanation": "Calcium is the primary mineral that gives bones and teeth their strength."
+        }
+      ]
+    },
+    {
+      "id": "first-aid",
+      "name": "First Aid",
+      "icon": "🩹",
+      "questions": [
+        {
+          "question": "What is the first thing to do if someone is choking?",
+          "options": ["Call ambulance", "Give water", "5 back blows", "CPR"],
+          "answer": 2,
+          "explanation": "Deliver 5 back blows between the shoulder blades to dislodge the object."
+        },
+        {
+          "question": "What should you apply on a minor burn?",
+          "options": ["Ice", "Butter", "Cool running water", "Toothpaste"],
+          "answer": 2,
+          "explanation": "Cool running water for at least 10 minutes helps reduce burn damage."
+        }
+      ]
+    },
+    {
+      "id": "mental-health",
+      "name": "Mental Health",
+      "icon": "🧠",
+      "questions": [
+        {
+          "question": "How many hours of sleep do adults need per day?",
+          "options": ["4-5 hours", "5-6 hours", "7-9 hours", "10-12 hours"],
+          "answer": 2,
+          "explanation": "Adults need 7-9 hours of quality sleep per night for optimal health."
+        },
+        {
+          "question": "Which activity is most effective for reducing stress?",
+          "options": ["Watching TV", "Regular exercise", "Eating sweets", "Sleeping more"],
+          "answer": 1,
+          "explanation": "Regular physical exercise releases endorphins which naturally reduce stress."
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+{
+  "name": "Kidney Disease Risk",
+  "description": "Based on 400 patient records. Predicts chronic kidney disease risk.",
+  "totalPatients": 400,
+  "fields": [
+    {
+      "key": "age",
+      "label": "Age",
+      "type": "number",
+      "min": 1,
+      "max": 100,
+      "unit": "years"
+    },
+    {
+      "key": "bp",
+      "label": "Blood Pressure",
+      "type": "number",
+      "min": 40,
+      "max": 200,
+      "unit": "mmHg"
+    },
+    {
+      "key": "sugar",
+      "label": "Sugar Level",
+      "type": "number",
+      "min": 0,
+      "max": 5
+    },
+    {
+      "key": "hemoglobin",
+      "label": "Hemoglobin",
+      "type": "number",
+      "min": 3,
+      "max": 20,
+      "unit": "g/dL"
+    },
+    {
+      "key": "diabetes",
+      "label": "Diabetes?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "key": "hypertension",
+      "label": "Hypertension?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    }
+  ],
+  "riskFactors": {
+    "byAge": {
+      "20-34": {
+        "total": 48,
+        "positive": 13,
+        "rate": 27.1
+      },
+      "35-44": {
+        "total": 45,
+        "positive": 14,
+        "rate": 31.1
+      },
+      "45-54": {
+        "total": 81,
+        "positive": 54,
+        "rate": 66.7
+      },
+      "55-64": {
+        "total": 98,
+        "positive": 67,
+        "rate": 68.4
+      },
+      "65+": {
+        "total": 119,
+        "positive": 94,
+        "rate": 79
+      }
+    },
+    "byHemoglobin": {
+      "Low (<10)": {
+        "total": 72,
+        "positive": 72,
+        "rate": 100
+      },
+      "Normal (10-14)": {
+        "total": 151,
+        "positive": 120,
+        "rate": 79.5
+      },
+      "High (14+)": {
+        "total": 125,
+        "positive": 12,
+        "rate": 9.6
+      }
+    },
+    "bydm": {
+      "yes": {
+        "total": 137,
+        "positive": 137,
+        "rate": 100
+      },
+      "no": {
+        "total": 261,
+        "positive": 113,
+        "rate": 43.3
+      }
+    },
+    "byhtn": {
+      "yes": {
+        "total": 147,
+        "positive": 147,
+        "rate": 100
+      },
+      "no": {
+        "total": 251,
+        "positive": 103,
+        "rate": 41
+      }
+    }
+  },
+  "baseRate": 62.5
+}

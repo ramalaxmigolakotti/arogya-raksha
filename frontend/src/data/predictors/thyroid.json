@@ -1,0 +1,184 @@
+{
+  "name": "Thyroid Cancer Risk",
+  "description": "Based on 2,12,691 patient records. Predicts thyroid cancer risk from hormone levels and risk factors.",
+  "totalPatients": 212691,
+  "fields": [
+    {
+      "key": "age",
+      "label": "Age",
+      "type": "number",
+      "min": 18,
+      "max": 90,
+      "unit": "years"
+    },
+    {
+      "key": "gender",
+      "label": "Gender",
+      "type": "select",
+      "options": [
+        "Male",
+        "Female"
+      ]
+    },
+    {
+      "key": "tsh",
+      "label": "TSH Level",
+      "type": "number",
+      "min": 0,
+      "max": 15,
+      "unit": "mIU/L"
+    },
+    {
+      "key": "t3",
+      "label": "T3 Level",
+      "type": "number",
+      "min": 0,
+      "max": 5,
+      "unit": "ng/mL"
+    },
+    {
+      "key": "t4",
+      "label": "T4 Level",
+      "type": "number",
+      "min": 0,
+      "max": 20,
+      "unit": "µg/dL"
+    },
+    {
+      "key": "familyHistory",
+      "label": "Family History?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "key": "radiation",
+      "label": "Radiation Exposure?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "key": "iodineDeficiency",
+      "label": "Iodine Deficiency?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "key": "smoking",
+      "label": "Do you smoke?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    }
+  ],
+  "riskFactors": {
+    "byTSH": {
+      "Low (<1)": {
+        "total": 1813,
+        "positive": 301,
+        "rate": 16.6
+      },
+      "Normal (1-4)": {
+        "total": 6061,
+        "positive": 876,
+        "rate": 14.5
+      },
+      "Elevated (4-8)": {
+        "total": 8097,
+        "positive": 1208,
+        "rate": 14.9
+      },
+      "High (8+)": {
+        "total": 4029,
+        "positive": 606,
+        "rate": 15
+      }
+    },
+    "byAge": {
+      "20-34": {
+        "total": 4100,
+        "positive": 588,
+        "rate": 14.3
+      },
+      "35-44": {
+        "total": 2683,
+        "positive": 407,
+        "rate": 15.2
+      },
+      "45-54": {
+        "total": 2599,
+        "positive": 386,
+        "rate": 14.9
+      },
+      "55-64": {
+        "total": 2623,
+        "positive": 385,
+        "rate": 14.7
+      },
+      "65+": {
+        "total": 7995,
+        "positive": 1225,
+        "rate": 15.3
+      }
+    },
+    "byFamily_History": {
+      "No": {
+        "total": 14087,
+        "high": 1080,
+        "highRiskRate": 7.7
+      },
+      "Yes": {
+        "total": 5913,
+        "high": 1911,
+        "highRiskRate": 32.3
+      }
+    },
+    "byRadiation_Exposure": {
+      "Yes": {
+        "total": 3054,
+        "high": 901,
+        "highRiskRate": 29.5
+      },
+      "No": {
+        "total": 16946,
+        "high": 2090,
+        "highRiskRate": 12.3
+      }
+    },
+    "byIodine_Deficiency": {
+      "No": {
+        "total": 15057,
+        "high": 1584,
+        "highRiskRate": 10.5
+      },
+      "Yes": {
+        "total": 4943,
+        "high": 1407,
+        "highRiskRate": 28.5
+      }
+    },
+    "bySmoking": {
+      "No": {
+        "total": 15927,
+        "high": 2380,
+        "highRiskRate": 14.9
+      },
+      "Yes": {
+        "total": 4073,
+        "high": 611,
+        "highRiskRate": 15
+      }
+    }
+  },
+  "baseRate": 15
+}

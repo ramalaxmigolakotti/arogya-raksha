@@ -1,0 +1,249 @@
+{
+  "name": "Diabetes & Heart Disease Risk",
+  "description": "Based on the Framingham Heart Study dataset (4,238 patients). Predicts 10-year risk of coronary heart disease.",
+  "totalPatients": 4238,
+  "fields": [
+    {
+      "key": "age",
+      "label": "Age",
+      "type": "number",
+      "min": 20,
+      "max": 80,
+      "unit": "years"
+    },
+    {
+      "key": "gender",
+      "label": "Gender",
+      "type": "select",
+      "options": [
+        "Male",
+        "Female"
+      ]
+    },
+    {
+      "key": "smoking",
+      "label": "Do you smoke?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "key": "cigsPerDay",
+      "label": "Cigarettes per day (if smoker)",
+      "type": "number",
+      "min": 0,
+      "max": 70
+    },
+    {
+      "key": "sysBP",
+      "label": "Systolic Blood Pressure",
+      "type": "number",
+      "min": 80,
+      "max": 300,
+      "unit": "mmHg"
+    },
+    {
+      "key": "diaBP",
+      "label": "Diastolic Blood Pressure",
+      "type": "number",
+      "min": 40,
+      "max": 150,
+      "unit": "mmHg"
+    },
+    {
+      "key": "totChol",
+      "label": "Total Cholesterol",
+      "type": "number",
+      "min": 100,
+      "max": 600,
+      "unit": "mg/dL"
+    },
+    {
+      "key": "bmi",
+      "label": "BMI",
+      "type": "number",
+      "min": 15,
+      "max": 60
+    },
+    {
+      "key": "glucose",
+      "label": "Glucose Level",
+      "type": "number",
+      "min": 40,
+      "max": 400,
+      "unit": "mg/dL"
+    },
+    {
+      "key": "heartRate",
+      "label": "Heart Rate",
+      "type": "number",
+      "min": 40,
+      "max": 150,
+      "unit": "bpm"
+    },
+    {
+      "key": "bpMeds",
+      "label": "On BP Medication?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "key": "diabetes",
+      "label": "Diagnosed with Diabetes?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    }
+  ],
+  "riskFactors": {
+    "byAge": {
+      "20-34": {
+        "total": 24,
+        "positive": 0,
+        "rate": 0
+      },
+      "35-44": {
+        "total": 1401,
+        "positive": 92,
+        "rate": 6.6
+      },
+      "45-54": {
+        "total": 1496,
+        "positive": 223,
+        "rate": 14.9
+      },
+      "55-64": {
+        "total": 1150,
+        "positive": 267,
+        "rate": 23.2
+      },
+      "65+": {
+        "total": 167,
+        "positive": 62,
+        "rate": 37.1
+      }
+    },
+    "byBMI": {
+      "Underweight": {
+        "total": 57,
+        "positive": 8,
+        "rate": 14
+      },
+      "Normal": {
+        "total": 1869,
+        "positive": 227,
+        "rate": 12.1
+      },
+      "Overweight": {
+        "total": 1754,
+        "positive": 294,
+        "rate": 16.8
+      },
+      "Obese": {
+        "total": 539,
+        "positive": 105,
+        "rate": 19.5
+      }
+    },
+    "bySysBP": {
+      "Normal (<120)": {
+        "total": 1279,
+        "positive": 109,
+        "rate": 8.5
+      },
+      "Elevated (120-129)": {
+        "total": 947,
+        "positive": 113,
+        "rate": 11.9
+      },
+      "High Stage 1 (130-139)": {
+        "total": 729,
+        "positive": 105,
+        "rate": 14.4
+      },
+      "High Stage 2 (140+)": {
+        "total": 1283,
+        "positive": 317,
+        "rate": 24.7
+      }
+    },
+    "byChol": {
+      "Desirable (<200)": {
+        "total": 829,
+        "positive": 87,
+        "rate": 10.5
+      },
+      "Borderline (200-239)": {
+        "total": 1478,
+        "positive": 214,
+        "rate": 14.5
+      },
+      "High (240+)": {
+        "total": 1881,
+        "positive": 334,
+        "rate": 17.8
+      }
+    },
+    "byGlucose": {
+      "Normal (<100)": {
+        "total": 3489,
+        "positive": 510,
+        "rate": 14.6
+      },
+      "Pre-diabetic (100-125)": {
+        "total": 275,
+        "positive": 45,
+        "rate": 16.4
+      },
+      "Diabetic (126+)": {
+        "total": 86,
+        "positive": 39,
+        "rate": 45.3
+      }
+    },
+    "byGender": {
+      "male": {
+        "total": 1819,
+        "positive": 343,
+        "rate": 18.9
+      },
+      "female": {
+        "total": 2419,
+        "positive": 301,
+        "rate": 12.4
+      }
+    },
+    "bySmoking": {
+      "smoker": {
+        "total": 2094,
+        "positive": 333,
+        "rate": 15.9
+      },
+      "nonSmoker": {
+        "total": 2144,
+        "positive": 311,
+        "rate": 14.5
+      }
+    },
+    "byDiabetes": {
+      "diabetic": {
+        "total": 109,
+        "positive": 40,
+        "rate": 36.7
+      },
+      "nonDiabetic": {
+        "total": 4129,
+        "positive": 604,
+        "rate": 14.6
+      }
+    }
+  },
+  "baseRate": 15.2
+}

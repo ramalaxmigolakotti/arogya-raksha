@@ -1,0 +1,254 @@
+[
+  {
+    "id": 1,
+    "state": "Andhra Pradesh1",
+    "subDivisionalHospitals": 58,
+    "districtHospitals": 17,
+    "mobileUnits": 475
+  },
+  {
+    "id": 2,
+    "state": "Arunachal Pradesh",
+    "subDivisionalHospitals": 0,
+    "districtHospitals": 14,
+    "mobileUnits": 16
+  },
+  {
+    "id": 3,
+    "state": "Assam",
+    "subDivisionalHospitals": 13,
+    "districtHospitals": 24,
+    "mobileUnits": 27
+  },
+  {
+    "id": 4,
+    "state": "Bihar",
+    "subDivisionalHospitals": 40,
+    "districtHospitals": 36,
+    "mobileUnits": 48
+  },
+  {
+    "id": 5,
+    "state": "Chhattisgarh",
+    "subDivisionalHospitals": 17,
+    "districtHospitals": 17,
+    "mobileUnits": 0
+  },
+  {
+    "id": 6,
+    "state": "Goa",
+    "subDivisionalHospitals": 0,
+    "districtHospitals": 2,
+    "mobileUnits": 4
+  },
+  {
+    "id": 7,
+    "state": "Gujarat",
+    "subDivisionalHospitals": 26,
+    "districtHospitals": 24,
+    "mobileUnits": 88
+  },
+  {
+    "id": 8,
+    "state": "Haryana",
+    "subDivisionalHospitals": 25,
+    "districtHospitals": 21,
+    "mobileUnits": 6
+  },
+  {
+    "id": 9,
+    "state": "Himachal Pradesh",
+    "subDivisionalHospitals": 36,
+    "districtHospitals": 12,
+    "mobileUnits": 1
+  },
+  {
+    "id": 10,
+    "state": "Jammu & Kashmir+",
+    "subDivisionalHospitals": 0,
+    "districtHospitals": 22,
+    "mobileUnits": 13
+  },
+  {
+    "id": 11,
+    "state": "Jharkhand",
+    "subDivisionalHospitals": 10,
+    "districtHospitals": 21,
+    "mobileUnits": 100
+  },
+  {
+    "id": 12,
+    "state": "Karnataka1",
+    "subDivisionalHospitals": 146,
+    "districtHospitals": 31,
+    "mobileUnits": 28
+  },
+  {
+    "id": 13,
+    "state": "Kerala2",
+    "subDivisionalHospitals": 43,
+    "districtHospitals": 14,
+    "mobileUnits": 14
+  },
+  {
+    "id": 14,
+    "state": "Madhya Pradesh1",
+    "subDivisionalHospitals": 56,
+    "districtHospitals": 50,
+    "mobileUnits": 91
+  },
+  {
+    "id": 15,
+    "state": "Maharashtra",
+    "subDivisionalHospitals": 81,
+    "districtHospitals": 23,
+    "mobileUnits": 2
+  },
+  {
+    "id": 16,
+    "state": "Manipur1",
+    "subDivisionalHospitals": 1,
+    "districtHospitals": 7,
+    "mobileUnits": 18
+  },
+  {
+    "id": 17,
+    "state": "Meghalaya",
+    "subDivisionalHospitals": 1,
+    "districtHospitals": 10,
+    "mobileUnits": 7
+  },
+  {
+    "id": 18,
+    "state": "Mizoram",
+    "subDivisionalHospitals": 2,
+    "districtHospitals": 8,
+    "mobileUnits": 9
+  },
+  {
+    "id": 19,
+    "state": "Nagaland",
+    "subDivisionalHospitals": 0,
+    "districtHospitals": 11,
+    "mobileUnits": 11
+  },
+  {
+    "id": 20,
+    "state": "Odisha",
+    "subDivisionalHospitals": 26,
+    "districtHospitals": 32,
+    "mobileUnits": 240
+  },
+  {
+    "id": 21,
+    "state": "Punjab",
+    "subDivisionalHospitals": 35,
+    "districtHospitals": 20,
+    "mobileUnits": 24
+  },
+  {
+    "id": 22,
+    "state": "Rajasthan",
+    "subDivisionalHospitals": 12,
+    "districtHospitals": 34,
+    "mobileUnits": 32
+  },
+  {
+    "id": 23,
+    "state": "Sikkim",
+    "subDivisionalHospitals": 0,
+    "districtHospitals": 4,
+    "mobileUnits": 4
+  },
+  {
+    "id": 24,
+    "state": "Tamil Nadu",
+    "subDivisionalHospitals": 231,
+    "districtHospitals": 30,
+    "mobileUnits": 385
+  },
+  {
+    "id": 25,
+    "state": "Tripura",
+    "subDivisionalHospitals": 11,
+    "districtHospitals": 2,
+    "mobileUnits": 4
+  },
+  {
+    "id": 26,
+    "state": "Uttarakhand",
+    "subDivisionalHospitals": 20,
+    "districtHospitals": 18,
+    "mobileUnits": 30
+  },
+  {
+    "id": 27,
+    "state": "Uttar Pradesh3",
+    "subDivisionalHospitals": 0,
+    "districtHospitals": 72,
+    "mobileUnits": 133
+  },
+  {
+    "id": 28,
+    "state": "West Bengal1",
+    "subDivisionalHospitals": 45,
+    "districtHospitals": 16,
+    "mobileUnits": 7
+  },
+  {
+    "id": 29,
+    "state": "Andaman & Nicobar Islands",
+    "subDivisionalHospitals": 0,
+    "districtHospitals": 3,
+    "mobileUnits": 0
+  },
+  {
+    "id": 30,
+    "state": "Chandigarh",
+    "subDivisionalHospitals": 0,
+    "districtHospitals": 1,
+    "mobileUnits": 2
+  },
+  {
+    "id": 31,
+    "state": "Dadra & Nagar Haveli",
+    "subDivisionalHospitals": 0,
+    "districtHospitals": 1,
+    "mobileUnits": 1
+  },
+  {
+    "id": 32,
+    "state": "Daman & Diu",
+    "subDivisionalHospitals": 0,
+    "districtHospitals": 2,
+    "mobileUnits": 1
+  },
+  {
+    "id": 33,
+    "state": "Delhi2",
+    "subDivisionalHospitals": 49,
+    "districtHospitals": 9,
+    "mobileUnits": 0
+  },
+  {
+    "id": 34,
+    "state": "Lakshadweep",
+    "subDivisionalHospitals": 1,
+    "districtHospitals": 1,
+    "mobileUnits": 0
+  },
+  {
+    "id": 35,
+    "state": "Puducherry2",
+    "subDivisionalHospitals": 0,
+    "districtHospitals": 4,
+    "mobileUnits": 4
+  },
+  {
+    "id": 36,
+    "state": "All India Total",
+    "subDivisionalHospitals": 985,
+    "districtHospitals": 613,
+    "mobileUnits": 1
+  }
+]

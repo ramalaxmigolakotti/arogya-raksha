@@ -1,0 +1,16 @@
+{
+  "national": [
+    { "name": "National Emergency", "number": "112", "icon": "🚨", "description": "All emergencies" },
+    { "name": "Ambulance", "number": "108", "icon": "🚑", "description": "Free ambulance service" },
+    { "name": "Police", "number": "100", "icon": "🚓", "description": "Police emergency" },
+    { "name": "Fire", "number": "101", "icon": "🚒", "description": "Fire department" },
+    { "name": "Women Helpline", "number": "1091", "icon": "👩", "description": "Women in distress" },
+    { "name": "Child Helpline", "number": "1098", "icon": "👶", "description": "Children in danger" },
+    { "name": "Mental Health", "number": "08046110007", "icon": "🧠", "description": "iCall (TISS)" },
+    { "name": "Poison Control", "number": "1066", "icon": "☠️", "description": "Poison information" }
+  ],
+  "bloodBanks": [
+    { "name": "Indian Red Cross Society", "phone": "+91 11 2371 6441", "city": "Delhi" },
+    { "name": "Rotary Blood Bank", "phone": "+91 11 2616 1551", "city": "Delhi" }
+  ]
+}
