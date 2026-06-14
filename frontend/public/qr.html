@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arogya Raksha — QR Code</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap');
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .card {
+      background: white;
+      border-radius: 32px;
+      max-width: 420px;
+      width: 100%;
+      overflow: hidden;
+      box-shadow: 0 25px 80px rgba(0,0,0,0.4);
+    }
+    .header {
+      background: linear-gradient(135deg, #10b981, #0d9488, #0891b2);
+      padding: 32px 24px 24px;
+      text-align: center;
+      position: relative;
+    }
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: -20px;
+      left: 0; right: 0;
+      height: 40px;
+      background: white;
+      border-radius: 50% 50% 0 0 / 100% 100% 0 0;
+    }
+    .logo-icon {
+      width: 56px; height: 56px;
+      background: rgba(255,255,255,0.2);
+      border: 2px solid rgba(255,255,255,0.3);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 28px;
+    }
+    .header h1 { color: white; font-size: 24px; font-weight: 900; }
+    .header p { color: rgba(255,255,255,0.85); font-size: 13px; margin-top: 4px; }
+    .body { padding: 16px 32px 32px; text-align: center; }
+    .scan-label {
+      font-size: 11px; font-weight: 800; color: #94a3b8;
+      text-transform: uppercase; letter-spacing: 3px; margin-bottom: 20px;
+    }
+    .qr-container {
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 24px;
+      padding: 24px;
+      display: inline-block;
+      margin-bottom: 20px;
+      position: relative;
+    }
+    .qr-container img { display: block; border-radius: 8px; }
+    .corner { position: absolute; width: 20px; height: 20px; border: 3px solid #10b981; }
+    .corner.tl { top: 12px; left: 12px; border-right: none; border-bottom: none; border-radius: 6px 0 0 0; }
+    .corner.tr { top: 12px; right: 12px; border-left: none; border-bottom: none; border-radius: 0 6px 0 0; }
+    .corner.bl { bottom: 12px; left: 12px; border-right: none; border-top: none; border-radius: 0 0 0 6px; }
+    .corner.br { bottom: 12px; right: 12px; border-left: none; border-top: none; border-radius: 0 0 6px 0; }
+    .url {
+      font-size: 14px; font-weight: 700; color: #334155;
+      background: #f1f5f9; padding: 10px 20px; border-radius: 12px;
+      display: inline-block; margin-bottom: 16px; border: 1px solid #e2e8f0;
+    }
+    .url span { color: #10b981; }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: linear-gradient(135deg, #10b981, #0d9488);
+      color: white; font-size: 10px; font-weight: 800;
+      padding: 6px 14px; border-radius: 20px;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    .footer {
+      border-top: 1px solid #f1f5f9;
+      padding: 16px 32px; text-align: center;
+    }
+    .footer p { font-size: 11px; color: #94a3b8; }
+    .actions { margin-top: 24px; display: flex; gap: 12px; justify-content: center; }
+    .btn {
+      padding: 12px 24px; border-radius: 14px; font-size: 14px;
+      font-weight: 700; cursor: pointer; border: none; transition: all 0.2s;
+    }
+    .btn:hover { transform: translateY(-2px); }
+    .btn-primary {
+      background: linear-gradient(135deg, #10b981, #0d9488);
+      color: white; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+    }
+    .btn-secondary { background: #f1f5f9; color: #475569; border: 1px solid #e2e8f0; }
+    @media print {
+      body { background: white; padding: 0; }
+      .card { box-shadow: none; max-width: 100%; }
+      .actions { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div class="card" id="qr-card">
+      <div class="header">
+        <div class="logo-icon">🏥</div>
+        <h1>Arogya Raksha</h1>
+        <p>AI-Powered Intelligent Healthcare Platform</p>
+      </div>
+      <div class="body">
+        <p class="scan-label">Scan to Access</p>
+        <div class="qr-container">
+          <div class="corner tl"></div>
+          <div class="corner tr"></div>
+          <div class="corner bl"></div>
+          <div class="corner br"></div>
+          <img id="qr-img" alt="QR Code for Arogya Raksha" width="280" height="280"
+               src="https://api.qrserver.com/v1/create-qr-code/?size=280x280&data=https%3A%2F%2Farogya-rho.vercel.app&bgcolor=f8fafc&color=0f172a&format=png&qzone=1&ecc=H" />
+        </div>
+        <br>
+        <div class="url"><span>arogya-rho</span>.vercel.app</div>
+        <br><br>
+        <div class="badge">✨ Powered by AI</div>
+      </div>
+      <div class="footer">
+        <p>Arogya Raksha · AI Healthcare · Google Gemini Hackathon 2025</p>
+      </div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-primary" onclick="downloadQR()">⬇ Download QR</button>
+      <button class="btn btn-secondary" onclick="window.print()">🖨 Print</button>
+    </div>
+  </div>
+  <script>
+    function downloadQR() {
+      const img = document.getElementById('qr-img');
+      const canvas = document.createElement('canvas');
+      canvas.width = 280; canvas.height = 280;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, 280, 280);
+      const link = document.createElement('a');
+      link.download = 'arogya-raksha-qr.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+    }
+  </script>
+</body>
+</html>
