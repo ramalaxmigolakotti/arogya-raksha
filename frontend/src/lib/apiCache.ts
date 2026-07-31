@@ -38,7 +38,12 @@ export async function cachedFetch<T = unknown>(
   } catch { /* sessionStorage unavailable (SSR) */ }
 
   // 3. Network fetch
-  const res = await fetch(url, options);
+  let res: Response;
+  try {
+    res = await fetch(url, options);
+  } catch (networkErr: any) {
+    throw new Error(`Backend unreachable: ${networkErr?.message || 'Failed to fetch'}. Is the server running?`);
+  }
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
   const data = await res.json() as T;
 

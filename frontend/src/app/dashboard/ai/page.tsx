@@ -20,15 +20,27 @@ export default function AIAssistant() {
 
   const [messages, setMessages] = useState<Message[]>([]);
 
-  // Set initial greeting with real user name
+  const LANG_GREETINGS: Record<string, string> = {
+    en: `Hello, ${firstName}. I am **Arogya AI**, your personal healthcare assistant. I can help you analyze medical reports, check your symptoms, or answer any health-related questions. How can I assist you today?`,
+    hi: `नमस्ते, ${firstName}। मैं **Arogya AI** हूँ, आपका व्यक्तिगत स्वास्थ्य सहायक। मैं आपकी मेडिकल रिपोर्ट का विश्लेषण करने, आपके लक्षणों की जांच करने, या किसी भी स्वास्थ्य संबंधी प्रश्न का उत्तर देने में मदद कर सकता हूँ। आज मैं आपकी कैसे मदद कर सकता हूँ?`,
+    te: `నమస్కారం, ${firstName}. నేను **Arogya AI**, మీ వ్యక్తిగత ఆరోగ్య సహాయకుడిని. మీ వైద్య నివేదికలను విశ్లేషించడంలో, మీ లక్షణాలను తనిఖీ చేయడంలో లేదా ఆరోగ్య సంబంధిత ప్రశ్నలకు సమాధానం ఇవ్వడంలో నేను సహాయం చేయగలను. ఈ రోజు నేను మీకు ఎలా సహాయం చేయగలను?`,
+    ta: `வணக்கம், ${firstName}. நான் **Arogya AI**, உங்கள் தனிப்பட்ட சுகாதார உதவியாளர். மருத்துவ அறிக்கைகளை பகுப்பாய்வு செய்வது, அறிகுறிகளை சரிபார்ப்பது அல்லது சுகாதார கேள்விகளுக்கு பதிலளிப்பது போன்றவற்றில் உதவ முடியும். இன்று உங்களுக்கு எப்படி உதவலாம்?`,
+    kn: `ನಮಸ್ಕಾರ, ${firstName}. ನಾನು **Arogya AI**, ನಿಮ್ಮ ವೈಯಕ್ತಿಕ ಆರೋಗ್ಯ ಸಹಾಯಕ. ವೈದ್ಯಕೀಯ ವರದಿಗಳನ್ನು ವಿಶ್ಲೇಷಿಸಲು, ರೋಗಲಕ್ಷಣಗಳನ್ನು ಪರಿಶೀಲಿಸಲು ಅಥವಾ ಆರೋಗ್ಯ ಪ್ರಶ್ನೆಗಳಿಗೆ ಉತ್ತರ ನೀಡಲು ನಾನು ಸಹಾಯ ಮಾಡಬಲ್ಲೆ. ಇಂದು ನಾನು ನಿಮಗೆ ಹೇಗೆ ಸಹಾಯ ಮಾಡಲಿ?`,
+    mr: `नमस्कार, ${firstName}. मी **Arogya AI** आहे, तुमचा वैयक्तिक आरोग्य सहाय्यक. मी तुमच्या वैद्यकीय अहवालांचे विश्लेषण करण्यात, लक्षणे तपासण्यात किंवा आरोग्य प्रश्नांची उत्तरे देण्यात मदत करू शकतो. आज मी तुम्हाला कशी मदत करू?`,
+    bn: `নমস্কার, ${firstName}। আমি **Arogya AI**, আপনার ব্যক্তিগত স্বাস্থ্য সহায়ক। আমি আপনার মেডিকেল রিপোর্ট বিশ্লেষণ করতে, লক্ষণ পরীক্ষা করতে বা স্বাস্থ্য সংক্রান্ত প্রশ্নের উত্তর দিতে সাহায্য করতে পারি। আজ আমি আপনাকে কীভাবে সাহায্য করতে পারি?`,
+    bho: `प्रणाम, ${firstName}। हम **Arogya AI** हईं, रउआ के निजी स्वास्थ्य सहायक। हम रउआ के मेडिकल रिपोर्ट के जांच करे में, लक्षण देखे में आ स्वास्थ्य संबंधी सवालन के जवाब देवे में मदद कर सकत बानी। आज हम रउआ के कइसे मदद करीं?`,
+  };
+
+  // Set initial greeting with real user name — language-aware
   useEffect(() => {
+    const greeting = LANG_GREETINGS[language] || LANG_GREETINGS['en'];
     setMessages([{
       id: 1,
       role: 'ai',
-      text: `Hello, ${firstName}. I am **Arogya AI**, your personal healthcare assistant. I can help you analyze medical reports, check your symptoms, or answer any health-related questions. How can I assist you today?`,
+      text: greeting,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }]);
-  }, [firstName]);
+  }, [firstName, language]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);

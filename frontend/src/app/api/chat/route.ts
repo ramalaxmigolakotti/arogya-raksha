@@ -22,14 +22,22 @@ export async function POST(req: NextRequest) {
       kn: 'Kannada (ಕನ್ನಡ)', mr: 'Marathi (मराठी)', bn: 'Bengali (বাংলা)', bho: 'Bhojpuri (भोजपुरी)',
     };
     const langName = LANG_NAMES[language || 'en'] || 'English';
-    const langInstruction = language && language !== 'en'
-      ? `\n\nCRITICAL LANGUAGE INSTRUCTION: You MUST respond ENTIRELY in ${langName}. Every sentence must be in ${langName} script.`
+    const isNonEnglish = language && language !== 'en';
+
+    // Language instruction placed FIRST so the model doesn't deprioritize it
+    const langInstruction = isNonEnglish
+      ? `⚠️ LANGUAGE RULE — HIGHEST PRIORITY ⚠️
+You MUST write your ENTIRE response in ${langName} only.
+Do NOT use English at all in your response — not even a single English sentence.
+Even if the user writes to you in English, you MUST reply ONLY in ${langName}.
+Use the native script of ${langName} for ALL text including greetings, medical terms, and disclaimers.
+This is a non-negotiable rule that overrides all other instructions.\n\n`
       : '';
 
     const patientName = userName || 'User';
     const systemMessage = {
       role: 'system',
-      content: `You are "Arogya AI", the intelligent healthcare assistant for the Indian healthcare platform "Arogya Raksha".${langInstruction}
+      content: `${langInstruction}You are "Arogya AI", the intelligent healthcare assistant for the Indian healthcare platform "Arogya Raksha".
 
 Your capabilities:
 - Answer medical and health questions accurately
@@ -50,6 +58,7 @@ Important rules:
 - Format your responses with clear sections using markdown when helpful (bold, bullet points, etc.)
 - Keep responses concise but thorough
 - Always include a disclaimer for medical advice
+${isNonEnglish ? `- REMEMBER: Every word of your response MUST be in ${langName}. This includes the disclaimer.` : ''}
 
 You are speaking with a patient named ${patientName}. Address them by name occasionally. Be warm and professional.`,
     };
