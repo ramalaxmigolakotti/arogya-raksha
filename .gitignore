@@ -7,8 +7,6 @@ node_modules/
 .DS_Store
 .planning/
 
-# Large dataset CSV files (download separately, not tracked in git)
-backend/data/*.csv
 
 .clerk/
 build_output.txt
