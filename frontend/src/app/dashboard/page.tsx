@@ -6,8 +6,8 @@ import { motion } from 'framer-motion';
 import {
   ScanLine, Upload, Stethoscope, Heart, Activity, Droplets,
   ChevronRight, Pill, MapPin, Star, Building2, ArrowUpRight,
-  FileUp, Thermometer, AlertCircle, CheckCircle2, Navigation,
-  User, Lock, BadgeAlert, Users, HeartHandshake, Map, Share2
+  FileUp, Thermometer, CheckCircle2,
+  User, Lock, BadgeAlert, Siren
 } from 'lucide-react';
 import { useLocation } from '@/context/LocationContext';
 import { useLanguage } from '@/context/LanguageContext';
@@ -378,41 +378,31 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Community & Care Features */}
+      {/* Quick Access */}
       <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-lg shadow-slate-200/30">
         <div className="flex items-center gap-3 mb-6">
           <div className="bg-emerald-100 p-2.5 rounded-xl">
-            <Users className="h-6 w-6 text-emerald-600" />
+            <Siren className="h-6 w-6 text-emerald-600" />
           </div>
           <div>
-            <h3 className="text-xl font-bold text-slate-800">Community & Care</h3>
-            <p className="text-sm text-slate-500">Connect with local resources and dedicated care</p>
+            <h3 className="text-xl font-bold text-slate-800">Quick Access</h3>
+            <p className="text-sm text-slate-500">Essential healthcare features</p>
           </div>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link href="/dashboard/healthshare" className="group bg-gradient-to-br from-emerald-50 to-teal-50 p-5 rounded-2xl border border-emerald-100 hover:shadow-md transition-all hover:-translate-y-1">
-            <div className="bg-emerald-100 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Share2 className="h-6 w-6 text-emerald-600" />
-            </div>
-            <h4 className="font-bold text-slate-800 mb-1">Resource Sharing</h4>
-            <p className="text-xs text-slate-500">Community health equipment and resources.</p>
-          </Link>
-
-          <Link href="/dashboard/healthcare-navigator" className="group bg-gradient-to-br from-indigo-50 to-blue-50 p-5 rounded-2xl border border-indigo-100 hover:shadow-md transition-all hover:-translate-y-1">
-            <div className="bg-indigo-100 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Navigation className="h-6 w-6 text-indigo-600" />
-            </div>
-            <h4 className="font-bold text-slate-800 mb-1">Healthcare Navigator</h4>
-            <p className="text-xs text-slate-500">Guided care pathways and facility matching.</p>
-          </Link>
-
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link href="/dashboard/emergency" className="group bg-gradient-to-br from-rose-50 to-pink-50 p-5 rounded-2xl border border-rose-100 hover:shadow-md transition-all hover:-translate-y-1">
             <div className="bg-rose-100 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Building2 className="h-6 w-6 text-rose-600" />
             </div>
             <h4 className="font-bold text-slate-800 mb-1">Emergency Support</h4>
             <p className="text-xs text-slate-500">Emergency contacts and blood donor networks.</p>
+          </Link>
+          <Link href="/dashboard/doctors" className="group bg-gradient-to-br from-indigo-50 to-blue-50 p-5 rounded-2xl border border-indigo-100 hover:shadow-md transition-all hover:-translate-y-1">
+            <div className="bg-indigo-100 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <User className="h-6 w-6 text-indigo-600" />
+            </div>
+            <h4 className="font-bold text-slate-800 mb-1">Find Doctors</h4>
+            <p className="text-xs text-slate-500">Browse and connect with certified doctors.</p>
           </Link>
         </div>
       </div>

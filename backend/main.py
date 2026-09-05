@@ -20,7 +20,6 @@ from models.medicine import load_medicines
 # ── Import all routes ──────────────────────────────────────────────────────────
 from routes.auth import router as auth_router
 from routes.users import router as users_router
-from routes.appointments import router as appointments_router
 from routes.hospitals import router as hospitals_router
 from routes.reports import router as reports_router
 from routes.medicines import router as medicines_router
@@ -30,12 +29,10 @@ from routes.blood_donors import router as blood_donors_router
 from routes.chat import router as chat_router
 from routes.orders import router as orders_router
 from routes.health import router as health_router
-from routes.media import router as media_router
 from routes.doctor_profiles import router as doctor_profiles_router
 from routes.medical_profile import router as medical_profile_router
 from routes.notifications import router as notifications_router
 from routes.whatsapp import router as whatsapp_router
-from routes.healthshare import router as healthshare_router
 from routes.predict import router as predict_router
 from routes.bot_dashboard import router as bot_dashboard_router
 
@@ -116,10 +113,9 @@ async def health_check():
     }
 
 
-# ── Include all 25 Routers ───────────────────────────────────────────────────
+# ── Include all Routers ───────────────────────────────────────────────────
 app.include_router(auth_router)
 app.include_router(users_router)
-app.include_router(appointments_router)
 app.include_router(hospitals_router)
 app.include_router(reports_router)
 app.include_router(medicines_router)
@@ -129,12 +125,10 @@ app.include_router(blood_donors_router)
 app.include_router(chat_router)
 app.include_router(orders_router)
 app.include_router(health_router)
-app.include_router(media_router)
 app.include_router(doctor_profiles_router)
 app.include_router(medical_profile_router)
 app.include_router(notifications_router)
 app.include_router(whatsapp_router)
-app.include_router(healthshare_router)
 app.include_router(predict_router)
 app.include_router(bot_dashboard_router)
 

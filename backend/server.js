@@ -85,7 +85,6 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 // Import routes
 const authRoutes = require('./routes/auth');
 const userRoutes = require('./routes/users');
-const appointmentRoutes = require('./routes/appointments');
 const hospitalRoutes = require('./routes/hospitals');
 const reportRoutes = require('./routes/reports');
 const medicineRoutes = require('./routes/medicines');
@@ -96,13 +95,10 @@ const chatRoutes = require('./routes/chat');
 const orderRoutes = require('./routes/orders');
 const healthRoutes = require('./routes/health');
 
-
-const mediaRoutes = require('./routes/media');
 const doctorProfileRoutes = require('./routes/doctorProfiles');
 const medicalProfileRoutes = require('./routes/medicalProfile');
 const notificationRoutes = require('./routes/notifications');
 const whatsappRoutes = require('./routes/whatsapp');
-const healthshareRoutes = require('./routes/healthshare');
 const predictRoutes = require('./routes/predict');
 
 // Preload all 9 predictor datasets into memory
@@ -111,7 +107,6 @@ require('./services/predictorDatasets').loadAll();
 // Register routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/appointments', appointmentRoutes);
 app.use('/api/hospitals', hospitalRoutes);
 app.use('/api/reports', reportRoutes);
 app.use('/api/medicines', medicineRoutes);
@@ -122,12 +117,10 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/health', healthRoutes);
 
-app.use('/api/media', mediaRoutes);
 app.use('/api/doctor-profiles', doctorProfileRoutes);
 app.use('/api/medical-profile', medicalProfileRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
-app.use('/api/healthshare', healthshareRoutes);
 app.use('/api/predict', predictRoutes);
 
 // Health check
