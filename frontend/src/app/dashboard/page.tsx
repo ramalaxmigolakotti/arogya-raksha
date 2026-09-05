@@ -73,33 +73,6 @@ export default function Dashboard() {
       </header>
 
 
-      {/* ── CRISIS COMMAND CENTER BANNER ── */}
-      <div className="bg-gradient-to-r from-red-600 via-rose-600 to-red-700 rounded-2xl p-5 border border-red-500/30 shadow-xl shadow-red-500/20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(255,255,255,0.1),transparent)]" />
-        <div className="absolute top-0 right-0 w-40 h-40 bg-white/5 rounded-full blur-3xl" />
-        <div className="relative z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center flex-shrink-0">
-              <AlertCircle className="h-6 w-6 text-white animate-pulse" />
-            </div>
-            <div>
-              <p className="text-xs font-black text-red-200 uppercase tracking-wider mb-0.5">New Feature</p>
-              <h2 className="text-xl font-extrabold text-white">Crisis Command Center</h2>
-              <p className="text-red-100 text-sm">Real-time emergency coordination for hospitality environments</p>
-            </div>
-          </div>
-          <div className="flex gap-2 flex-shrink-0">
-            <Link href="/crisis/report" target="_blank"
-              className="flex items-center gap-1.5 px-4 py-2.5 bg-white/15 hover:bg-white/25 border border-white/20 text-white font-bold text-sm rounded-xl transition-all">
-              🚨 Guest SOS
-            </Link>
-            <Link href="/dashboard/crisis"
-              className="flex items-center gap-2 px-5 py-2.5 bg-white text-red-600 font-black text-sm rounded-xl shadow-lg hover:scale-105 transition-transform">
-              <ChevronRight className="h-4 w-4" /> Open Dashboard
-            </Link>
-          </div>
-        </div>
-      </div>
 
       {/* ── MEDICAL PROFILE CARD ── */}
       {profileLoaded && (
@@ -393,37 +366,29 @@ export default function Dashboard() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Link href="/dashboard/asha" className="group bg-gradient-to-br from-rose-50 to-pink-50 p-5 rounded-2xl border border-rose-100 hover:shadow-md transition-all hover:-translate-y-1">
-            <div className="bg-rose-100 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Users className="h-6 w-6 text-rose-600" />
-            </div>
-            <h4 className="font-bold text-slate-800 mb-1">ASHA Workers</h4>
-            <p className="text-xs text-slate-500">Connect with local community health activists.</p>
-          </Link>
-
-          <Link href="/dashboard/elder-care" className="group bg-gradient-to-br from-indigo-50 to-blue-50 p-5 rounded-2xl border border-indigo-100 hover:shadow-md transition-all hover:-translate-y-1">
-            <div className="bg-indigo-100 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <HeartHandshake className="h-6 w-6 text-indigo-600" />
-            </div>
-            <h4 className="font-bold text-slate-800 mb-1">Elder Care</h4>
-            <p className="text-xs text-slate-500">Specialized healthcare tracking for seniors.</p>
-          </Link>
-
-          <Link href="/dashboard/phc-finder" className="group bg-gradient-to-br from-amber-50 to-orange-50 p-5 rounded-2xl border border-amber-100 hover:shadow-md transition-all hover:-translate-y-1">
-            <div className="bg-amber-100 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Map className="h-6 w-6 text-amber-600" />
-            </div>
-            <h4 className="font-bold text-slate-800 mb-1">PHC Finder</h4>
-            <p className="text-xs text-slate-500">Locate Primary Health Centres near you.</p>
-          </Link>
-
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Link href="/dashboard/healthshare" className="group bg-gradient-to-br from-emerald-50 to-teal-50 p-5 rounded-2xl border border-emerald-100 hover:shadow-md transition-all hover:-translate-y-1">
             <div className="bg-emerald-100 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
               <Share2 className="h-6 w-6 text-emerald-600" />
             </div>
             <h4 className="font-bold text-slate-800 mb-1">Resource Sharing</h4>
             <p className="text-xs text-slate-500">Community health equipment and resources.</p>
+          </Link>
+
+          <Link href="/dashboard/healthcare-navigator" className="group bg-gradient-to-br from-indigo-50 to-blue-50 p-5 rounded-2xl border border-indigo-100 hover:shadow-md transition-all hover:-translate-y-1">
+            <div className="bg-indigo-100 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Navigation className="h-6 w-6 text-indigo-600" />
+            </div>
+            <h4 className="font-bold text-slate-800 mb-1">Healthcare Navigator</h4>
+            <p className="text-xs text-slate-500">Guided care pathways and facility matching.</p>
+          </Link>
+
+          <Link href="/dashboard/emergency" className="group bg-gradient-to-br from-rose-50 to-pink-50 p-5 rounded-2xl border border-rose-100 hover:shadow-md transition-all hover:-translate-y-1">
+            <div className="bg-rose-100 w-12 h-12 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Building2 className="h-6 w-6 text-rose-600" />
+            </div>
+            <h4 className="font-bold text-slate-800 mb-1">Emergency Support</h4>
+            <p className="text-xs text-slate-500">Emergency contacts and blood donor networks.</p>
           </Link>
         </div>
       </div>

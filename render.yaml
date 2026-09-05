@@ -1,15 +1,15 @@
-# Render deploy config for Arogya Raksha Backend
+# Render deploy config for Arogya Raksha Backend (Python FastAPI)
 services:
   - type: web
     name: arogya-raksha-backend
-    env: node
+    env: python
     rootDir: backend
-    buildCommand: npm install
-    startCommand: npm start
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app_asgi --host 0.0.0.0 --port $PORT
     healthCheckPath: /api/health
     envVars:
-      - key: NODE_ENV
-        value: production
+      - key: PYTHON_VERSION
+        value: 3.11.9
       - key: PORT
         value: 10000
       - key: SUPABASE_URL

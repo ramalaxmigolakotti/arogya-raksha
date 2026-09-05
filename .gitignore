@@ -11,3 +11,11 @@ node_modules/
 .clerk/
 build_output.txt
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+.pytest_cache/
