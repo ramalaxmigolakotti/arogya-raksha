@@ -177,6 +177,7 @@ function StarRating({ rating, count }: { rating: number; count: number }) {
 
 // ── Location Status ────────────────────────────────────────────────────────
 function LocationStatus({ status, address }: { status: string; address: string }) {
+  const { t } = useLanguage();
   return (
     <div className="flex items-center gap-2 text-sm">
       {status === 'granted' ? (
@@ -187,13 +188,13 @@ function LocationStatus({ status, address }: { status: string; address: string }
           </span>
           <span className="text-slate-600 font-medium truncate max-w-[340px]">
             <LocateFixed className="h-3.5 w-3.5 inline mr-1 text-emerald-600" />
-            {address || 'Location detected'}
+            {address || t('locationDetected')}
           </span>
         </>
       ) : status === 'loading' ? (
-        <><Loader2 className="h-4 w-4 animate-spin text-blue-500" /><span className="text-slate-500 font-medium">Detecting location…</span></>
+        <><Loader2 className="h-4 w-4 animate-spin text-blue-500" /><span className="text-slate-500 font-medium">{t('detectingLocation')}</span></>
       ) : (
-        <><AlertTriangle className="h-4 w-4 text-amber-500" /><span className="text-amber-600 font-medium">Location access needed</span></>
+        <><AlertTriangle className="h-4 w-4 text-amber-500" /><span className="text-amber-600 font-medium">{t('locationAccessNeeded')}</span></>
       )}
     </div>
   );
@@ -201,43 +202,52 @@ function LocationStatus({ status, address }: { status: string; address: string }
 
 // ── Booking Modal ──────────────────────────────────────────────────────────
 function BookingModal({ hospital, onClose, onSubmit }: {
-  hospital: NearbyHospital; onClose: () => void; onSubmit: (f: BookingForm) => void;
+  hospital: NearbyHospital;
+  onClose: () => void;
+  onSubmit: (form: BookingForm) => void;
 }) {
-  const [form, setForm] = useState<BookingForm>({ name:'', phone:'', specialty:'', date:'', time:'', reason:'' });
-  const [selectedSlot, setSelectedSlot] = useState<string|null>(null);
+  const { t } = useLanguage();
+  const [form, setForm] = useState<BookingForm>({
+    name: '', phone: '', specialty: '', date: '', time: '', reason: '',
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const bookingRef = useRef(`ARK-${Date.now().toString().slice(-6)}`);
+  const [isSuccess, setIsSuccess]       = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState<string | null>(null);
+  const [copied, setCopied]             = useState(false);
+  const bookingRef                      = useRef(`AR-${Math.floor(100000 + Math.random() * 900000)}`);
+
+  const slots = {
+    morning:   ['09:00 AM', '09:30 AM', '10:00 AM', '10:30 AM', '11:00 AM', '11:30 AM'],
+    afternoon: ['12:00 PM', '12:30 PM', '02:00 PM', '02:30 PM', '03:00 PM', '03:30 PM'],
+    evening:   ['05:00 PM', '05:30 PM', '06:00 PM', '06:30 PM', '07:00 PM', '07:30 PM'],
+  };
+
+  const isAvailable = (i: number) => i % 5 !== 2; // seed pseudo-availability
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!form.time) return;
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      setIsSuccess(true);
+      onSubmit(form);
+    }, 1200);
+  };
 
   const specialties = hospital.specialties.length
     ? hospital.specialties
     : ['General Physician','Cardiologist','Dermatologist','Orthopedic','ENT Specialist','Pediatrician','Gynecologist','Neurologist'];
 
-  const slots = {
-    morning:   ['09:00','09:30','10:00','10:30','11:00','11:30'],
-    afternoon: ['13:00','13:30','14:00','14:30','15:00','15:30','16:00'],
-    evening:   ['18:00','18:30','19:00','19:30','20:00'],
-  };
-  const seed = hospital.id.split('').reduce((a,c) => a + c.charCodeAt(0), 0);
-  const isAvailable = (i: number) => (seed + i * 7) % 3 !== 0;
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault(); setIsSubmitting(true);
-    onSubmit(form);
-    await new Promise(r => setTimeout(r, 800));
-    setIsSubmitting(false); setSubmitted(true);
-  };
-
-  if (submitted) return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden animate-in zoom-in-95 duration-300">
-        <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-8 text-center">
-          <div className="mx-auto mb-4 bg-white/20 rounded-full w-20 h-20 flex items-center justify-center border-2 border-white/30">
+  if (isSuccess) return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden text-center animate-in zoom-in-95 duration-300">
+        <div className="bg-gradient-to-b from-emerald-500 to-emerald-600 p-8 text-white">
+          <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4 backdrop-blur-sm">
             <CheckCircle2 className="h-10 w-10 text-white" />
           </div>
-          <h3 className="text-2xl font-black text-white mb-1">Appointment Booked! 🎉</h3>
-          <p className="text-emerald-100 text-sm">Your appointment at <strong className="text-white">{hospital.name}</strong> is confirmed.</p>
+          <h3 className="text-2xl font-bold mb-1">{t('appointmentBooked')}</h3>
+          <p className="text-emerald-100 text-sm">{t('appointmentBookedMsg')}</p>
         </div>
         <div className="p-6 space-y-4">
           <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 flex items-center justify-between">
@@ -251,12 +261,12 @@ function BookingModal({ hospital, onClose, onSubmit }: {
             </button>
           </div>
           <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100 grid grid-cols-2 gap-2 text-sm">
-            <div><span className="text-slate-400 text-xs font-bold">Patient</span><p className="font-bold text-slate-800">{form.name}</p></div>
-            <div><span className="text-slate-400 text-xs font-bold">Phone</span><p className="font-bold text-slate-800">{form.phone}</p></div>
-            <div><span className="text-slate-400 text-xs font-bold">Specialty</span><p className="font-bold text-slate-800">{form.specialty||'General Physician'}</p></div>
-            <div><span className="text-slate-400 text-xs font-bold">Date & Time</span><p className="font-bold text-slate-800">{form.date} · {form.time}</p></div>
+            <div><span className="text-slate-400 text-xs font-bold">{t('patientName')}</span><p className="font-bold text-slate-800">{form.name}</p></div>
+            <div><span className="text-slate-400 text-xs font-bold">{t('phone')}</span><p className="font-bold text-slate-800">{form.phone}</p></div>
+            <div><span className="text-slate-400 text-xs font-bold">{t('doctorSpecialty')}</span><p className="font-bold text-slate-800">{form.specialty||'General Physician'}</p></div>
+            <div><span className="text-slate-400 text-xs font-bold">{t('selectDate')}</span><p className="font-bold text-slate-800">{form.date} · {form.time}</p></div>
           </div>
-          <button onClick={onClose} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition-colors text-sm">Done</button>
+          <button onClick={onClose} className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition-colors text-sm">{t('done')}</button>
         </div>
       </div>
     </div>
@@ -273,42 +283,42 @@ function BookingModal({ hospital, onClose, onSubmit }: {
           {hospital.openNow !== null && (
             <span className={`mt-2 inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full ${hospital.openNow ? 'bg-emerald-400/30 text-emerald-100' : 'bg-red-400/30 text-red-100'}`}>
               <span className={`w-1.5 h-1.5 rounded-full ${hospital.openNow ? 'bg-emerald-300 animate-pulse' : 'bg-red-300'}`} />
-              {hospital.openNow ? 'Open Now' : 'Closed Now'}
+              {hospital.openNow ? t('openNow') : t('closed')}
             </span>
           )}
         </div>
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"><User className="h-3.5 w-3.5 inline mr-1" />Patient Name</label>
-              <input required value={form.name} onChange={e => setForm({...form,name:e.target.value})} className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all" placeholder="Full name" />
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"><User className="h-3.5 w-3.5 inline mr-1" />{t('patientName')}</label>
+              <input required value={form.name} onChange={e => setForm({...form,name:e.target.value})} className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all" placeholder={t('fullName')} />
             </div>
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"><Phone className="h-3.5 w-3.5 inline mr-1" />Phone</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"><Phone className="h-3.5 w-3.5 inline mr-1" />{t('phone')}</label>
               <input required type="tel" value={form.phone} onChange={e => setForm({...form,phone:e.target.value})} className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all" placeholder="+91 98765 43210" />
             </div>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"><Stethoscope className="h-3.5 w-3.5 inline mr-1" />Doctor Specialty</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"><Stethoscope className="h-3.5 w-3.5 inline mr-1" />{t('doctorSpecialty')}</label>
             <select value={form.specialty} onChange={e => setForm({...form,specialty:e.target.value})} className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all bg-white">
-              <option value="">Select specialty</option>
+              <option value="">{t('specialty')}</option>
               {specialties.map(s => <option key={s} value={s}>{s}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"><Calendar className="h-3.5 w-3.5 inline mr-1" />Select Date</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2"><Calendar className="h-3.5 w-3.5 inline mr-1" />{t('selectDate')}</label>
             <input required type="date" value={form.date} onChange={e => { setForm({...form,date:e.target.value,time:''}); setSelectedSlot(null); }}
               min={new Date().toISOString().split('T')[0]}
               className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all" />
           </div>
           {form.date && (
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3"><Clock className="h-3.5 w-3.5 inline mr-1" />Available Time Slots</label>
-              {(['Morning','Afternoon','Evening'] as const).map((period, pi) => {
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-3"><Clock className="h-3.5 w-3.5 inline mr-1" />{t('availableTimeSlots')}</label>
+              {(['morning','afternoon','evening'] as const).map((periodKey, pi) => {
                 const periodSlots = pi===0 ? slots.morning : pi===1 ? slots.afternoon : slots.evening;
                 return (
-                  <div key={period} className="mb-3">
-                    <p className="text-xs font-semibold text-slate-400 mb-1.5">{period}</p>
+                  <div key={periodKey} className="mb-3">
+                    <p className="text-xs font-semibold text-slate-400 mb-1.5">{t(periodKey)}</p>
                     <div className="flex flex-wrap gap-2">
                       {periodSlots.map((slot,si) => {
                         const avail = isAvailable(pi*10+si);
@@ -328,11 +338,11 @@ function BookingModal({ hospital, onClose, onSubmit }: {
             </div>
           )}
           <div>
-            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Reason for Visit</label>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">{t('reasonForVisit')}</label>
             <input value={form.reason} onChange={e => setForm({...form,reason:e.target.value})} className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-400 transition-all" placeholder="e.g., General checkup, Follow-up…" />
           </div>
           <button type="submit" disabled={isSubmitting} className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 disabled:opacity-70 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-emerald-500/30 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2">
-            {isSubmitting ? <><Loader2 className="h-5 w-5 animate-spin" />Booking...</> : <><Calendar className="h-5 w-5" />Confirm Appointment</>}
+            {isSubmitting ? <><Loader2 className="h-5 w-5 animate-spin" />{t('booking')}</> : <><Calendar className="h-5 w-5" />{t('confirmAppointment')}</>}
           </button>
         </form>
       </div>
@@ -347,6 +357,7 @@ function HospitalCard({ hospital, selected, onSelect, onBook }: {
   onSelect: () => void;
   onBook: () => void;
 }) {
+  const { t } = useLanguage();
   const openStatus = hospital.openNow;
   const isEmergency = hospital.emergency;
 
@@ -361,7 +372,7 @@ function HospitalCard({ hospital, selected, onSelect, onBook }: {
       {hospital.aiScore && hospital.aiScore >= 70 && (
         <div className="bg-gradient-to-r from-violet-600 to-indigo-600 px-4 py-2 flex items-center gap-2">
           <Sparkles className="h-3.5 w-3.5 text-yellow-300 animate-pulse" />
-          <span className="text-white text-xs font-black">AI Recommended for {hospital.aiCondition}</span>
+          <span className="text-white text-xs font-black">{t('aiRecommendedFor')} {hospital.aiCondition}</span>
           <span className="ml-auto bg-white/20 text-white text-[10px] font-black px-2 py-0.5 rounded-full">{hospital.aiScore}% match</span>
         </div>
       )}
@@ -370,7 +381,7 @@ function HospitalCard({ hospital, selected, onSelect, onBook }: {
       {isEmergency && (
         <div className="bg-gradient-to-r from-red-500 to-rose-600 px-4 py-1.5 flex items-center gap-2">
           <Shield className="h-3.5 w-3.5 text-white animate-pulse" />
-          <span className="text-white text-xs font-black">24/7 Emergency Services Available</span>
+          <span className="text-white text-xs font-black">{t('emergency247')}</span>
         </div>
       )}
 
@@ -385,12 +396,12 @@ function HospitalCard({ hospital, selected, onSelect, onBook }: {
               hospital.type === 'Hospital' ? 'bg-blue-50 text-blue-600 border-blue-100' :
               hospital.type === 'Pharmacy' ? 'bg-green-50 text-green-600 border-green-100' :
               'bg-purple-50 text-purple-600 border-purple-100'
-            }`}>{hospital.type}</span>
+            }`}>{hospital.type === 'Hospital' ? t('hospitals') : hospital.type === 'Pharmacy' ? t('pharmacies') : t('clinics')}</span>
             {/* Live Open/Closed Status */}
             {openStatus !== null && openStatus !== undefined && (
               <span className={`flex items-center gap-1 text-[10px] font-black px-2 py-0.5 rounded-full ${openStatus ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-red-50 text-red-600 border border-red-200'}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${openStatus ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`} />
-                {openStatus ? 'Open Now' : 'Closed'}
+                {openStatus ? t('openNow') : t('closed')}
               </span>
             )}
           </div>
@@ -420,7 +431,7 @@ function HospitalCard({ hospital, selected, onSelect, onBook }: {
           <div className="bg-blue-50 rounded-xl p-2 text-center border border-blue-100">
             <Navigation className="h-3.5 w-3.5 text-blue-500 mx-auto mb-0.5" />
             <p className="text-xs font-black text-blue-700">{Number(hospital.distance).toFixed(1)}<span className="text-[9px] font-bold"> km</span></p>
-            <p className="text-[9px] text-blue-400 font-bold">Distance</p>
+            <p className="text-[9px] text-blue-400 font-bold">{t('distance')}</p>
           </div>
           {/* Open/Closed */}
           <div className={`rounded-xl p-2 text-center border ${
@@ -429,9 +440,9 @@ function HospitalCard({ hospital, selected, onSelect, onBook }: {
           }`}>
             <Clock className={`h-3.5 w-3.5 mx-auto mb-0.5 ${openStatus === true ? 'text-emerald-500' : openStatus === false ? 'text-red-500' : 'text-slate-400'}`} />
             <p className={`text-xs font-black ${openStatus === true ? 'text-emerald-700' : openStatus === false ? 'text-red-700' : 'text-slate-500'}`}>
-              {openStatus === true ? 'Open' : openStatus === false ? 'Closed' : '—'}
+              {openStatus === true ? t('openNow') : openStatus === false ? t('closed') : '—'}
             </p>
-            <p className="text-[9px] text-slate-400 font-bold">Status</p>
+            <p className="text-[9px] text-slate-400 font-bold">{t('status')}</p>
           </div>
           {/* Doctors Available */}
           <div className={`rounded-xl p-2 text-center border ${
@@ -449,7 +460,7 @@ function HospitalCard({ hospital, selected, onSelect, onBook }: {
             }`}>
               {hospital.availabilityStatus === 'unavailable' ? '0' : hospital.doctorsAvailable}
             </p>
-            <p className="text-[9px] text-slate-400 font-bold">Doctors</p>
+            <p className="text-[9px] text-slate-400 font-bold">{t('doctorsCount')}</p>
           </div>
           {/* Beds or Rating */}
           <div className="bg-amber-50 rounded-xl p-2 text-center border border-amber-100">
@@ -457,13 +468,13 @@ function HospitalCard({ hospital, selected, onSelect, onBook }: {
               <>
                 <Bed className="h-3.5 w-3.5 text-amber-500 mx-auto mb-0.5" />
                 <p className="text-xs font-black text-amber-700">{hospital.bedCount}</p>
-                <p className="text-[9px] text-amber-400 font-bold">Beds</p>
+                <p className="text-[9px] text-amber-400 font-bold">{t('beds')}</p>
               </>
             ) : (
               <>
                 <Star className="h-3.5 w-3.5 text-amber-500 mx-auto mb-0.5 fill-amber-400" />
                 <p className="text-xs font-black text-amber-700">{hospital.rating.toFixed(1)}</p>
-                <p className="text-[9px] text-amber-400 font-bold">Rating</p>
+                <p className="text-[9px] text-amber-400 font-bold">{t('rating')}</p>
               </>
             )}
           </div>
@@ -486,8 +497,8 @@ function HospitalCard({ hospital, selected, onSelect, onBook }: {
               hospital.availabilityStatus === 'available' ? 'text-emerald-700' :
               hospital.availabilityStatus === 'limited' ? 'text-amber-700' : 'text-red-700'
             }`}>
-              {hospital.availabilityStatus === 'available' ? 'Doctors Available' :
-               hospital.availabilityStatus === 'limited' ? 'Limited Availability' : 'Currently Unavailable'}
+              {hospital.availabilityStatus === 'available' ? t('doctorsAvailable') :
+               hospital.availabilityStatus === 'limited' ? t('limitedAvailability') : t('currentlyUnavailable')}
             </span>
           </div>
           <span className="text-xs font-bold text-slate-500">
@@ -848,11 +859,11 @@ export default function Hospitals() {
             <Bot className="h-8 w-8" />
           </div>
           <div className="flex-1">
-            <p className="font-black text-lg flex items-center gap-2">MediBot AI Assistant <Sparkles className="h-4 w-4 text-yellow-300 animate-pulse" /><span className="text-[10px] font-black bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full">AI POWERED</span></p>
-            <p className="text-white/80 text-sm">Need help choosing a hospital? Ask MediBot for personalized medical guidance</p>
+            <p className="font-black text-lg flex items-center gap-2">{t('medibotAssistant')} <Sparkles className="h-4 w-4 text-yellow-300 animate-pulse" /><span className="text-[10px] font-black bg-yellow-400 text-yellow-900 px-2 py-0.5 rounded-full">{t('aiPowered')}</span></p>
+            <p className="text-white/80 text-sm">{t('medibotDescription')}</p>
           </div>
           <div className="hidden sm:flex items-center gap-1.5 bg-white/15 px-4 py-2.5 rounded-xl border border-white/20 font-bold text-sm group-hover:bg-white/25 transition-colors">
-            <MessageCircle className="h-4 w-4" /> Chat Now
+            <MessageCircle className="h-4 w-4" /> {t('chatNow')}
           </div>
         </div>
       </a>
@@ -863,22 +874,22 @@ export default function Hospitals() {
           <div>
             <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
               <span className="bg-emerald-100 p-2 rounded-xl"><Building2 className="h-7 w-7 text-emerald-600" /></span>
-              Nearby Hospitals
+              {t('nearbyHospitals')}
             </h1>
             <div className="mt-2 flex flex-wrap items-center gap-3">
               <LocationStatus status={locationStatus} address={locationAddress} />
               <button onClick={() => setShowLocationPicker(!showLocationPicker)} className="text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-2.5 py-1 rounded-lg transition-colors flex items-center gap-1">
-                <MapPinned className="h-3 w-3" /> Change Location
+                <MapPinned className="h-3 w-3" /> {t('changeLocation')}
               </button>
               {/* Live stats */}
               {!loading && hospitals.length > 0 && (
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />{openCount} Open Now
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />{openCount} {t('openNow')}
                   </span>
                   {emergencyCount > 0 && (
                     <span className="text-xs font-bold bg-red-50 text-red-600 px-2 py-0.5 rounded-full border border-red-200 flex items-center gap-1">
-                      <Zap className="h-2.5 w-2.5" />{emergencyCount} Emergency
+                      <Zap className="h-2.5 w-2.5" />{emergencyCount} {t('emergency')}
                     </span>
                   )}
                 </div>
@@ -911,13 +922,13 @@ export default function Hospitals() {
               <option value={20000}>20 km</option>
             </select>
             <select value={sortBy} onChange={e => setSortBy(e.target.value as any)} className="bg-slate-50 border border-slate-200 text-sm font-medium rounded-xl px-3 py-2.5 outline-none focus:ring-2 focus:ring-emerald-500/20">
-              <option value="distance">Sort: Nearest</option>
-              <option value="rating">Sort: Rating</option>
-              <option value="open">Sort: Open Now</option>
+              <option value="distance">{t('sortNearest')}</option>
+              <option value="rating">{t('sortRating')}</option>
+              <option value="open">{t('sortOpenNow')}</option>
             </select>
             <div className="flex bg-slate-100 rounded-xl p-1">
-              <button onClick={() => setViewMode('list')} className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${viewMode==='list' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>List</button>
-              <button onClick={() => setViewMode('map')} className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${viewMode==='map' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>Map</button>
+              <button onClick={() => setViewMode('list')} className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${viewMode==='list' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>{t('list')}</button>
+              <button onClick={() => setViewMode('map')} className={`px-4 py-2 text-sm font-semibold rounded-lg transition-all ${viewMode==='map' ? 'bg-white text-slate-800 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>{t('map')}</button>
             </div>
           </div>
         </div>
@@ -925,10 +936,10 @@ export default function Hospitals() {
         {/* Facility Filter */}
         <div className="flex gap-2 flex-wrap">
           {[
-            { key:'all', label:'All Facilities', icon:Building2 },
-            { key:'hospital', label:'Hospitals', icon:Building2 },
-            { key:'clinic', label:'Clinics', icon:Stethoscope },
-            { key:'pharmacy', label:'Pharmacies', icon:Pill },
+            { key:'all', label:t('allFacilities'), icon:Building2 },
+            { key:'hospital', label:t('hospitals'), icon:Building2 },
+            { key:'clinic', label:t('clinics'), icon:Stethoscope },
+            { key:'pharmacy', label:t('pharmacies'), icon:Pill },
           ].map(tab => (
             <button key={tab.key} onClick={() => setFacilityFilter(tab.key as any)}
               className={`flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-bold transition-all ${facilityFilter===tab.key ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'}`}>
@@ -941,7 +952,7 @@ export default function Hospitals() {
         <div className="relative w-full">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
           <input type="text" value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Search by name, specialty, or area…"
+            placeholder={t('searchHospitalsPlaceholder')}
             className="w-full pl-12 pr-4 py-3.5 bg-white border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400 transition-all shadow-sm" />
           {searchQuery && <button onClick={() => setSearchQuery('')} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"><X className="h-4 w-4" /></button>}
         </div>
@@ -952,10 +963,10 @@ export default function Hospitals() {
         <div className="bg-amber-50 border border-amber-200 rounded-2xl p-5 flex items-start gap-4">
           <AlertTriangle className="h-6 w-6 text-amber-500 flex-shrink-0 mt-0.5" />
           <div>
-            <h3 className="font-bold text-amber-800 mb-1">Location access required</h3>
+            <h3 className="font-bold text-amber-800 mb-1">{t('locationAccessRequired')}</h3>
             <p className="text-amber-700 text-sm">Enable location permissions for real hospital distances. Showing demo data.</p>
             <button onClick={() => window.location.reload()} className="mt-3 bg-amber-100 hover:bg-amber-200 text-amber-800 px-4 py-2 rounded-xl text-sm font-semibold transition-colors">
-              <LocateFixed className="h-4 w-4 inline mr-1" /> Retry Location
+              <LocateFixed className="h-4 w-4 inline mr-1" /> {t('retryLocation')}
             </button>
           </div>
         </div>
@@ -985,8 +996,8 @@ export default function Hospitals() {
       {!loading && viewMode === 'list' && (
         <>
           <p className="text-slate-500 text-sm font-medium">
-            Found <strong className="text-slate-700">{filteredHospitals.length}</strong> facilities within {searchRadius/1000} km
-            {openCount > 0 && <> · <span className="text-emerald-600 font-bold">{openCount} open now</span></>}
+            {t('foundFacilities')} <strong className="text-slate-700">{filteredHospitals.length}</strong> {searchRadius/1000} km
+            {openCount > 0 && <> · <span className="text-emerald-600 font-bold">{openCount} {t('openNow')}</span></>}
           </p>
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             {filteredHospitals.map(hospital => (
@@ -1002,8 +1013,8 @@ export default function Hospitals() {
           {filteredHospitals.length === 0 && !loading && (
             <div className="flex flex-col items-center py-16 gap-4">
               <div className="bg-slate-100 p-6 rounded-full"><Search className="h-10 w-10 text-slate-400" /></div>
-              <h3 className="text-lg font-bold text-slate-700">No hospitals found</h3>
-              <p className="text-slate-500 text-sm">Try increasing the search radius or changing your location.</p>
+              <h3 className="text-lg font-bold text-slate-700">{t('noHospitalsFound')}</h3>
+              <p className="text-slate-500 text-sm">{t('tryIncreasingRadius')}</p>
             </div>
           )}
         </>
