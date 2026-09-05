@@ -9,11 +9,16 @@ export async function POST(req: NextRequest) {
     if (!symptoms) return NextResponse.json({ error: 'Symptoms are required.' }, { status: 400 });
 
     const LANG_NAMES: Record<string, string> = {
-      en: 'English', hi: 'Hindi', te: 'Telugu', ta: 'Tamil',
-      kn: 'Kannada', mr: 'Marathi', bn: 'Bengali', bho: 'Bhojpuri',
+      en: 'English', hi: 'Hindi (हिंदी)', te: 'Telugu (తెలుగు)', ta: 'Tamil (தமிழ்)',
+      kn: 'Kannada (ಕನ್ನಡ)', mr: 'Marathi (मराठी)', bn: 'Bengali (বাংলা)', bho: 'Bhojpuri (भोजपुरी)',
+      gu: 'Gujarati (ગુજરાતી)', pa: 'Punjabi (ਪੰਜਾਬੀ)', or: 'Odia (ଓଡ଼ିଆ)', as: 'Assamese (অসমীয়া)',
+      ur: 'Urdu (اردو)', ml: 'Malayalam (മലയാളം)', mai: 'Maithili (मैथिली)', sat: 'Santali (ᱥᱟᱱᱛﺎᱲᱤ)',
+      kok: 'Konkani (कोंकणी)', doi: 'Dogri (डोगरी)', ks: 'Kashmiri (کٲشُر)', mni: 'Manipuri (মেইতেই)',
+      ne: 'Nepali (नेपाली)', sd: 'Sindhi (سنڌي)', sa: 'Sanskrit (संस्कृतम्)',
     };
+    const targetLangName = LANG_NAMES[language || 'en'] || 'English';
     const langInstruction = language && language !== 'en'
-      ? `\n\nCRITICAL: Respond ENTIRELY in ${LANG_NAMES[language] || 'English'}.` : '';
+      ? `\n\nCRITICAL: Respond ENTIRELY in ${targetLangName} using native script for all explanation fields (diagnosis, foodAdvice, exerciseAdvice, lifestyleAdvice, generalAdvice, whenToSeeDoctor, disclaimer). Keep JSON structure and keys intact.` : '';
 
     const patientContext = [
       age     && `Age: ${age}`,

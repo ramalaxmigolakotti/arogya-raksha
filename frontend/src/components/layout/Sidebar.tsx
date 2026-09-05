@@ -9,7 +9,7 @@ import {
   ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-import { useLanguage, Language } from '@/context/LanguageContext';
+import { useLanguage, Language, LANGUAGES } from '@/context/LanguageContext';
 import { useState, useRef, useEffect } from 'react';
 
 // Shared collapsed state — stored in sessionStorage so it persists across navigations
@@ -54,31 +54,7 @@ export default function Sidebar() {
     { icon: Settings, label: t('settings'), href: '/dashboard/settings' },
   ];
 
-  const languages: { code: Language; name: string; flag: string; native: string }[] = [
-    { code: 'en',  name: 'English',   flag: '🇬🇧', native: 'English'   },
-    { code: 'hi',  name: 'Hindi',     flag: '🇮🇳', native: 'हिंदी'     },
-    { code: 'te',  name: 'Telugu',    flag: '🇮🇳', native: 'తెలుగు'    },
-    { code: 'ta',  name: 'Tamil',     flag: '🇮🇳', native: 'தமிழ்'     },
-    { code: 'kn',  name: 'Kannada',   flag: '🇮🇳', native: 'ಕನ್ನಡ'    },
-    { code: 'mr',  name: 'Marathi',   flag: '🇮🇳', native: 'मराठी'     },
-    { code: 'bn',  name: 'Bengali',   flag: '🇮🇳', native: 'বাংলা'     },
-    { code: 'bho', name: 'Bhojpuri',  flag: '🇮🇳', native: 'भोजपुरी'   },
-    { code: 'gu',  name: 'Gujarati',  flag: '🇮🇳', native: 'ગુજરાતી'  },
-    { code: 'pa',  name: 'Punjabi',   flag: '🇮🇳', native: 'ਪੰਜਾਬੀ'    },
-    { code: 'or',  name: 'Odia',      flag: '🇮🇳', native: 'ଓଡ଼ିଆ'      },
-    { code: 'as',  name: 'Assamese',  flag: '🇮🇳', native: 'অসমীয়া'   },
-    { code: 'ur',  name: 'Urdu',      flag: '🇮🇳', native: 'اردو'      },
-    { code: 'ml',  name: 'Malayalam', flag: '🇮🇳', native: 'മലയാളം'   },
-    { code: 'mai', name: 'Maithili',  flag: '🇮🇳', native: 'मैथिली'    },
-    { code: 'sat', name: 'Santali',   flag: '🇮🇳', native: 'ᱥᱟᱱᱛᱟᱲᱤ' },
-    { code: 'kok', name: 'Konkani',   flag: '🇮🇳', native: 'कोंकणी'    },
-    { code: 'doi', name: 'Dogri',     flag: '🇮🇳', native: 'डोगरी'     },
-    { code: 'ks',  name: 'Kashmiri',  flag: '🇮🇳', native: 'کٲشُر'     },
-    { code: 'mni', name: 'Manipuri',  flag: '🇮🇳', native: 'মেইতেই'   },
-    { code: 'ne',  name: 'Nepali',    flag: '🇳🇵', native: 'नेपाली'    },
-    { code: 'sd',  name: 'Sindhi',    flag: '🇮🇳', native: 'سنڌي'     },
-    { code: 'sa',  name: 'Sanskrit',  flag: '🇮🇳', native: 'संस्कृतम्' },
-  ];
+  const languages = LANGUAGES;
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

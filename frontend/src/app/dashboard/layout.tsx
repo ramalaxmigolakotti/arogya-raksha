@@ -8,6 +8,8 @@ import MediBotAgent from '@/components/MediBotAgent';
 import ClerkApiProvider from '@/components/ClerkApiProvider';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useState, useEffect } from 'react';
+import NotificationManager from '@/components/NotificationManager';
+
 
 function DashboardInner({ children }: { children: React.ReactNode }) {
   usePushNotifications();
@@ -47,6 +49,7 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
           <Footer />
         </main>
       </div>
+      <NotificationManager showBanner />
     </div>
   );
 }

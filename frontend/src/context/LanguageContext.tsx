@@ -2,12 +2,50 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-export type Language = 'en' | 'te' | 'hi' | 'ta' | 'kn' | 'mr' | 'bn' | 'bho';
+export type Language =
+  | 'en' | 'hi' | 'te' | 'ta' | 'kn' | 'mr' | 'bn' | 'bho'
+  | 'gu' | 'pa' | 'or' | 'as' | 'ur' | 'ml' | 'mai' | 'sat'
+  | 'kok' | 'doi' | 'ks' | 'mni' | 'ne' | 'sd' | 'sa';
+
+export interface LanguageMeta {
+  code: Language;
+  name: string;
+  native: string;
+  flag: string;
+}
+
+export const LANGUAGES: LanguageMeta[] = [
+  { code: 'en',  name: 'English',   flag: '🇬🇧', native: 'English'   },
+  { code: 'hi',  name: 'Hindi',     flag: '🇮🇳', native: 'हिंदी'     },
+  { code: 'te',  name: 'Telugu',    flag: '🇮🇳', native: 'తెలుగు'    },
+  { code: 'ta',  name: 'Tamil',     flag: '🇮🇳', native: 'தமிழ்'     },
+  { code: 'kn',  name: 'Kannada',   flag: '🇮🇳', native: 'ಕನ್ನಡ'    },
+  { code: 'mr',  name: 'Marathi',   flag: '🇮🇳', native: 'मराठी'     },
+  { code: 'bn',  name: 'Bengali',   flag: '🇮🇳', native: 'বাংলা'     },
+  { code: 'bho', name: 'Bhojpuri',  flag: '🇮🇳', native: 'भोजपुरी'   },
+  { code: 'gu',  name: 'Gujarati',  flag: '🇮🇳', native: 'ગુજરાતી'  },
+  { code: 'pa',  name: 'Punjabi',   flag: '🇮🇳', native: 'ਪੰਜਾਬੀ'    },
+  { code: 'or',  name: 'Odia',      flag: '🇮🇳', native: 'ଓଡ଼ିଆ'      },
+  { code: 'as',  name: 'Assamese',  flag: '🇮🇳', native: 'অসমীয়া'   },
+  { code: 'ur',  name: 'Urdu',      flag: '🇮🇳', native: 'اردو'      },
+  { code: 'ml',  name: 'Malayalam', flag: '🇮🇳', native: 'മലയാളം'   },
+  { code: 'mai', name: 'Maithili',  flag: '🇮🇳', native: 'मैथिली'    },
+  { code: 'sat', name: 'Santali',   flag: '🇮🇳', native: 'ᱥᱟᱱᱛᱟᱲᱤ' },
+  { code: 'kok', name: 'Konkani',   flag: '🇮🇳', native: 'कोंकणी'    },
+  { code: 'doi', name: 'Dogri',     flag: '🇮🇳', native: 'डोगरी'     },
+  { code: 'ks',  name: 'Kashmiri',  flag: '🇮🇳', native: 'کٲشُر'     },
+  { code: 'mni', name: 'Manipuri',  flag: '🇮🇳', native: 'মেইতেই'   },
+  { code: 'ne',  name: 'Nepali',    flag: '🇳🇵', native: 'नेपाली'    },
+  { code: 'sd',  name: 'Sindhi',    flag: '🇮🇳', native: 'سنڌي'     },
+  { code: 'sa',  name: 'Sanskrit',  flag: '🇮🇳', native: 'संस्कृतम्' },
+];
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string) => string;
+  currentLangMeta: LanguageMeta;
+  getLanguageInstruction: () => string;
 }
 
 // ─── TRANSLATIONS ───────────────────────────────────────────────────────────
@@ -1430,7 +1468,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const saved = localStorage.getItem('app-language') as Language;
-    if (saved && translations[saved]) {
+    if (saved && LANGUAGES.some((l) => l.code === saved)) {
       setLanguageState(saved);
     }
   }, []);
@@ -1441,12 +1479,19 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     window.dispatchEvent(new CustomEvent('language-changed', { detail: lang }));
   };
 
+  const currentLangMeta = LANGUAGES.find((l) => l.code === language) || LANGUAGES[0];
+
+  const getLanguageInstruction = () => {
+    if (language === 'en') return '';
+    return `IMPORTANT: Write your ENTIRE response in ${currentLangMeta.name} (${currentLangMeta.native}) using native script. Do NOT reply in English unless writing specific medicine names.`;
+  };
+
   const t = (key: string) => {
     return translations[language]?.[key] || translations['en']?.[key] || key;
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage, t, currentLangMeta, getLanguageInstruction }}>
       {children}
     </LanguageContext.Provider>
   );
@@ -1455,11 +1500,13 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 export function useLanguage() {
   const context = useContext(LanguageContext);
   if (context === undefined) {
-    // Return a no-op fallback instead of throwing — allows use outside provider (e.g. SOS page)
+    const defaultMeta = LANGUAGES[0];
     return {
       language: 'en' as Language,
       setLanguage: () => {},
       t: (key: string) => key,
+      currentLangMeta: defaultMeta,
+      getLanguageInstruction: () => '',
     };
   }
   return context;

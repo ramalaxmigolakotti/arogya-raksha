@@ -40,6 +40,11 @@ export default function MedicineScanner() {
   const [error, setError] = useState('');
   const [result, setResult] = useState<ScanResult | null>(null);
   const [datasetMatches, setDatasetMatches] = useState<any[]>([]);
+  const [interactions, setInteractions] = useState<{medicine: string; risk: string; severity: 'mild'|'moderate'|'severe'}[]>([]);
+  const [savedToProfile, setSavedToProfile] = useState(false);
+  const [scanHistory, setScanHistory] = useState<{name: string; date: string}[]>(() => {
+    try { return JSON.parse(localStorage.getItem('scanner_history') || '[]'); } catch { return []; }
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const { t, language } = useLanguage();
@@ -106,6 +111,7 @@ export default function MedicineScanner() {
       // Dataset-first: search our 253K dataset for this medicine
       if (data.medicineName) {
         await searchDataset(data.medicineName);
+        checkInteractions(data.medicineName + ' ' + (data.genericName || ''));
       }
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -118,7 +124,60 @@ export default function MedicineScanner() {
     setImageData(null);
     setResult(null);
     setDatasetMatches([]);
+    setInteractions([]);
+    setSavedToProfile(false);
     setError('');
+  };
+
+  // Check drug interactions against user's saved medicines
+  const checkInteractions = (identified: string) => {
+    try {
+      const profile = JSON.parse(localStorage.getItem('medical_profile') || localStorage.getItem('arogya_medical_profile') || '{}');
+      const currentMeds: string[] = profile?.current_medications || profile?.medications || [];
+      if (!currentMeds.length) return;
+
+      const knownInteractions: Record<string, {with: string; risk: string; severity: 'mild'|'moderate'|'severe'}[]> = {
+        'paracetamol':  [{ with: 'Warfarin', risk: 'May increase bleeding risk', severity: 'moderate' }],
+        'ibuprofen':    [{ with: 'Aspirin', risk: 'Increased GI bleed risk', severity: 'severe' }, { with: 'Warfarin', risk: 'Increased bleeding', severity: 'severe' }],
+        'metformin':    [{ with: 'Alcohol', risk: 'Risk of lactic acidosis', severity: 'severe' }],
+        'aspirin':      [{ with: 'Ibuprofen', risk: 'Reduced cardioprotective effect', severity: 'moderate' }],
+        'amoxicillin':  [{ with: 'Warfarin', risk: 'May increase INR', severity: 'moderate' }],
+      };
+
+      const identifiedLower = identified.toLowerCase();
+      const found: typeof interactions = [];
+
+      for (const [drug, ixns] of Object.entries(knownInteractions)) {
+        if (identifiedLower.includes(drug)) {
+          for (const ixn of ixns) {
+            if (currentMeds.some(m => m.toLowerCase().includes(ixn.with.toLowerCase()))) {
+              found.push({ medicine: ixn.with, risk: ixn.risk, severity: ixn.severity });
+            }
+          }
+        }
+      }
+      setInteractions(found);
+    } catch {}
+  };
+
+  const saveToProfile = () => {
+    if (!result) return;
+    try {
+      const raw = localStorage.getItem('medical_profile') || localStorage.getItem('arogya_medical_profile') || '{}';
+      const profile = JSON.parse(raw);
+      const meds: string[] = profile.current_medications || [];
+      if (!meds.includes(result.medicineName)) {
+        meds.push(result.medicineName);
+        profile.current_medications = meds;
+        localStorage.setItem('medical_profile', JSON.stringify(profile));
+      }
+      // Save to scan history
+      const newEntry = { name: result.medicineName, date: new Date().toLocaleDateString() };
+      const hist = [newEntry, ...scanHistory].slice(0, 10);
+      setScanHistory(hist);
+      localStorage.setItem('scanner_history', JSON.stringify(hist));
+      setSavedToProfile(true);
+    } catch {}
   };
 
   return (
@@ -256,6 +315,37 @@ export default function MedicineScanner() {
 
           {result && (
             <div className="space-y-4 animate-in slide-in-from-bottom-4 duration-300">
+
+              {/* Drug Interaction Warning */}
+              {interactions.length > 0 && (
+                <div className="bg-rose-50 border-2 border-rose-300 rounded-2xl p-4">
+                  <p className="font-bold text-rose-800 flex items-center gap-2 mb-2">
+                    <AlertTriangle className="h-5 w-5" /> ⚠️ Drug Interaction Alert
+                  </p>
+                  {interactions.map((ix, i) => (
+                    <div key={i} className="bg-white rounded-xl p-3 border border-rose-200 mb-2">
+                      <p className="text-sm font-bold text-rose-700">With: {ix.medicine}</p>
+                      <p className="text-xs text-rose-600">{ix.risk}</p>
+                      <span className={`text-xs font-bold capitalize px-2 py-0.5 rounded-full mt-1 inline-block ${
+                        ix.severity === 'severe' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-700'
+                      }`}>{ix.severity} risk</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Add to Profile Button */}
+              <button onClick={saveToProfile} disabled={savedToProfile}
+                className={`w-full py-3 rounded-2xl font-bold text-sm flex items-center justify-center gap-2 transition-all ${
+                  savedToProfile
+                    ? 'bg-emerald-100 text-emerald-700 cursor-default'
+                    : 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:-translate-y-0.5 shadow-lg shadow-emerald-500/20'
+                }`}>
+                {savedToProfile
+                  ? <><CheckCircle2 className="h-4 w-4" /> Added to My Medicines</>
+                  : <><Package className="h-4 w-4" /> Add to My Medicines</>}
+              </button>
+
               {/* Medicine Identity Card */}
               <div className="bg-white rounded-3xl p-6 border border-slate-100 shadow-xl shadow-slate-200/40">
                 <div className="flex items-start justify-between mb-4">
