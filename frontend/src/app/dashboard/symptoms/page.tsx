@@ -328,32 +328,59 @@ export default function SymptomChecker() {
   const [recordSaved, setRecordSaved]         = useState(false);
   const [savingRecord, setSavingRecord]       = useState(false);
 
+  // Safely extract hospitals array from any response shape
+  const extractHospitals = (data: any): NearbyHospital[] => {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.hospitals)) return data.hospitals;
+    if (data && Array.isArray(data.data)) return data.data;
+    return [];
+  };
+
   // Fetch hospitals near user after diagnosis
   const fetchNearbyHospitals = async () => {
     setHospitalsLoading(true);
     try {
       if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (pos) => {
-          const { latitude, longitude } = pos.coords;
-          const res = await fetch(`/api/hospitals?lat=${latitude}&lng=${longitude}&limit=3`);
-          const data = await res.json();
-          const list = (data.hospitals || data || []).slice(0, 3);
-          setNearbyHospitals(list);
-          setHospitalsLoading(false);
-          setJourneyStep(7);
-          fetchNearbyDoctors();
-        }, () => {
-          // fallback — fetch without coords
-          fetch('/api/hospitals?limit=3').then(r => r.json()).then(data => {
-            setNearbyHospitals((data.hospitals || data || []).slice(0, 3));
-            setHospitalsLoading(false);
-            setJourneyStep(7);
-            fetchNearbyDoctors();
-          });
-        });
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            try {
+              const { latitude, longitude } = pos.coords;
+              const res = await fetch(`/api/hospitals?lat=${latitude}&lng=${longitude}&limit=3`);
+              const data = await res.json();
+              setNearbyHospitals(extractHospitals(data).slice(0, 3));
+            } catch {
+              setNearbyHospitals([]);
+            } finally {
+              setHospitalsLoading(false);
+              setJourneyStep(7);
+              fetchNearbyDoctors();
+            }
+          },
+          async () => {
+            // Geolocation denied — fetch without coords
+            try {
+              const res = await fetch('/api/hospitals?limit=3');
+              const data = await res.json();
+              setNearbyHospitals(extractHospitals(data).slice(0, 3));
+            } catch {
+              setNearbyHospitals([]);
+            } finally {
+              setHospitalsLoading(false);
+              setJourneyStep(7);
+              fetchNearbyDoctors();
+            }
+          }
+        );
+      } else {
+        // Geolocation not supported
+        setHospitalsLoading(false);
+        setJourneyStep(7);
+        fetchNearbyDoctors();
       }
     } catch {
       setHospitalsLoading(false);
+      setJourneyStep(7);
+      fetchNearbyDoctors();
     }
   };
 
