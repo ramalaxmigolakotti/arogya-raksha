@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "name": "Dr. Sameer",
+    "specialty": "General Surgeon",
+    "experience": "12+ Years",
+    "rating": 4.9,
+    "reviews": 128,
+    "image": "/assets/doctors/dr_sameer.png",
+    "availability": "Mon - Sat",
+    "address": "Apollo Indraprastha Hospital, Mathura Rd",
+    "phone": "+91 98765 43210",
+    "tags": ["Laparoscopic", "Robotic Surgery"],
+    "bio": "Experienced general surgeon specializing in minimally invasive procedures."
+  },
+  {
+    "id": 2,
+    "name": "Dr. Rama Lakshmi",
+    "specialty": "Dermatologist",
+    "experience": "10+ Years",
+    "rating": 4.8,
+    "reviews": 95,
+    "image": "/assets/doctors/dr_rama_lakshmi.png",
+    "availability": "Tue - Sun",
+    "address": "Max Super Speciality Hospital, Saket",
+    "phone": "+91 98765 43211",
+    "tags": ["Cosmetology", "Skin Care"],
+    "bio": "Expert dermatologist with specialization in cosmetic and clinical dermatology."
+  },
+  {
+    "id": 3,
+    "name": "Dr. Bindhu",
+    "specialty": "Pediatrician",
+    "experience": "8+ Years",
+    "rating": 4.9,
+    "reviews": 210,
+    "image": "/assets/doctors/dr_bindhu.png",
+    "availability": "Mon - Fri",
+    "address": "Rainbow Children's Hospital",
+    "phone": "+91 98765 43212",
+    "tags": ["Child Health", "Vaccination"],
+    "bio": "Caring pediatrician dedicated to children's health and development."
+  },
+  {
+    "id": 4,
+    "name": "Dr. Prasanna",
+    "specialty": "Cardiologist",
+    "experience": "15+ Years",
+    "rating": 5.0,
+    "reviews": 156,
+    "image": "/assets/doctors/dr_prasanna.png",
+    "availability": "Available for Consult",
+    "address": "Fortis Hospital, Vasant Kunj",
+    "phone": "+91 98765 43213",
+    "tags": ["Heart Care", "Surgery"],
+    "bio": "Leading cardiologist with extensive experience in interventional cardiology."
+  },
+  {
+    "id": 5,
+    "name": "Dr. Ganesh",
+    "specialty": "Neurologist",
+    "experience": "9+ Years",
+    "rating": 4.7,
+    "reviews": 88,
+    "image": "/assets/doctors/dr_ganesh.png",
+    "availability": "By Appointment",
+    "address": "AIIMS Hospital, Ansari Nagar",
+    "phone": "+91 98765 43214",
+    "tags": ["Brain Health", "Treatment"],
+    "bio": "Expert neurologist specializing in brain health diagnostics and treatment."
+  }
+]

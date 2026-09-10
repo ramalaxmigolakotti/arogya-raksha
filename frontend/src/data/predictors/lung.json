@@ -1,0 +1,91 @@
+{
+  "name": "Lung Disease Risk",
+  "description": "Based on 5200 patient records. Predicts lung disease type and recovery probability.",
+  "totalPatients": 5200,
+  "fields": [
+    {
+      "key": "age",
+      "label": "Age",
+      "type": "number",
+      "min": 18,
+      "max": 90,
+      "unit": "years"
+    },
+    {
+      "key": "gender",
+      "label": "Gender",
+      "type": "select",
+      "options": [
+        "Male",
+        "Female"
+      ]
+    },
+    {
+      "key": "smoking",
+      "label": "Smoking Status",
+      "type": "select",
+      "options": [
+        "Never",
+        "Former",
+        "Current"
+      ]
+    },
+    {
+      "key": "lungCapacity",
+      "label": "Lung Capacity",
+      "type": "number",
+      "min": 1,
+      "max": 6,
+      "unit": "liters"
+    }
+  ],
+  "riskFactors": {
+    "diseaseDistribution": {
+      "COPD": 1003,
+      "Bronchitis": 1009,
+      "Asthma": 1008,
+      "Lung Cancer": 934,
+      "Pneumonia": 946,
+      "Unknown": 300
+    },
+    "bySmoking": {
+      "No": {
+        "total": 2397,
+        "recovered": 1160,
+        "recoveryRate": 48.4
+      },
+      "Yes": {
+        "total": 2503,
+        "recovered": 1190,
+        "recoveryRate": 47.5
+      },
+      "Unknown": {
+        "total": 300,
+        "recovered": 142,
+        "recoveryRate": 47.3
+      }
+    },
+    "byLungCapacity": {
+      "Very Low (<2)": {
+        "total": 993,
+        "recovered": 476,
+        "recoveryRate": 47.9
+      },
+      "Low (2-3)": {
+        "total": 972,
+        "recovered": 477,
+        "recoveryRate": 49.1
+      },
+      "Normal (3-4.5)": {
+        "total": 1436,
+        "recovered": 676,
+        "recoveryRate": 47.1
+      },
+      "Good (4.5+)": {
+        "total": 1499,
+        "recovered": 728,
+        "recoveryRate": 48.6
+      }
+    }
+  }
+}

@@ -1,0 +1,86 @@
+[
+  {
+    "id": 1,
+    "name": "ESI Hospital, Indiranagar",
+    "address": "H.A.L. 2nd stage,  Indiranagar,  Bangalore �   560  038.",
+    "district": "Bengaluru Urban",
+    "phone": "080-25266993"
+  },
+  {
+    "id": 2,
+    "name": "ESI Hospital, Mysore",
+    "address": "K.R.S. Road,",
+    "district": "",
+    "phone": ""
+  },
+  {
+    "id": 3,
+    "name": "",
+    "address": "",
+    "district": "",
+    "phone": ""
+  },
+  {
+    "id": 4,
+    "name": "ESI Hospital, Mangalore",
+    "address": "Kadri , Shivbagh,",
+    "district": "",
+    "phone": ""
+  },
+  {
+    "id": 5,
+    "name": "",
+    "address": "",
+    "district": "",
+    "phone": ""
+  },
+  {
+    "id": 6,
+    "name": "ESI Hospital, Davanagere",
+    "address": "Nittuvalli Extension,",
+    "district": "",
+    "phone": ""
+  },
+  {
+    "id": 7,
+    "name": "",
+    "address": "",
+    "district": "",
+    "phone": ""
+  },
+  {
+    "id": 8,
+    "name": "ESI Hospital, Hubli",
+    "address": "Karwar Road,",
+    "district": "",
+    "phone": ""
+  },
+  {
+    "id": 9,
+    "name": "",
+    "address": "",
+    "district": "",
+    "phone": ""
+  },
+  {
+    "id": 10,
+    "name": "ESI Hospital, Belagavi",
+    "address": "Ashok Nagar,   Near BUDA Office, Head Post Office Shivajinagar,  Belgaum � 590016.",
+    "district": "Belagavi",
+    "phone": "0831-2474369"
+  },
+  {
+    "id": 11,
+    "name": "ESI Hospital, Dandeli",
+    "address": "Dandeli - 581 325 (Uttara Kannada)",
+    "district": "Uttara Kannada",
+    "phone": "08284-"
+  },
+  {
+    "id": 12,
+    "name": "",
+    "address": "",
+    "district": "",
+    "phone": ""
+  }
+]

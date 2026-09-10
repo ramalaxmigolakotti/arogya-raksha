@@ -1,0 +1,176 @@
+{
+  "name": "Dengue Fever Risk",
+  "description": "Based on a dataset of 10,00,000 patient records. Predicts dengue likelihood based on symptoms.",
+  "totalPatients": 1000000,
+  "fields": [
+    {
+      "key": "fever",
+      "label": "Do you have fever?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "key": "headache",
+      "label": "Do you have headache?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "key": "jointPain",
+      "label": "Do you have joint/body pain?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "key": "bleeding",
+      "label": "Any unusual bleeding?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    }
+  ],
+  "riskFactors": {
+    "bySymptomCombo": {
+      "0-0-1-1": {
+        "total": 622,
+        "positive": 318,
+        "rate": 51.1
+      },
+      "1-1-1-0": {
+        "total": 646,
+        "positive": 336,
+        "rate": 52
+      },
+      "0-1-1-0": {
+        "total": 649,
+        "positive": 335,
+        "rate": 51.6
+      },
+      "0-1-0-1": {
+        "total": 626,
+        "positive": 327,
+        "rate": 52.2
+      },
+      "0-0-1-0": {
+        "total": 605,
+        "positive": 306,
+        "rate": 50.6
+      },
+      "0-1-1-1": {
+        "total": 586,
+        "positive": 308,
+        "rate": 52.6
+      },
+      "1-0-0-0": {
+        "total": 590,
+        "positive": 292,
+        "rate": 49.5
+      },
+      "1-0-1-0": {
+        "total": 608,
+        "positive": 289,
+        "rate": 47.5
+      },
+      "1-1-0-1": {
+        "total": 631,
+        "positive": 316,
+        "rate": 50.1
+      },
+      "1-1-1-1": {
+        "total": 599,
+        "positive": 303,
+        "rate": 50.6
+      },
+      "0-1-0-0": {
+        "total": 665,
+        "positive": 333,
+        "rate": 50.1
+      },
+      "1-0-0-1": {
+        "total": 696,
+        "positive": 345,
+        "rate": 49.6
+      },
+      "0-0-0-1": {
+        "total": 595,
+        "positive": 292,
+        "rate": 49.1
+      },
+      "0-0-0-0": {
+        "total": 594,
+        "positive": 292,
+        "rate": 49.2
+      },
+      "1-0-1-1": {
+        "total": 678,
+        "positive": 338,
+        "rate": 49.9
+      },
+      "1-1-0-0": {
+        "total": 610,
+        "positive": 307,
+        "rate": 50.3
+      }
+    },
+    "byFever": {
+      "withSymptom": {
+        "total": 5058,
+        "positive": 2526,
+        "rate": 49.9
+      },
+      "withoutSymptom": {
+        "total": 4942,
+        "positive": 2511,
+        "rate": 50.8
+      }
+    },
+    "byHeadache": {
+      "withSymptom": {
+        "total": 5012,
+        "positive": 2565,
+        "rate": 51.2
+      },
+      "withoutSymptom": {
+        "total": 4988,
+        "positive": 2472,
+        "rate": 49.6
+      }
+    },
+    "byJointPain": {
+      "withSymptom": {
+        "total": 4993,
+        "positive": 2533,
+        "rate": 50.7
+      },
+      "withoutSymptom": {
+        "total": 5007,
+        "positive": 2504,
+        "rate": 50
+      }
+    },
+    "byBleeding": {
+      "withSymptom": {
+        "total": 5033,
+        "positive": 2547,
+        "rate": 50.6
+      },
+      "withoutSymptom": {
+        "total": 4967,
+        "positive": 2490,
+        "rate": 50.1
+      }
+    }
+  },
+  "baseRate": 50.4
+}

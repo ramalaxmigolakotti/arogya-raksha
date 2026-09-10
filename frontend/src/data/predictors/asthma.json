@@ -1,0 +1,221 @@
+{
+  "name": "Asthma Risk Assessment",
+  "description": "Based on 10,000 patient records. Predicts asthma risk and control level.",
+  "totalPatients": 10000,
+  "fields": [
+    {
+      "key": "age",
+      "label": "Age",
+      "type": "number",
+      "min": 5,
+      "max": 90,
+      "unit": "years"
+    },
+    {
+      "key": "gender",
+      "label": "Gender",
+      "type": "select",
+      "options": [
+        "Male",
+        "Female"
+      ]
+    },
+    {
+      "key": "bmi",
+      "label": "BMI",
+      "type": "number",
+      "min": 15,
+      "max": 50
+    },
+    {
+      "key": "smoking",
+      "label": "Smoking Status",
+      "type": "select",
+      "options": [
+        "Never",
+        "Former",
+        "Current"
+      ]
+    },
+    {
+      "key": "familyHistory",
+      "label": "Family History of Asthma?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "key": "allergies",
+      "label": "Do you have allergies?",
+      "type": "select",
+      "options": [
+        "Yes",
+        "No"
+      ]
+    },
+    {
+      "key": "pollution",
+      "label": "Air Pollution Level in your area",
+      "type": "select",
+      "options": [
+        "Low",
+        "Medium",
+        "High"
+      ]
+    },
+    {
+      "key": "physicalActivity",
+      "label": "Physical Activity Level",
+      "type": "select",
+      "options": [
+        "Low",
+        "Medium",
+        "High"
+      ]
+    }
+  ],
+  "riskFactors": {
+    "byAge": {
+      "20-34": {
+        "total": 1706,
+        "positive": 427,
+        "rate": 25
+      },
+      "35-44": {
+        "total": 1105,
+        "positive": 282,
+        "rate": 25.5
+      },
+      "45-54": {
+        "total": 1118,
+        "positive": 254,
+        "rate": 22.7
+      },
+      "55-64": {
+        "total": 1162,
+        "positive": 279,
+        "rate": 24
+      },
+      "65+": {
+        "total": 4909,
+        "positive": 1191,
+        "rate": 24.3
+      }
+    },
+    "byBMI": {
+      "Underweight": {
+        "total": 923,
+        "positive": 209,
+        "rate": 22.6
+      },
+      "Normal": {
+        "total": 4035,
+        "positive": 853,
+        "rate": 21.1
+      },
+      "Overweight": {
+        "total": 3450,
+        "positive": 767,
+        "rate": 22.2
+      },
+      "Obese": {
+        "total": 1592,
+        "positive": 604,
+        "rate": 37.9
+      }
+    },
+    "bySmoking_Status": {
+      "Former": {
+        "total": 2487,
+        "positive": 461,
+        "rate": 18.5
+      },
+      "Never": {
+        "total": 6070,
+        "positive": 1162,
+        "rate": 19.1
+      },
+      "Current": {
+        "total": 1443,
+        "positive": 810,
+        "rate": 56.1
+      }
+    },
+    "byFamily_History": {
+      "0": {
+        "total": 6966,
+        "positive": 887,
+        "rate": 12.7
+      },
+      "1": {
+        "total": 3034,
+        "positive": 1546,
+        "rate": 51
+      }
+    },
+    "byAllergies": {
+      "None": {
+        "total": 2936,
+        "positive": 186,
+        "rate": 6.3
+      },
+      "Dust": {
+        "total": 2479,
+        "positive": 767,
+        "rate": 30.9
+      },
+      "Multiple": {
+        "total": 1001,
+        "positive": 328,
+        "rate": 32.8
+      },
+      "Pollen": {
+        "total": 1999,
+        "positive": 644,
+        "rate": 32.2
+      },
+      "Pets": {
+        "total": 1585,
+        "positive": 508,
+        "rate": 32.1
+      }
+    },
+    "byAir_Pollution_Level": {
+      "Moderate": {
+        "total": 4915,
+        "positive": 789,
+        "rate": 16.1
+      },
+      "Low": {
+        "total": 2984,
+        "positive": 474,
+        "rate": 15.9
+      },
+      "High": {
+        "total": 2101,
+        "positive": 1170,
+        "rate": 55.7
+      }
+    },
+    "byPhysical_Activity_Level": {
+      "Sedentary": {
+        "total": 4062,
+        "positive": 1644,
+        "rate": 40.5
+      },
+      "Moderate": {
+        "total": 3909,
+        "positive": 497,
+        "rate": 12.7
+      },
+      "Active": {
+        "total": 2029,
+        "positive": 292,
+        "rate": 14.4
+      }
+    }
+  },
+  "baseRate": 24.3
+}

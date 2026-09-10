@@ -1,0 +1,1172 @@
+[
+  {
+    "id": 1,
+    "district": "Bagalakote",
+    "taluk": "Bagalkote",
+    "place": "Bagalkote  DAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 2,
+    "district": "Bagalakote",
+    "taluk": "Jamakhandi",
+    "place": "Jamakhandi",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 3,
+    "district": "Bagalakote",
+    "taluk": "Bilagi",
+    "place": "Beelagi",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 4,
+    "district": "Bagalakote",
+    "taluk": "Hungund",
+    "place": "Hungund TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 5,
+    "district": "Bagalakote",
+    "taluk": "Mudhol",
+    "place": "Mudhol TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 6,
+    "district": "Ballary",
+    "taluk": "Bellary",
+    "place": "TGAMC Bellary TCH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Medical College and Hospital",
+    "beds": 150
+  },
+  {
+    "id": 7,
+    "district": "Ballary",
+    "taluk": "Bellary",
+    "place": "Emmiganur",
+    "area": "Rural",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 8,
+    "district": "Ballary",
+    "taluk": "Sanduru",
+    "place": "Sanduru",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 9,
+    "district": "Ballary",
+    "taluk": "Hospete",
+    "place": "Hospete",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 10,
+    "district": "Ballary",
+    "taluk": "Siraguppa",
+    "place": "Siraguppa",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 11,
+    "district": "Ballary",
+    "taluk": "Hadagali",
+    "place": "Hadagali",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 12,
+    "district": "Ballary",
+    "taluk": "Harapanahalli",
+    "place": "Harapanahalli",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 13,
+    "district": "Belagavi",
+    "taluk": "Soundatti",
+    "place": "Soundatti",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 14,
+    "district": "Belagavi",
+    "taluk": "Soundatti",
+    "place": "Hooli",
+    "area": "Rural",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 15,
+    "district": "Belagavi",
+    "taluk": "Bailhongal",
+    "place": "Bylhongala",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 16,
+    "district": "Belagavi",
+    "taluk": "Athani",
+    "place": "Athani",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 17,
+    "district": "Belagavi",
+    "taluk": "Ramadurga",
+    "place": "Ramadurga",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 18,
+    "district": "Belagavi",
+    "taluk": "Belagavi",
+    "place": "Belagavi DAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 19,
+    "district": "Bengaluru Rural",
+    "taluk": "Doddaballapura",
+    "place": "Doddaballapura",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 20,
+    "district": "Bengaluru Rural",
+    "taluk": "Nelamangala",
+    "place": "Nelamangala TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 21,
+    "district": "Bengaluru Rural",
+    "taluk": "Hosakote",
+    "place": "Hosakote TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 22,
+    "district": "Bengaluru Urban",
+    "taluk": "Bangalore (City)",
+    "place": "Banglore (SJIIM)TH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Medical College and Hospital.",
+    "beds": 275
+  },
+  {
+    "id": 23,
+    "district": "Bengaluru Urban",
+    "taluk": "Bangalore (North)",
+    "place": "Marenahlli",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 24,
+    "district": "Bengaluru Urban",
+    "taluk": "Bangalore (East)",
+    "place": "Indiranagara CU Ayurveda",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 5
+  },
+  {
+    "id": 25,
+    "district": "Bengaluru Urban",
+    "taluk": "Bangalore (S)",
+    "place": "Anekal TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 26,
+    "district": "Bidar",
+    "taluk": "Bidar",
+    "place": "Bidar CU Ayurveda DAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 15
+  },
+  {
+    "id": 27,
+    "district": "Bidar",
+    "taluk": "Basavakalyan",
+    "place": "Basavakalyan",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 28,
+    "district": "Bidar",
+    "taluk": "Bhalki",
+    "place": "Bhalki TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 29,
+    "district": "Chamarajanagara",
+    "taluk": "Chamarajanagar",
+    "place": "Chamarajanagar",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 30,
+    "district": "Chamarajanagara",
+    "taluk": "Gundlupet",
+    "place": "Gundlupet",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 31,
+    "district": "Chamarajanagara",
+    "taluk": "Kollegal",
+    "place": "Kollegal",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 32,
+    "district": "Chikkaballapur",
+    "taluk": "Chintamani",
+    "place": "Chintamani",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 33,
+    "district": "Chikkamagalur",
+    "taluk": "Kadur",
+    "place": "Kadur",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 34,
+    "district": "Chikkamagalur",
+    "taluk": "Mudigere",
+    "place": "Mudigere",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 35,
+    "district": "Chikkamagalur",
+    "taluk": "Tarikere",
+    "place": "Tarikere",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 36,
+    "district": "Chikkamagalur",
+    "taluk": "Srungeri",
+    "place": "Srungeri TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 37,
+    "district": "Chitradurga",
+    "taluk": "Hiriyur",
+    "place": "Hiriyur",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 38,
+    "district": "Chitradurga",
+    "taluk": "Hiriyur",
+    "place": "Imangala",
+    "area": "Rural",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 39,
+    "district": "Chitradurga",
+    "taluk": "Challakere",
+    "place": "Challakere",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 40,
+    "district": "Chitradurga",
+    "taluk": "Hosadurga",
+    "place": "Hosadurga TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 41,
+    "district": "Chitradurga",
+    "taluk": "Hosadurga",
+    "place": "Doddathekalavatti",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 42,
+    "district": "Dakshina Kannada",
+    "taluk": "Mangalore",
+    "place": "Thokuru Jokatte",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 43,
+    "district": "Dakshina Kannada",
+    "taluk": "Mangalore",
+    "place": "Ullala TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 44,
+    "district": "Dakshina Kannada",
+    "taluk": "Mangalore",
+    "place": "Lalbagh CU Ayurveda Mangalore",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 15
+  },
+  {
+    "id": 45,
+    "district": "Davanagere",
+    "taluk": "Channagiri",
+    "place": "Channagiri TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 46,
+    "district": "Davanagere",
+    "taluk": "Harihara",
+    "place": "Harihara TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 47,
+    "district": "Dharwad",
+    "taluk": "Dharwad",
+    "place": "Dharwad  DAH ZP",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 25
+  },
+  {
+    "id": 48,
+    "district": "Dharwad",
+    "taluk": "Kalaghattagi",
+    "place": "Kalaghattagi  TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 49,
+    "district": "Dharwad",
+    "taluk": "Navalgund",
+    "place": "Navalgund  TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 50,
+    "district": "Gadag",
+    "taluk": "Gadag",
+    "place": "Betageri-Gadag  DAH  ZP",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 51,
+    "district": "Gadag",
+    "taluk": "Ron",
+    "place": "Ron",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 52,
+    "district": "Gadag",
+    "taluk": "Mundaragi",
+    "place": "Mundargi  TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 53,
+    "district": "Gadag",
+    "taluk": "Nargund",
+    "place": "Nargund TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 54,
+    "district": "Hassan",
+    "taluk": "Hassan",
+    "place": "Hassan  DAH  ZP",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 25
+  },
+  {
+    "id": 55,
+    "district": "Hassan",
+    "taluk": "Hassan",
+    "place": "Kattaya",
+    "area": "Rural",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 56,
+    "district": "Hassan",
+    "taluk": "Arasikere",
+    "place": "Belagumba",
+    "area": "Rural",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 57,
+    "district": "Hassan",
+    "taluk": "Arasikere",
+    "place": "Arasikere  TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 58,
+    "district": "Hassan",
+    "taluk": "Holenarasipura",
+    "place": "Holenarasipura",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 59,
+    "district": "Hassan",
+    "taluk": "Aluru",
+    "place": "Aluru TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 60,
+    "district": "Haveri",
+    "taluk": "Shiggavi",
+    "place": "Shiggavi",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 61,
+    "district": "Haveri",
+    "taluk": "Ranibennur",
+    "place": "Ranibennur",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 62,
+    "district": "Haveri",
+    "taluk": "Byadagi",
+    "place": "Byadagi TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 63,
+    "district": "Kalaburgi",
+    "taluk": "Kalaburagi",
+    "place": "Kamalapur",
+    "area": "Rural",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 64,
+    "district": "Kalaburgi",
+    "taluk": "Chittapura",
+    "place": "Chittapur",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 65,
+    "district": "Kalaburgi",
+    "taluk": "Afzalpura",
+    "place": "Afzalpur",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 66,
+    "district": "Kalaburgi",
+    "taluk": "Afzalpura",
+    "place": "Devalaganagapura",
+    "area": "Rural",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 67,
+    "district": "Kalaburgi",
+    "taluk": "Sedam",
+    "place": "Sedam",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 68,
+    "district": "Kalaburgi",
+    "taluk": "Kalaburagi",
+    "place": "Kalaburagi CU Ayurveda DAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 69,
+    "district": "Kalaburgi",
+    "taluk": "Chincholi",
+    "place": "Chincholi TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 70,
+    "district": "Kodagu",
+    "taluk": "Madikeri",
+    "place": "Madikeri  DAH  ZP",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 71,
+    "district": "Kodagu",
+    "taluk": "Virajpete",
+    "place": "Virajpete",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 72,
+    "district": "Kodagu",
+    "taluk": "Somwarpet",
+    "place": "Kushal nagar CU",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 73,
+    "district": "Kodagu",
+    "taluk": "Somwarpet",
+    "place": "Somwarpet CU",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 5
+  },
+  {
+    "id": 74,
+    "district": "Kolar",
+    "taluk": "Srinivasapura",
+    "place": "Srinivasapura",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 75,
+    "district": "Kolar",
+    "taluk": "Malur",
+    "place": "Malur TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 76,
+    "district": "Koppal",
+    "taluk": "Koppal",
+    "place": "Koppal DAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 77,
+    "district": "Koppal",
+    "taluk": "Koppal",
+    "place": "Ginigera",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 78,
+    "district": "Koppal",
+    "taluk": "Gangavati",
+    "place": "Gangavati",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 79,
+    "district": "Koppal",
+    "taluk": "Yalaburga",
+    "place": "Yalaburga TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 80,
+    "district": "Mandya",
+    "taluk": "Mandya",
+    "place": "Mandya  DAH ZP",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 25
+  },
+  {
+    "id": 81,
+    "district": "Mandya",
+    "taluk": "Mandya",
+    "place": "Dudda",
+    "area": "Rural",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 82,
+    "district": "Mandya",
+    "taluk": "Malavalli",
+    "place": "Malavalli",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 83,
+    "district": "Mandya",
+    "taluk": "Madduru",
+    "place": "Madduru",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 84,
+    "district": "Mandya",
+    "taluk": "Madduru",
+    "place": "Halehalli CU",
+    "area": "Rural",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 5
+  },
+  {
+    "id": 85,
+    "district": "Mysuru",
+    "taluk": "Mysore",
+    "place": "GAMC TH Mysore",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Medical College and Hospital.",
+    "beds": 175
+  },
+  {
+    "id": 86,
+    "district": "Mysuru",
+    "taluk": "Mysore",
+    "place": "Hitech PKU",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Panchakrma Hosp.",
+    "beds": 100
+  },
+  {
+    "id": 87,
+    "district": "Mysuru",
+    "taluk": "HD Kote",
+    "place": "HD Kote   TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 88,
+    "district": "Mysuru",
+    "taluk": "Nanjangud",
+    "place": "Maraluru Goddanapura",
+    "area": "Rural",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 89,
+    "district": "Mysuru",
+    "taluk": "Nanjangud",
+    "place": "Nanjangud",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 90,
+    "district": "Mysuru",
+    "taluk": "Hunasur",
+    "place": "Hunasuru",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 91,
+    "district": "Mysuru",
+    "taluk": "Hunasur",
+    "place": "Undawadi",
+    "area": "Rural",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 92,
+    "district": "Mysuru",
+    "taluk": "KR Nagar",
+    "place": "KR Nagara TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 93,
+    "district": "Mysuru",
+    "taluk": "Piriyapatna",
+    "place": "Piriyapattana TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 94,
+    "district": "Raichur",
+    "taluk": "Raichur",
+    "place": "Raichur  DAH ZP",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 15
+  },
+  {
+    "id": 95,
+    "district": "Raichur",
+    "taluk": "Devadurga",
+    "place": "Devadurga  TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 96,
+    "district": "Raichur",
+    "taluk": "Lingasagur",
+    "place": "Lingasaguru TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 97,
+    "district": "Ramanagara",
+    "taluk": "Magadi",
+    "place": "Magadi",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 98,
+    "district": "Ramanagara",
+    "taluk": "Kanakapura",
+    "place": "Kanakapura",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 99,
+    "district": "Shivamogga",
+    "taluk": "Shivamogga",
+    "place": "GAMC Shimoga Teaching Hospital",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Medical college and Hospital.",
+    "beds": 100
+  },
+  {
+    "id": 100,
+    "district": "Tumkur",
+    "taluk": "Tumkur",
+    "place": "Tumkur  DAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 15
+  },
+  {
+    "id": 101,
+    "district": "Tumkur",
+    "taluk": "Gubbi",
+    "place": "Manchaladore",
+    "area": "Rural",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 5
+  },
+  {
+    "id": 102,
+    "district": "Tumkur",
+    "taluk": "Tiptur",
+    "place": "Tiptur",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 103,
+    "district": "Tumkur",
+    "taluk": "Chikkanayakanahalli",
+    "place": "Chikkanayakanahalli",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 104,
+    "district": "Tumkur",
+    "taluk": "Madhugiri",
+    "place": "Madhugiri TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 105,
+    "district": "Udupi",
+    "taluk": "Udupi",
+    "place": "Udupi DAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 106,
+    "district": "Udupi",
+    "taluk": "Kundapur",
+    "place": "Kundapura TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 107,
+    "district": "Udupi",
+    "taluk": "karkala",
+    "place": "Karkala TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 108,
+    "district": "Uttara Kannada",
+    "taluk": "Karwar",
+    "place": "Karwar DAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 109,
+    "district": "Uttara Kannada",
+    "taluk": "Sirsi",
+    "place": "Sirsi",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 110,
+    "district": "Uttara Kannada",
+    "taluk": "Kumta",
+    "place": "Kumta",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 111,
+    "district": "Uttara Kannada",
+    "taluk": "Mundagod",
+    "place": "Mundagod",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 112,
+    "district": "Uttara Kannada",
+    "taluk": "Haliyal",
+    "place": "Dandeli Ambewadi CU Ayurveda",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 5
+  },
+  {
+    "id": 113,
+    "district": "Vijayapura",
+    "taluk": "Vijayapura",
+    "place": "Bijapura  DAH  ZP",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 50
+  },
+  {
+    "id": 114,
+    "district": "Vijayapura",
+    "taluk": "Muddebihal",
+    "place": "Muddebihal  TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 115,
+    "district": "Vijayapura",
+    "taluk": "Sindagi",
+    "place": "Sindagi TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 10
+  },
+  {
+    "id": 116,
+    "district": "Yadgir",
+    "taluk": "Shahapur",
+    "place": "Shahapur TAH",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  },
+  {
+    "id": 117,
+    "district": "Yadgir",
+    "taluk": "Yadgir",
+    "place": "Yadgir",
+    "area": "Urban",
+    "system": "Ayurveda",
+    "type": "Govt. Ayurveda Hosp.",
+    "beds": 6
+  }
+]
