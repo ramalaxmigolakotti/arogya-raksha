@@ -109,7 +109,7 @@ Return ONLY valid JSON — no markdown:
 }${langInstruction}`;
 
     const { content: detailContent } = await callGroq('scanner', {
-      model:           GROQ_MODELS.LLAMA_33_70B,
+      model:           GROQ_MODELS.BALANCED,
       messages:        [
         { role: 'system', content: 'You are a pharmaceutical AI expert for India. Return valid JSON only. No markdown. Never substitute or rename medicines.' },
         { role: 'user',   content: detailPrompt },

@@ -1,14 +1,16 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Search, Bell, MapPin, Video, Loader2, RefreshCw, LogIn, Globe, ChevronDown, Check } from 'lucide-react';
+import { Search, Bell, MapPin, Video, Loader2, RefreshCw, LogIn, LogOut, Globe, ChevronDown, Check, User, Users, Stethoscope } from 'lucide-react';
 import { useLocation } from '@/context/LocationContext';
 import { useLanguage, LANGUAGES, Language } from '@/context/LanguageContext';
+import { useUserRole, UserRole } from '@/context/UserRoleContext';
 import { useUser, UserButton, SignInButton } from '@clerk/nextjs';
 
 export default function Header() {
   const { location, loading, error, refreshLocation } = useLocation();
   const { t, language, setLanguage, currentLangMeta } = useLanguage();
+  const { role, setRole, logout } = useUserRole();
   const { isSignedIn } = useUser();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [langSearch, setLangSearch] = useState('');
@@ -64,6 +66,43 @@ export default function Header() {
             <RefreshCw className="h-3 w-3 text-slate-300 group-hover:text-emerald-500 transition-colors hidden md:block" />
           )}
         </button>
+
+        {/* Role Switcher Pill (Patient | ASHA | Doctor) */}
+        <div className="hidden md:flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold">
+          <button
+            onClick={() => setRole('patient')}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
+              role === 'patient'
+                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+            }`}
+          >
+            <User className="h-3.5 w-3.5" />
+            <span>Patient</span>
+          </button>
+          <button
+            onClick={() => setRole('asha')}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
+              role === 'asha'
+                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+            }`}
+          >
+            <Users className="h-3.5 w-3.5" />
+            <span>ASHA Worker</span>
+          </button>
+          <button
+            onClick={() => setRole('doctor')}
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
+              role === 'doctor'
+                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
+                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
+            }`}
+          >
+            <Stethoscope className="h-3.5 w-3.5" />
+            <span>Doctor EHR</span>
+          </button>
+        </div>
 
         {/* Language Selector Dropdown */}
         <div className="relative" ref={langRef}>
@@ -132,23 +171,15 @@ export default function Header() {
           <span className="absolute top-2 right-2 h-2 w-2 bg-rose-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
         </button>
 
-        {/* Auth: Show UserButton if signed in, else show Login button */}
-        {isSignedIn ? (
-          <UserButton
-            appearance={{
-              elements: {
-                avatarBox: 'h-10 w-10 ring-2 ring-emerald-100 hover:ring-emerald-300 transition-all shadow-md',
-              },
-            }}
-          />
-        ) : (
-          <SignInButton mode="modal">
-            <button className="flex items-center gap-2 bg-slate-900 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg transition-all hover:-translate-y-0.5">
-              <LogIn className="h-4 w-4" />
-              <span className="hidden sm:inline">Login</span>
-            </button>
-          </SignInButton>
-        )}
+        {/* Logout button — returns to role selector */}
+        <button
+          onClick={logout}
+          title="Logout / Switch Role"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-rose-50 dark:hover:bg-rose-950/30 hover:text-rose-600 dark:hover:text-rose-400 border border-transparent hover:border-rose-200 dark:hover:border-rose-800 text-xs font-bold transition-all"
+        >
+          <LogOut className="h-4 w-4" />
+          <span className="hidden md:inline">Logout</span>
+        </button>
       </div>
     </header>
   );

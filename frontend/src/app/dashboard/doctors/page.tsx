@@ -1,14 +1,21 @@
 'use client';
-
+ 
 import { useState, useEffect, useCallback } from 'react';
 import {
   Search, MapPin, Phone, Star, Clock, GraduationCap, Building2,
   Stethoscope, User, Filter, ChevronDown, X, IndianRupee,
-  PhoneCall, Languages, Video, MessageCircle, Crown, Sparkles, Calendar
+  PhoneCall, Languages, Video, MessageCircle, Crown, Sparkles, Calendar,
+  CheckCircle2, ShieldCheck, Ticket, ArrowRight, Loader2
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useUserRole } from '@/context/UserRoleContext';
 import Image from 'next/image';
+import Link from 'next/link';
 import api from '@/lib/api';
+import RazorpayCheckout from '@/components/RazorpayCheckout';
+import { useHealthcareJourney } from '@/context/HealthcareJourneyContext';
+import { persistMedicalRecord } from '@/lib/medicalHistoryService';
+import FeaturePastHistoryModal from '@/components/FeaturePastHistoryModal';
 
 interface Doctor {
   id: string;
@@ -92,12 +99,21 @@ const SPECIALIZATION_FILTERS = [
 ];
 
 /* ─── Contact Action Buttons Component ─── */
-function ContactButtons({ phone, doctorName, size = 'md' }: { phone: string; doctorName?: string; size?: 'sm' | 'md' }) {
+function ContactButtons({
+  phone,
+  doctorName,
+  size = 'md',
+  onBook,
+}: {
+  phone: string;
+  doctorName?: string;
+  size?: 'sm' | 'md';
+  onBook?: () => void;
+}) {
   const cleanPhone = phone.replace(/\D/g, '');
   const whatsappUrl = `https://wa.me/91${cleanPhone}`;
   const callUrl = `tel:+91${cleanPhone}`;
   const videoCallUrl = `/dashboard/video-call?phone=${cleanPhone}`;
-  const bookUrl = `/dashboard/appointments?doctor=${encodeURIComponent(doctorName || '')}&phone=${cleanPhone}`;
 
   const btnBase = size === 'sm'
     ? 'flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all hover:-translate-y-0.5 shadow-md'
@@ -107,11 +123,16 @@ function ContactButtons({ phone, doctorName, size = 'md' }: { phone: string; doc
 
   return (
     <div className="flex flex-wrap gap-2">
-      <a href={bookUrl}
+      <button
+        type="button"
         className={`${btnBase} bg-gradient-to-r from-violet-500 to-purple-600 text-white shadow-violet-500/25`}
-        onClick={e => e.stopPropagation()}>
+        onClick={(e) => {
+          e.stopPropagation();
+          onBook?.();
+        }}
+      >
         <Calendar className={iconSize} /> Book
-      </a>
+      </button>
       <a href={callUrl}
         className={`${btnBase} bg-gradient-to-r from-emerald-500 to-green-600 text-white shadow-emerald-500/25`}
         onClick={e => e.stopPropagation()}>
@@ -131,6 +152,283 @@ function ContactButtons({ phone, doctorName, size = 'md' }: { phone: string; doc
   );
 }
 
+/* ─── Doctor Direct Booking Modal with Razorpay Checkout ─── */
+function DoctorBookingModal({
+  doctor,
+  onClose,
+}: {
+  doctor: { name: string; phone: string; consultation_fee?: number; hospital_name?: string; specialization?: string };
+  onClose: () => void;
+}) {
+  const { user } = useUserRole();
+  const { bookNewJourney } = useHealthcareJourney();
+  const [date, setDate] = useState('Today');
+  const [slot, setSlot] = useState('11:30 AM');
+  const [mode, setMode] = useState<'opd' | 'video'>('opd');
+  const [name, setName] = useState(user?.name || '');
+  const [phone, setPhone] = useState(user?.phone || '');
+  const [reason, setReason] = useState('Routine Medical Consultation');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [step, setStep] = useState<'form' | 'success'>('form');
+  const [bookingPass, setBookingPass] = useState<any>(null);
+
+  const fee = doctor.consultation_fee || 500;
+
+  const handleBookingConfirmed = async (paymentId: string, status: 'paid' | 'free_bpl_aarogyasri') => {
+    setIsSubmitting(true);
+    const finalFee = status === 'free_bpl_aarogyasri' ? 0 : fee;
+    try {
+      const journey = await bookNewJourney({
+        patientName: name,
+        patientPhone: phone,
+        doctorName: `Dr. ${doctor.name}`,
+        doctorId: `doc_${doctor.name.toLowerCase().replace(/\s+/g, '_')}`,
+        hospitalName: doctor.hospital_name || 'City Care Hospital',
+        department: doctor.specialization || 'General Medicine',
+        slotTime: `${date} ${slot}`,
+        symptoms: `${mode === 'video' ? '[Video Teleconsult]' : '[In-Person OPD]'} ${reason}`,
+        paymentStatus: status,
+        consultationFee: finalFee,
+        paymentId,
+        bookingSource: 'patient_self',
+      });
+
+      persistMedicalRecord(user?.id || 'usr_pat_8812', {
+        type: 'doctor_consultation',
+        title: `Doctor Appointment: Dr. ${doctor.name}`,
+        userQuery: `Booked ${mode === 'video' ? 'Video' : 'OPD'} consultation with Dr. ${doctor.name} for ${date} (${slot})`,
+        aiResponse: `Confirmed Token #${journey.tokenNumber}. Fee: ${status === 'paid' ? `₹${fee} PAID` : 'AAROGYASRI FREE'}. Payment ID: ${paymentId}`,
+        summary: `Dr. ${doctor.name} (${doctor.specialization}) • Token #${journey.tokenNumber}`,
+        metadata: {
+          tokenNumber: journey.tokenNumber,
+          doctorName: doctor.name,
+          slotTime: `${date} ${slot}`,
+          paymentStatus: status,
+          paymentAmount: finalFee,
+          paymentId,
+        },
+      }).catch(() => {});
+
+      setBookingPass(journey);
+      setStep('success');
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[110] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-200">
+        {/* Header */}
+        <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-6 text-white relative">
+          <button onClick={onClose} className="absolute top-4 right-4 p-1.5 rounded-lg hover:bg-white/20 transition-colors">
+            <X className="h-5 w-5" />
+          </button>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 bg-white/20 rounded-2xl">
+              <Calendar className="h-6 w-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-xl font-bold">Book Doctor Consultation</h3>
+              <p className="text-violet-100 text-xs">Dr. {doctor.name} • {doctor.specialization || 'General Medicine'}</p>
+            </div>
+          </div>
+        </div>
+
+        {step === 'form' ? (
+          <div className="p-6 space-y-4 max-h-[80vh] overflow-y-auto">
+            {/* Mode selection */}
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Consultation Mode</label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setMode('opd')}
+                  className={`p-3 rounded-2xl border text-left transition-all ${
+                    mode === 'opd'
+                      ? 'border-violet-600 bg-violet-50/70 ring-2 ring-violet-500/20 text-violet-900'
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <p className="font-extrabold text-xs">🏥 Hospital OPD Visit</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">In-person clinical examination</p>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode('video')}
+                  className={`p-3 rounded-2xl border text-left transition-all ${
+                    mode === 'video'
+                      ? 'border-violet-600 bg-violet-50/70 ring-2 ring-violet-500/20 text-violet-900'
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                >
+                  <p className="font-extrabold text-xs">📹 Video Consultation</p>
+                  <p className="text-[10px] text-slate-400 mt-0.5">Encrypted WebRTC HD call</p>
+                </button>
+              </div>
+            </div>
+
+            {/* Date & Slot selection */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Date</label>
+                <select
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-violet-500 bg-white"
+                >
+                  <option value="Today">Today (Sep 8)</option>
+                  <option value="Tomorrow">Tomorrow (Sep 9)</option>
+                  <option value="Wednesday">Wednesday (Sep 10)</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Slot Time</label>
+                <select
+                  value={slot}
+                  onChange={(e) => setSlot(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-violet-500 bg-white"
+                >
+                  <option value="10:30 AM">10:30 AM</option>
+                  <option value="11:30 AM">11:30 AM</option>
+                  <option value="02:30 PM">02:30 PM</option>
+                  <option value="05:00 PM">05:00 PM</option>
+                </select>
+              </div>
+            </div>
+
+            {/* Patient Name & Phone */}
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Patient Name</label>
+                <input
+                  type="text"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-violet-500"
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Phone Number</label>
+                <input
+                  type="text"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
+                  className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-bold text-slate-800 outline-none focus:border-violet-500"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-1.5">Symptoms / Purpose</label>
+              <input
+                type="text"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                placeholder="Brief reason for consultation..."
+                className="w-full border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs font-semibold text-slate-800 outline-none focus:border-violet-500"
+              />
+            </div>
+
+            {/* Fee summary card */}
+            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-xs space-y-2">
+              <div className="flex justify-between items-center text-slate-600">
+                <span>Doctor Consultation Fee:</span>
+                <span className="font-bold text-slate-800">₹{fee}</span>
+              </div>
+              <div className="flex justify-between items-center text-slate-600">
+                <span>Hospital / Facility:</span>
+                <span className="font-bold text-slate-800">{doctor.hospital_name || 'City Care Hospital'}</span>
+              </div>
+              <div className="pt-2 border-t border-slate-200 flex justify-between items-center">
+                <span className="font-black text-slate-900 text-sm">Total Amount Due:</span>
+                <span className="text-emerald-600 font-black text-lg">₹{fee}</span>
+              </div>
+            </div>
+
+            {/* Razorpay Gateway Checkout */}
+            <div className="space-y-3 pt-1">
+              <RazorpayCheckout
+                amount={fee}
+                itemName={`Consultation: Dr. ${doctor.name}`}
+                itemDescription={`${mode === 'video' ? 'Video Teleconsultation' : 'OPD Visit'} on ${date} at ${slot}`}
+                userName={name}
+                userPhone={phone}
+                buttonText={`Pay ₹${fee} via Razorpay`}
+                buttonClassName="w-full bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-700 hover:from-violet-700 hover:to-indigo-800 text-white font-black py-4 rounded-2xl shadow-xl shadow-violet-600/30 transition-all flex items-center justify-center gap-2 text-sm disabled:opacity-50"
+                onSuccess={(paymentId) => handleBookingConfirmed(paymentId, 'paid')}
+              />
+
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-slate-200"></div>
+                <span className="flex-shrink mx-3 text-[10px] font-bold text-slate-400 uppercase tracking-widest">OR ZERO-COST GOVT COVERAGE</span>
+                <div className="flex-grow border-t border-slate-200"></div>
+              </div>
+
+              <button
+                type="button"
+                disabled={isSubmitting}
+                onClick={() => handleBookingConfirmed('AAROGYASRI-FREE-BPL', 'free_bpl_aarogyasri')}
+                className="w-full py-3.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-2 border-emerald-300 rounded-2xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-sm"
+              >
+                <ShieldCheck className="h-4 w-4 text-emerald-600" />
+                <span>YSR Aarogyasri / PM-JAY Free OPD (₹0)</span>
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="p-7 text-center space-y-4">
+            <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-3xl flex items-center justify-center mx-auto shadow-lg">
+              <CheckCircle2 className="h-9 w-9" />
+            </div>
+            <div>
+              <h4 className="text-xl font-black text-slate-900">Appointment Confirmed!</h4>
+              <p className="text-xs text-slate-500 mt-1">
+                Your appointment with Dr. {doctor.name} has been transmitted to Doctor EHR.
+              </p>
+            </div>
+
+            <div className="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-xs text-left space-y-2">
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-bold">Allocated Token:</span>
+                <span className="font-mono font-black text-blue-600">#{bookingPass?.tokenNumber || 22}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-bold">Slot Time:</span>
+                <span className="font-extrabold text-slate-800">{date} · {slot}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500 font-bold">Payment Status:</span>
+                <span className="font-bold text-emerald-600">
+                  {bookingPass?.paymentStatus === 'free_bpl_aarogyasri' ? 'Aarogyasri Free (₹0)' : `₹${fee} PAID (${bookingPass?.paymentId})`}
+                </span>
+              </div>
+            </div>
+
+            <div className="pt-2 flex flex-col gap-2">
+              <Link
+                href="/dashboard/tracking"
+                className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-2xl font-black text-xs shadow-lg hover:from-emerald-700 hover:to-teal-700 transition-all flex items-center justify-center gap-2"
+              >
+                <span>Track in Real-Time Radar</span>
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+              <button
+                onClick={onClose}
+                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function DoctorsPage() {
   const { t, language } = useLanguage();
   const [doctors, setDoctors] = useState<Doctor[]>([]);
@@ -139,6 +437,7 @@ export default function DoctorsPage() {
   const [specialization, setSpecialization] = useState('All');
   const [selectedDoctor, setSelectedDoctor] = useState<Doctor | null>(null);
   const [selectedTopDoctor, setSelectedTopDoctor] = useState<typeof TOP_DOCTORS[0] | null>(null);
+  const [bookingDoctor, setBookingDoctor] = useState<any | null>(null);
   const [showFilters, setShowFilters] = useState(false);
 
   const fetchDoctors = useCallback(async () => {
@@ -177,11 +476,18 @@ export default function DoctorsPage() {
           <p className="text-white/80 text-lg max-w-2xl">
             Browse our verified doctors. Search by name, location, or specialization.
           </p>
-          <div className="flex flex-wrap gap-4 mt-6">
+          <div className="flex flex-wrap items-center gap-4 mt-6">
             <div className="bg-white/15 backdrop-blur-md rounded-xl px-5 py-3 text-white">
               <span className="text-2xl font-bold">{doctors.length + TOP_DOCTORS.length}</span>
-              <span className="ml-2 text-white/70 text-sm">Doctors Available</span>
+              <span className="text-white/70 text-sm ml-2">Doctors Available</span>
             </div>
+            <FeaturePastHistoryModal
+              featureTitle="Doctor Consultations"
+              types={['doctor_consultation']}
+              icon="👨‍⚕️"
+              buttonLabel="My Past Bookings"
+              className="bg-white/20 hover:bg-white text-white hover:text-purple-900 border-white/30 backdrop-blur-md px-5 py-3.5 rounded-xl text-sm font-bold"
+            />
           </div>
         </div>
       </div>
@@ -271,7 +577,7 @@ export default function DoctorsPage() {
                 </div>
 
                 {/* Contact Buttons */}
-                <ContactButtons phone={doc.phone} doctorName={doc.name} size="sm" />
+                <ContactButtons phone={doc.phone} doctorName={doc.name} size="sm" onBook={() => setBookingDoctor(doc)} />
               </div>
             </div>
           ))}
@@ -428,7 +734,7 @@ export default function DoctorsPage() {
 
                   {/* Contact Buttons for all doctors with phone */}
                   {doctor.phone && (
-                    <ContactButtons phone={doctor.phone} doctorName={doctor.name} size="sm" />
+                    <ContactButtons phone={doctor.phone} doctorName={doctor.name} size="sm" onBook={() => setBookingDoctor(doctor)} />
                   )}
                 </div>
               </div>
@@ -556,7 +862,16 @@ export default function DoctorsPage() {
               {selectedDoctor.phone && (
                 <div>
                   <h4 className="text-sm font-bold text-slate-700 mb-3">Contact Doctor</h4>
-                  <ContactButtons phone={selectedDoctor.phone} doctorName={selectedDoctor.name} size="md" />
+                  <ContactButtons
+                    phone={selectedDoctor.phone}
+                    doctorName={selectedDoctor.name}
+                    size="md"
+                    onBook={() => {
+                      const d = selectedDoctor;
+                      setSelectedDoctor(null);
+                      setBookingDoctor(d);
+                    }}
+                  />
                 </div>
               )}
 
@@ -666,7 +981,16 @@ export default function DoctorsPage() {
               {/* Contact Actions */}
               <div>
                 <h4 className="text-sm font-bold text-slate-700 mb-3">Contact Doctor</h4>
-                <ContactButtons phone={selectedTopDoctor.phone} doctorName={selectedTopDoctor.name} size="md" />
+                <ContactButtons
+                  phone={selectedTopDoctor.phone}
+                  doctorName={selectedTopDoctor.name}
+                  size="md"
+                  onBook={() => {
+                    const d = selectedTopDoctor;
+                    setSelectedTopDoctor(null);
+                    setBookingDoctor(d);
+                  }}
+                />
               </div>
 
               <button onClick={() => setSelectedTopDoctor(null)}
@@ -676,6 +1000,14 @@ export default function DoctorsPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {/* Direct Booking Modal with Razorpay Checkout */}
+      {bookingDoctor && (
+        <DoctorBookingModal
+          doctor={bookingDoctor}
+          onClose={() => setBookingDoctor(null)}
+        />
       )}
     </div>
   );

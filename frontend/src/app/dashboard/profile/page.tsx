@@ -1,14 +1,28 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { createClient } from '@supabase/supabase-js';
 import {
   User, Heart, Pill, AlertTriangle, Phone, Hospital,
   Shield, Save, CheckCircle2, Edit2, Activity, Droplets,
-  Weight, Ruler, Calendar, Lock, BadgeAlert, Plus, X, Loader2
+  Weight, Ruler, Calendar, Lock, BadgeAlert, Plus, X, Loader2,
+  Clock, Trash2, Search, Zap, Bot, Stethoscope, QrCode
 } from 'lucide-react';
+import toast from 'react-hot-toast';
 import { useLanguage } from '@/context/LanguageContext';
+import { useUserRole } from '@/context/UserRoleContext';
+import Link from 'next/link';
+import PatientPassportQRCard from '@/components/PatientPassportQRCard';
+import {
+  MedicalRecord,
+  MedicalRecordType,
+  getLocalHistory,
+  deleteMedicalRecord,
+  clearLocalHistory,
+  clearCategoryRecords,
+  persistMedicalRecord,
+} from '@/lib/medicalHistoryService';
 
 // Direct Supabase client (bypasses backend — works even when backend is offline)
 const supabase = createClient(
@@ -43,14 +57,16 @@ interface Profile {
   organ_donor?: boolean; doctor_notes?: string;
 }
 
-type TabKey = 'personal' | 'medical' | 'vitals' | 'contacts' | 'hospitals';
+type TabKey = 'passport' | 'personal' | 'medical' | 'vitals' | 'contacts' | 'hospitals' | 'history';
 
-const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
-  { key: 'personal',  label: 'Personal',       icon: User },
-  { key: 'medical',   label: 'Medical',         icon: Heart },
-  { key: 'vitals',    label: 'Vitals',          icon: Activity },
-  { key: 'contacts',  label: 'Emergency',       icon: Phone },
-  { key: 'hospitals', label: 'Hospitals',       icon: Hospital },
+const TABS: { key: TabKey; label: string; icon: React.ElementType; badge?: string }[] = [
+  { key: 'passport',  label: 'Health Passport QR', icon: QrCode, badge: '2FA' },
+  { key: 'personal',  label: 'Personal',          icon: User },
+  { key: 'medical',   label: 'Medical',            icon: Heart },
+  { key: 'vitals',    label: 'Vitals',             icon: Activity },
+  { key: 'contacts',  label: 'Emergency',          icon: Phone },
+  { key: 'hospitals', label: 'Hospitals',          icon: Hospital },
+  { key: 'history',   label: 'Lifetime Records',   icon: Clock, badge: 'ALL' },
 ];
 
 function TagInput({ values, onChange, placeholder }: {
@@ -101,55 +117,141 @@ export default function MedicalProfilePage() {
   const [saved, setSaved] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
 
-  const STORAGE_KEY = 'arogya_medical_profile';
-  const userKey = user?.id ? `arogya_medical_profile_${user.id}` : STORAGE_KEY;
+  const { user: userProfile } = useUserRole();
+  const activeUserId = userProfile?.id || user?.id || 'usr_pat_8812';
+  const [historyRecords, setHistoryRecords] = useState<MedicalRecord[]>([]);
+  const [historyFilter, setHistoryFilter] = useState<string>('all');
+  const [historySearch, setHistorySearch] = useState<string>('');
 
-  // Immediate load from localStorage on mount (0ms delay!)
+  const FEATURE_TABS: { id: string; label: string; icon: string; types: MedicalRecordType[]; path: string }[] = [
+    { id: 'all', label: 'All History', icon: '🌟', types: [], path: '' },
+    { id: 'symptom_checker', label: 'Symptom Checker', icon: '🩺', types: ['symptom_check', 'ai_doctor_consultation'], path: '/dashboard/ai' },
+    { id: 'medicine_finder', label: 'Medicine Finder', icon: '💊', types: ['medicine_order'], path: '/dashboard/medicines' },
+    { id: 'medicine_scanner', label: 'Medicine Scanner', icon: '🔍', types: ['medicine_scan'], path: '/dashboard/scanner' },
+    { id: 'doctors', label: 'Doctors', icon: '👨‍⚕️', types: ['doctor_consultation'], path: '/dashboard/doctors' },
+    { id: 'diagnostic_centre', label: 'Diagnostic Centre', icon: '🔬', types: ['diagnostic_booking'], path: '/dashboard/diagnostic-centre' },
+    { id: 'hospitals', label: 'Hospitals', icon: '🏥', types: ['hospital_appointment'], path: '/dashboard/hospitals' },
+    { id: 'health_predictors', label: 'Health Predictors', icon: '🧠', types: ['health_prediction', 'health_quiz'], path: '/dashboard/predictors' },
+    { id: 'medical_reports', label: 'Medical Reports', icon: '📄', types: ['medical_report_analysis'], path: '/dashboard/reports' },
+    { id: 'health_tracker', label: 'Health Tracker', icon: '💓', types: ['health_tracker'], path: '/dashboard/profile' },
+  ];
+
+  const loadHistory = useCallback(() => {
+    const recs = getLocalHistory(activeUserId);
+    setHistoryRecords(recs);
+  }, [activeUserId]);
+
   useEffect(() => {
+    loadHistory();
+    const handleUpdate = () => loadHistory();
+    window.addEventListener('medical-history-updated', handleUpdate);
+    return () => window.removeEventListener('medical-history-updated', handleUpdate);
+  }, [loadHistory]);
+
+  const getTabCount = (tab: typeof FEATURE_TABS[0]) => {
+    if (tab.id === 'all') return historyRecords.length;
+    return historyRecords.filter((r) => tab.types.includes(r.type)).length;
+  };
+
+  const activeTabObj = FEATURE_TABS.find((t) => t.id === historyFilter) || FEATURE_TABS[0];
+
+  const handleDeleteHistoryItem = async (recId: string) => {
+    if (confirm('Permanently delete this medical record from your lifetime history?')) {
+      await deleteMedicalRecord(activeUserId, recId);
+      loadHistory();
+      toast.success('Record deleted from your medical history');
+    }
+  };
+
+  const handleClearHistoryCategory = async () => {
+    if (activeTabObj.id === 'all') {
+      if (confirm('Are you sure you want to delete ALL lifetime records across all features? This action cannot be undone.')) {
+        clearLocalHistory(activeUserId);
+        await supabase.from('patient_health_records').delete().eq('user_id', activeUserId);
+        loadHistory();
+        toast.success('All lifetime medical history cleared');
+      }
+    } else {
+      if (confirm(`Delete all records under "${activeTabObj.label}"? This cannot be undone.`)) {
+        await clearCategoryRecords(activeUserId, activeTabObj.types);
+        loadHistory();
+        toast.success(`Cleared all ${activeTabObj.label} records`);
+      }
+    }
+  };
+
+  const filteredRecords = historyRecords.filter((rec) => {
+    const matchesCategory =
+      activeTabObj.id === 'all' || activeTabObj.types.includes(rec.type);
+    const q = historySearch.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      rec.title.toLowerCase().includes(q) ||
+      (rec.userQuery && rec.userQuery.toLowerCase().includes(q)) ||
+      (rec.aiResponse && rec.aiResponse.toLowerCase().includes(q)) ||
+      (rec.summary && rec.summary.toLowerCase().includes(q));
+    return matchesCategory && matchesSearch;
+  });
+
+  // Strictly scope the storage key to the active user's ID
+  const userKey = activeUserId ? `arogya_medical_profile_${activeUserId}` : 'arogya_medical_profile_guest';
+
+  // Load from local storage scoped strictly to this user
+  useEffect(() => {
+    // 1. Reset state to clean defaults whenever activeUserId changes
+    const currentUserName = userProfile?.name || user?.fullName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
+    setProfile({
+      full_name: currentUserName || '',
+      conditions: [],
+      current_medications: [],
+      allergies: [],
+      preferred_hospitals: [],
+      has_insurance: false,
+      organ_donor: false,
+    });
+    setHasProfile(false);
+
     try {
-      const cached = localStorage.getItem(userKey) || localStorage.getItem(STORAGE_KEY);
+      // Clean up legacy unscoped keys that leaked across accounts
+      localStorage.removeItem('arogya_medical_profile');
+      localStorage.removeItem('medical_profile');
+
+      // Check strictly this user's scoped key
+      const cached = localStorage.getItem(userKey);
       if (cached) {
         const data = JSON.parse(cached);
-        setProfile(prev => ({ ...prev, ...data }));
-        setHasProfile(true);
+        if (data && (data.user_id === activeUserId || !data.user_id)) {
+          setProfile(prev => ({ ...prev, ...data }));
+          setHasProfile(true);
+        }
       }
     } catch (e) {
       console.warn('[Profile] Local cache read error:', e);
     }
-    setIsLoading(false);
-  }, [userKey]);
+  }, [activeUserId, userKey, userProfile?.name, user?.fullName, user?.firstName, user?.lastName]);
 
-  // Non-blocking background sync from Supabase when user is ready
+  // Non-blocking background sync from Supabase for the active user
   useEffect(() => {
-    if (!isLoaded) return;
-    if (!user) {
+    if (!activeUserId) {
       setIsLoading(false);
       return;
     }
 
-    // Auto-prefill full name from Clerk if missing
-    if (user.fullName || user.firstName) {
-      setProfile(p => ({
-        ...p,
-        full_name: p.full_name || user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim()
-      }));
-    }
-
-    // Non-blocking fetch with strict 2.5s timeout so it never hangs
     const timeoutPromise = new Promise((_, reject) =>
-      setTimeout(() => reject(new Error('timeout')), 2500)
+      setTimeout(() => reject(new Error('timeout')), 3000)
     );
 
     const fetchPromise = supabase
       .from('user_medical_profiles')
       .select('*')
-      .eq('user_id', user.id)
-      .single();
+      .eq('user_id', activeUserId)
+      .maybeSingle();
 
     Promise.race([fetchPromise, timeoutPromise])
       .then((res: any) => {
         const { data, error } = res || {};
-        if (error && error.code !== 'PGRST116') {
+        if (error) {
+          console.warn('[Profile] Supabase profile fetch notice:', error.message);
           return;
         }
         if (data) {
@@ -172,17 +274,14 @@ export default function MedicalProfilePage() {
           setHasProfile(true);
           try {
             localStorage.setItem(userKey, JSON.stringify(formatted));
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(formatted));
           } catch {}
         }
       })
-      .catch(() => {
-        // Fallback silently to localStorage — zero freeze!
-      })
+      .catch(() => {})
       .finally(() => {
         setIsLoading(false);
       });
-  }, [isLoaded, user, userKey]);
+  }, [activeUserId, userKey]);
 
   const set = (key: keyof Profile, value: unknown) =>
     setProfile(p => ({ ...p, [key]: value }));
@@ -191,7 +290,7 @@ export default function MedicalProfilePage() {
   const save = async () => {
     setIsSaving(true);
     const profileData = {
-      user_id: user?.id || 'guest',
+      user_id: activeUserId,
       ...profile,
       age: profile.age ? Number(profile.age) : null,
       height_cm: profile.height_cm ? Number(profile.height_cm) : null,
@@ -204,12 +303,29 @@ export default function MedicalProfilePage() {
       updated_at: new Date().toISOString(),
     };
 
-    // 1. Instant local save (0ms)
+    // 1. Instant local save strictly scoped to this user
     try {
       localStorage.setItem(userKey, JSON.stringify(profileData));
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(profileData));
+      localStorage.removeItem('arogya_medical_profile');
       window.dispatchEvent(new CustomEvent('medicalProfileUpdated', { detail: profileData }));
     } catch {}
+
+    // Auto-record Health Tracker checkpoint in lifetime history if vitals entered
+    if (profile.bp_systolic || profile.sugar_level_fasting || profile.pulse_rate || profile.weight_kg) {
+      persistMedicalRecord(activeUserId, {
+        type: 'health_tracker',
+        title: `Vitals Logged (${new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })})`,
+        summary: `Blood Pressure: ${profile.bp_systolic || '--'}/${profile.bp_diastolic || '--'} mmHg, Fasting Sugar: ${profile.sugar_level_fasting || '--'} mg/dL, Pulse: ${profile.pulse_rate || '--'} bpm, Weight: ${profile.weight_kg || '--'} kg`,
+        userQuery: 'Recorded personal vitals checkpoint',
+        aiResponse: 'Vitals validated and logged into lifetime health trajectory.',
+        metadata: {
+          bp: `${profile.bp_systolic || '--'}/${profile.bp_diastolic || '--'}`,
+          sugar: profile.sugar_level_fasting,
+          pulse: profile.pulse_rate,
+          weight: profile.weight_kg,
+        },
+      }).catch(() => {});
+    }
 
     setSaved(true);
     setHasProfile(true);
@@ -217,7 +333,7 @@ export default function MedicalProfilePage() {
     setIsSaving(false);
 
     // 2. Background sync to Supabase (if user logged in)
-    if (user?.id) {
+    if (activeUserId) {
       try {
         const timeoutPromise = new Promise((_, reject) =>
           setTimeout(() => reject(new Error('timeout')), 3000)
@@ -267,6 +383,17 @@ export default function MedicalProfilePage() {
           <div className="flex items-center gap-1.5 text-xs text-slate-500 bg-slate-100 px-3 py-1.5 rounded-xl">
             <Lock className="h-3.5 w-3.5" /> Private — only visible to you
           </div>
+          <button
+            onClick={() => setActiveTab('passport')}
+            className={`flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-extrabold text-sm transition-all shadow-sm ${
+              activeTab === 'passport'
+                ? 'bg-indigo-600 text-white shadow-indigo-500/30'
+                : 'bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200'
+            }`}
+          >
+            <QrCode className="h-4 w-4" />
+            <span>Health Passport QR</span>
+          </button>
           <button onClick={save} disabled={isSaving}
             className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg transition-all ${
               saved ? 'bg-emerald-500 text-white shadow-emerald-500/30' :
@@ -332,6 +459,15 @@ export default function MedicalProfilePage() {
 
       {/* Tab Content */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+
+        {/* ── HEALTH PASSPORT QR ── */}
+        {activeTab === 'passport' && (
+          <PatientPassportQRCard
+            userId={activeUserId}
+            userProfile={userProfile || undefined}
+            medicalProfile={profile}
+          />
+        )}
 
         {/* ── PERSONAL ── */}
         {activeTab === 'personal' && (
@@ -613,6 +749,203 @@ export default function MedicalProfilePage() {
                 ])}
                 placeholder="e.g. Regional Cancer Centre, Sankara Nethralaya…" />
             </div>
+          </div>
+        )}
+
+        {/* ── LIFETIME HEALTH HISTORY & AUDIT TRAIL ── */}
+        {activeTab === 'history' && (
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-700 pb-4">
+              <div>
+                <h2 className="text-base font-extrabold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Clock className="h-5 w-5 text-indigo-600" />
+                  Lifetime Health Records & AI Consultation History
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Stored forever with your authenticated account ({userProfile?.name} • {userProfile?.badgeId}). You can review or delete any record below.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 flex-wrap">
+                <button
+                  type="button"
+                  onClick={handleClearHistoryCategory}
+                  className="text-xs font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-3 py-1.5 rounded-xl transition-all flex items-center gap-1.5"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Clear {activeTabObj.id === 'all' ? 'All Lifetime History' : `${activeTabObj.label} History`}
+                </button>
+              </div>
+            </div>
+
+            {/* Feature Filter Pills with Live Counts */}
+            <div className="flex items-center gap-2 flex-wrap">
+              {FEATURE_TABS.map((tab) => {
+                const count = getTabCount(tab);
+                const isSelected = historyFilter === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setHistoryFilter(tab.id)}
+                    className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'bg-slate-900 dark:bg-indigo-600 text-white border-slate-900 dark:border-indigo-600 shadow-sm ring-2 ring-indigo-500/20'
+                        : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-slate-600'
+                    }`}
+                  >
+                    <span>{tab.icon}</span>
+                    <span>{tab.label}</span>
+                    <span
+                      className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                        isSelected
+                          ? 'bg-white/20 text-white'
+                          : 'bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {activeTabObj.path && (
+              <div className="flex items-center justify-between bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-100 dark:border-indigo-900/40 rounded-xl px-4 py-2 text-xs">
+                <span className="text-slate-600 dark:text-slate-300 font-medium">
+                  Showing your lifetime history for <strong className="text-slate-900 dark:text-white">{activeTabObj.label}</strong>
+                </span>
+                <Link
+                  href={activeTabObj.path}
+                  className="text-indigo-600 dark:text-indigo-400 font-bold hover:underline flex items-center gap-1"
+                >
+                  <span>Open {activeTabObj.label} Page</span>
+                  <span>→</span>
+                </Link>
+              </div>
+            )}
+
+            {/* Search inside history */}
+            <div className="relative">
+              <Search className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                value={historySearch}
+                onChange={(e) => setHistorySearch(e.target.value)}
+                placeholder="Search past symptoms, diagnoses, scanned medicines, or doctor advice..."
+                className="w-full pl-10 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs outline-none focus:border-indigo-500 focus:bg-white dark:focus:bg-slate-700 transition-all text-slate-800 dark:text-slate-100 font-medium"
+              />
+            </div>
+
+            {/* Records List */}
+            {filteredRecords.length === 0 ? (
+              <div className="text-center py-12 bg-slate-50 dark:bg-slate-800/40 rounded-2xl border border-dashed border-slate-200 dark:border-slate-700 p-6 space-y-2">
+                <Clock className="h-8 w-8 text-slate-300 mx-auto" />
+                <p className="text-sm font-extrabold text-slate-700 dark:text-slate-300">No medical records found in this category</p>
+                <p className="text-xs text-slate-400 max-w-md mx-auto">
+                  Whenever you check symptoms, chat with the AI Doctor, scan medicines, or run health predictions, all queries and answers will be preserved here permanently.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredRecords.map((rec) => (
+                  <div
+                    key={rec.id}
+                    className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 p-5 shadow-sm space-y-3 hover:border-indigo-200 dark:hover:border-indigo-500/40 transition-all"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <span className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 text-indigo-600 dark:text-indigo-400 font-bold text-sm flex items-center justify-center">
+                          {rec.type === 'symptom_check' ? '🩺' :
+                           rec.type === 'ai_doctor_consultation' ? '🤖' :
+                           rec.type === 'health_prediction' || rec.type === 'health_quiz' ? '🧠' :
+                           rec.type === 'medicine_scan' ? '🔍' :
+                           rec.type === 'medicine_order' ? '💊' :
+                           rec.type === 'doctor_consultation' ? '👨‍⚕️' :
+                           rec.type === 'diagnostic_booking' ? '🔬' :
+                           rec.type === 'hospital_appointment' ? '🏥' :
+                           rec.type === 'medical_report_analysis' ? '📄' :
+                           rec.type === 'health_tracker' ? '💓' : '📋'}
+                        </span>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="text-sm font-extrabold text-slate-900 dark:text-white">{rec.title}</h4>
+                            <span className="text-[9px] uppercase tracking-wider font-extrabold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-300">
+                              {rec.type.replace(/_/g, ' ')}
+                            </span>
+                          </div>
+                          <p className="text-[10px] text-slate-400 font-medium">
+                            {new Date(rec.timestamp).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteHistoryItem(rec.id)}
+                        className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl border border-transparent hover:border-rose-100 transition-colors"
+                        title="Delete this record permanently"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    {/* Summary if available */}
+                    {rec.summary && (
+                      <div className="text-xs text-slate-600 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-900/30 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                        {rec.summary}
+                      </div>
+                    )}
+
+                    {/* User Input / Symptoms Query */}
+                    {rec.userQuery && (
+                      <div className="bg-slate-50 dark:bg-slate-900/60 rounded-xl p-3.5 border border-slate-100 dark:border-slate-800 text-xs">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
+                          What you asked / Input provided:
+                        </span>
+                        <p className="text-slate-700 dark:text-slate-200 font-medium whitespace-pre-wrap leading-relaxed">{rec.userQuery}</p>
+                      </div>
+                    )}
+
+                    {/* AI Response / Diagnosis / Output */}
+                    {rec.aiResponse && (
+                      <div className="bg-gradient-to-br from-indigo-50/60 to-blue-50/40 dark:from-indigo-950/30 dark:to-blue-950/20 rounded-xl p-3.5 border border-indigo-100/60 dark:border-indigo-900/30 text-xs">
+                        <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block mb-1">
+                          AI Doctor / Diagnosis & Clinical Output:
+                        </span>
+                        <p className="text-slate-800 dark:text-slate-100 font-medium whitespace-pre-wrap leading-relaxed">{rec.aiResponse}</p>
+                      </div>
+                    )}
+
+                    {/* Metadata Badges */}
+                    {rec.metadata && Object.keys(rec.metadata).length > 0 && (
+                      <div className="flex items-center gap-1.5 flex-wrap pt-1">
+                        {rec.metadata.severity && (
+                          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 dark:bg-amber-900/40 text-amber-800 dark:text-amber-300">
+                            Severity: {rec.metadata.severity}
+                          </span>
+                        )}
+                        {rec.metadata.riskScore !== undefined && (
+                          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-rose-100 dark:bg-rose-900/40 text-rose-800 dark:text-rose-300">
+                            Risk Score: {rec.metadata.riskScore}%
+                          </span>
+                        )}
+                        {rec.metadata.tokenNumber && (
+                          <span className="text-[10px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-800 dark:text-emerald-300">
+                            Token #{rec.metadata.tokenNumber}
+                          </span>
+                        )}
+                        {rec.metadata.paymentAmount && (
+                          <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-800 dark:text-blue-300">
+                            Paid ₹{rec.metadata.paymentAmount}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

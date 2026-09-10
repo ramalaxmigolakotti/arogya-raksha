@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+// @ts-ignore
 import webpush from 'web-push';
 import { subscriptionStore } from '../subscribe/route';
 

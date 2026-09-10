@@ -5,10 +5,11 @@ import { Loader2, CheckCircle2, XCircle, CreditCard, ShieldCheck } from 'lucide-
 
 interface RazorpayCheckoutProps {
   amount: number; // In INR (e.g., 499)
-  itemName: string;
+  itemName?: string;
   itemDescription?: string;
   onSuccess: (paymentId: string, orderId: string) => void;
   onFailure?: (error: string) => void;
+  onBplFreeSelect?: () => void;
   buttonText?: string;
   buttonClassName?: string;
   userName?: string;
@@ -24,7 +25,7 @@ declare global {
 
 export default function RazorpayCheckout({
   amount,
-  itemName,
+  itemName = 'Service',
   itemDescription,
   onSuccess,
   onFailure,

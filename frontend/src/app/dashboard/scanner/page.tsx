@@ -1,14 +1,20 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, Suspense } from 'react';
 import {
   Camera, Upload, Loader2, Pill, AlertTriangle, X, Search,
   Building2, ShieldAlert, Package, DollarSign, Thermometer,
   CheckCircle2, Info, ChevronRight, ScanLine, ImageIcon,
-  RotateCcw, Stethoscope, FileWarning
+  RotateCcw, Stethoscope, FileWarning, QrCode, Shield
 } from 'lucide-react';
 import HealthcareCTA from '@/components/HealthcareCTA';
 import { useLanguage } from '@/context/LanguageContext';
+import { useUserRole } from '@/context/UserRoleContext';
+import { persistMedicalRecord } from '@/lib/medicalHistoryService';
+import FeaturePastHistoryModal from '@/components/FeaturePastHistoryModal';
+import DoctorPatientQRScanner from '@/components/DoctorPatientQRScanner';
+import { useSearchParams } from 'next/navigation';
+
 
 interface ScanResult {
   identified: boolean;
@@ -34,6 +40,11 @@ interface ScanResult {
 }
 
 export default function MedicineScanner() {
+  const searchParams = useSearchParams();
+  const [scannerType, setScannerType] = useState<'patient_qr' | 'medicine'>(() => {
+    return searchParams?.get('mode') === 'medicine' ? 'medicine' : 'patient_qr';
+  });
+  const { user } = useUserRole();
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [imageData, setImageData] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -112,6 +123,26 @@ export default function MedicineScanner() {
       if (data.medicineName) {
         await searchDataset(data.medicineName);
         checkInteractions(data.medicineName + ' ' + (data.genericName || ''));
+
+        // Auto-persist scanned medicine to user's authenticated lifetime history
+        persistMedicalRecord(user?.id || 'usr_pat_8812', {
+          type: 'medicine_scan',
+          title: `Medicine Scan: ${data.medicineName}`,
+          userQuery: `Scanned image containing ${data.medicineName}`,
+          aiResponse: `Composition: ${data.composition || 'Standard formulation'}. Form: ${data.form || 'Tablet'} (${data.strength || 'Standard'}). Dosage: ${data.dosage || 'As directed by physician'}.`,
+          summary: `${data.medicineName} (${data.strength || data.form || 'Medicine'})`,
+          metadata: {
+            medicineName: data.medicineName,
+            genericName: data.genericName,
+            manufacturer: data.manufacturer,
+            composition: data.composition,
+            dosage: data.dosage,
+            warnings: data.warnings || [],
+            sideEffects: data.sideEffects || [],
+            prescriptionRequired: data.prescriptionRequired,
+            mrp: data.mrp,
+          },
+        }).catch(() => {});
       }
     } catch (err: any) {
       setError(err.message || 'Something went wrong. Please try again.');
@@ -132,7 +163,8 @@ export default function MedicineScanner() {
   // Check drug interactions against user's saved medicines
   const checkInteractions = (identified: string) => {
     try {
-      const profile = JSON.parse(localStorage.getItem('medical_profile') || localStorage.getItem('arogya_medical_profile') || '{}');
+      const userProfileKey = user?.id ? `arogya_medical_profile_${user.id}` : 'arogya_medical_profile';
+      const profile = JSON.parse(localStorage.getItem(userProfileKey) || '{}');
       const currentMeds: string[] = profile?.current_medications || profile?.medications || [];
       if (!currentMeds.length) return;
 
@@ -163,13 +195,14 @@ export default function MedicineScanner() {
   const saveToProfile = () => {
     if (!result) return;
     try {
-      const raw = localStorage.getItem('medical_profile') || localStorage.getItem('arogya_medical_profile') || '{}';
+      const userProfileKey = user?.id ? `arogya_medical_profile_${user.id}` : 'arogya_medical_profile';
+      const raw = localStorage.getItem(userProfileKey) || '{}';
       const profile = JSON.parse(raw);
       const meds: string[] = profile.current_medications || [];
       if (!meds.includes(result.medicineName)) {
         meds.push(result.medicineName);
         profile.current_medications = meds;
-        localStorage.setItem('medical_profile', JSON.stringify(profile));
+        localStorage.setItem(userProfileKey, JSON.stringify(profile));
       }
       // Save to scan history
       const newEntry = { name: result.medicineName, date: new Date().toLocaleDateString() };
@@ -183,8 +216,8 @@ export default function MedicineScanner() {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-8 duration-500 w-full pb-12">
       {/* Header */}
-      <header>
-        <div className="flex items-center gap-3 mb-2">
+      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
           <div className="bg-cyan-100 p-2.5 rounded-xl border border-cyan-200">
             <ScanLine className="h-6 w-6 text-cyan-600" />
           </div>
@@ -193,9 +226,46 @@ export default function MedicineScanner() {
             <p className="text-slate-500 font-medium">{t('scannerSubtitle')}</p>
           </div>
         </div>
+        <FeaturePastHistoryModal
+          featureTitle="Medicine Scans"
+          types={['medicine_scan']}
+          icon="🔍"
+          buttonLabel="Past Scans"
+        />
       </header>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+      {/* Scanner Domain Switcher */}
+      <div className="flex items-center bg-slate-100 p-1.5 rounded-2xl text-xs font-bold max-w-md mx-auto">
+        <button
+          onClick={() => setScannerType('patient_qr')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl transition-all ${
+            scannerType === 'patient_qr'
+              ? 'bg-white text-indigo-600 shadow-sm font-black'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <QrCode className="h-4 w-4" />
+          <span>Patient Medical QR</span>
+          <span className="text-[9px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-full font-bold">2FA</span>
+        </button>
+
+        <button
+          onClick={() => setScannerType('medicine')}
+          className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl transition-all ${
+            scannerType === 'medicine'
+              ? 'bg-white text-blue-600 shadow-sm font-black'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <Pill className="h-4 w-4" />
+          <span>Medicine Strip OCR</span>
+        </button>
+      </div>
+
+      {scannerType === 'patient_qr' ? (
+        <DoctorPatientQRScanner />
+      ) : (
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* LEFT: Image Upload */}
         <div className="space-y-5">
           {/* Upload Area */}
@@ -580,6 +650,7 @@ export default function MedicineScanner() {
           )}
         </div>
       </div>
+      )}
     </div>
   );
 }

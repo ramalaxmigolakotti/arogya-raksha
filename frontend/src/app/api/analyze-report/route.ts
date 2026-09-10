@@ -67,7 +67,8 @@ Status must be: "normal", "high", "low", or "critical"`;
       const { content } = await callGroqVision(
         imageData,
         visionPrompt,
-        'You are a medical OCR system. Extract lab values exactly as printed. Return JSON only.'
+        'You are a medical OCR system. Extract lab values exactly as printed. Return JSON only.',
+        'reports'
       );
       const parsed = parseGroqJSON(content);
       rawExtracted = JSON.stringify(parsed);
@@ -116,8 +117,8 @@ Analyze this thoroughly and return ONLY valid JSON:
   "disclaimer": "This is an AI analysis. Always consult a qualified doctor."
 }`;
 
-    const { content: analysis } = await callGroq('doctor', {
-      model: GROQ_MODELS.LLAMA_33_70B,
+    const { content: analysis } = await callGroq('reports', {
+      model: GROQ_MODELS.REASONING_COMPLEX,
       messages: [
         {
           role: 'system',

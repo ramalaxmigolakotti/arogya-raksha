@@ -10,6 +10,10 @@ import {
   Navigation, ChevronDown, CheckCircle, Circle
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useUserRole } from '@/context/UserRoleContext';
+import { persistMedicalRecord } from '@/lib/medicalHistoryService';
+import FeaturePastHistoryModal from '@/components/FeaturePastHistoryModal';
+
 
 interface Medicine {
   name: string;
@@ -302,6 +306,7 @@ function AdviceCard({
 
 export default function SymptomChecker() {
   const { t, language } = useLanguage();
+  const { user } = useUserRole();
 
   // Form state
   const [age, setAge] = useState('');
@@ -479,6 +484,29 @@ export default function SymptomChecker() {
       if (!res.ok) throw new Error(data.error || 'Failed to analyze');
       setResult(data);
       setJourneyStep(5); // Medicines shown
+
+      // Auto-save symptom check & AI diagnosis to lifetime authenticated history
+      const querySummary = `Symptoms: ${selectedSymptoms.join(', ')} (Age: ${age}${gender ? `, ${gender}` : ''})`;
+      const aiSummary = `Diagnosis: ${data.diagnosis || 'Clinical Assessment'} [${data.severity || 'Moderate'} severity]. ${data.lifestyleAdvice || data.foodAdvice || ''}`;
+      persistMedicalRecord(user?.id || 'usr_pat_8812', {
+        type: 'symptom_check',
+        title: `Symptom Check: ${selectedSymptoms.slice(0, 3).join(', ')}`,
+        userQuery: querySummary,
+        aiResponse: aiSummary,
+        summary: data.diagnosis,
+        metadata: {
+          symptoms: selectedSymptoms,
+          age,
+          gender,
+          diagnosis: data.diagnosis,
+          severity: data.severity,
+          medicines: (data.medicines || []).map((m: any) => m.name),
+          foodAdvice: data.foodAdvice,
+          exerciseAdvice: data.exerciseAdvice,
+          lifestyleAdvice: data.lifestyleAdvice,
+        },
+      }).catch(() => {});
+
       // Auto-trigger hospital + doctor fetch
       setTimeout(() => {
         setJourneyStep(6);
@@ -493,6 +521,25 @@ export default function SymptomChecker() {
 
   return (
     <div className="w-full pb-12 space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-500">
+      {/* Header with Past Data Button */}
+      <div className="flex items-center justify-between flex-wrap gap-3 pb-1">
+        <div>
+          <h1 className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+            <Stethoscope className="h-6 w-6 text-violet-600" />
+            AI Symptom Checker
+          </h1>
+          <p className="text-xs text-slate-500 dark:text-slate-400">
+            Intelligent differential diagnosis, recommended medications & nearest care
+          </p>
+        </div>
+        <FeaturePastHistoryModal
+          featureTitle="Symptom Checks"
+          types={['symptom_check', 'ai_doctor_consultation']}
+          icon="🩺"
+          buttonLabel="View Past Checks"
+        />
+      </div>
+
       {/* Journey Progress — shown once user starts */}
       {journeyStep > 1 && <JourneyProgress currentStep={journeyStep} />}
 

@@ -1,7 +1,8 @@
 import { NextRequest } from 'next/server';
-import { getSarvamKeyManager } from '@/lib/sarvamKeyManager';
 
-const SARVAM_API_URL = 'https://api.sarvam.ai/v1/chat/completions';
+const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_API_KEY = process.env.GROQ_API_KEY_DOCTOR || '';
+const MODEL = 'qwen/qwen3.8-27b';
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,104 +16,74 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    const manager = getSarvamKeyManager();
+    if (!GROQ_API_KEY) {
+      return new Response(JSON.stringify({ error: 'Groq API Key for Doctor is not configured.' }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
 
     const LANG_NAMES: Record<string, string> = {
       en: 'English', hi: 'Hindi (हिंदी)', te: 'Telugu (తెలుగు)', ta: 'Tamil (தமிழ்)',
       kn: 'Kannada (ಕನ್ನಡ)', mr: 'Marathi (मराठी)', bn: 'Bengali (বাংলা)', bho: 'Bhojpuri (भोजपुरी)',
       gu: 'Gujarati (ગુજરાતી)', pa: 'Punjabi (ਪੰਜਾਬੀ)', or: 'Odia (ଓଡ଼ିଆ)', as: 'Assamese (অসমীয়া)',
-      ur: 'Urdu (اردو)', ml: 'Malayalam (മലയാളം)', mai: 'Maithili (मैथिली)', sat: 'Santali (ᱥᱟᱱᱛﺎᱲᱤ)',
+      ur: 'Urdu (اردو)', ml: 'Malayalam (മലയാളം)', mai: 'Maithili (मैथिली)', sat: 'Santali (ᱥᱟᱱᱛᱟᱲᱤ)',
       kok: 'Konkani (कोंकणी)', doi: 'Dogri (डोगरी)', ks: 'Kashmiri (کٲشُر)', mni: 'Manipuri (মেইতেই)',
       ne: 'Nepali (नेपाली)', sd: 'Sindhi (سنڌي)', sa: 'Sanskrit (संस्कृतम्)',
     };
     const langName = LANG_NAMES[language || 'en'] || 'English';
     const isNonEnglish = language && language !== 'en';
 
-    // Language instruction placed FIRST so the model doesn't deprioritize it
     const langInstruction = isNonEnglish
       ? `⚠️ LANGUAGE RULE — HIGHEST PRIORITY ⚠️
 You MUST write your ENTIRE response in ${langName} only.
-Do NOT use English at all in your response — not even a single English sentence.
-Even if the user writes to you in English, you MUST reply ONLY in ${langName}.
-Use the native script of ${langName} for ALL text including greetings, medical terms, and disclaimers.
-This is a non-negotiable rule that overrides all other instructions.\n\n`
+Do NOT use English at all in your response.
+Even if the user writes to you in English, reply in ${langName} using native script.
+This applies to all greetings, clinical terms, tips, and disclaimers.\n\n`
       : '';
 
     const patientName = userName || 'User';
     const systemMessage = {
       role: 'system',
-      content: `${langInstruction}You are "Arogya AI", the intelligent healthcare assistant for the Indian healthcare platform "Arogya Raksha".
+      content: `${langInstruction}You are "Arogya AI", an expert personal healthcare assistant and AI doctor for the Indian healthcare platform "Arogya Raksha".
 
 Your capabilities:
-- Answer medical and health questions accurately
-- Help analyze symptoms and suggest possible conditions
-- Provide general health advice and wellness tips
-- Explain medical terms, reports, and test results in simple language
-- Suggest when to see a doctor
-- Provide information about medicines, their uses, and side effects
-- Give diet and lifestyle recommendations
-- Discuss mental health and wellness
+- Answer medical, wellness, and health questions accurately and with deep empathy
+- Analyze symptoms and suggest probable conditions with severity levels
+- Suggest safe Indian OTC medicines, appropriate home remedies (Ayush / Indian remedies where suitable), and diet tips
+- Explain medical terms, lab reports, and vitals in simple terms
+- Provide clear red flags indicating when to immediately consult an in-person doctor
+- Always maintain warmth and medical professionalism
 
-Important rules:
-- Always recommend consulting a qualified doctor for serious symptoms
-- Never diagnose definitively — provide possible conditions and advice
-- Be empathetic, caring, and professional
-- Use simple language, avoid excessive medical jargon
-- Consider Indian healthcare context (common diseases, available medicines, local practices)
-- Format your responses with clear sections using markdown when helpful (bold, bullet points, etc.)
-- Keep responses concise but thorough
-- Always include a disclaimer for medical advice
-${isNonEnglish ? `- REMEMBER: Every word of your response MUST be in ${langName}. This includes the disclaimer.` : ''}
+Important Rules:
+- Always recommend consulting a qualified doctor for definitive diagnosis and severe symptoms
+- Never diagnose definitively — provide possibilities and clear guidance
+- Consider Indian healthcare context (common ailments, local diet like khichdi/haldi milk, Indian OTC brands)
+- Format with markdown bullets and bold headers for clarity and scannability
+- Conclude with a helpful medical disclaimer.
 
-You are speaking with a patient named ${patientName}. Address them by name occasionally. Be warm and professional.`,
+You are speaking with patient ${patientName}. Address them warmly.`,
     };
 
-    let sarvamResponse: Response | null = null;
-    let lastError = '';
+    const groqRes = await fetch(GROQ_API_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${GROQ_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [systemMessage, ...messages],
+        temperature: 0.6,
+        max_tokens: 2048,
+        stream: true,
+      }),
+    });
 
-    for (let attempt = 0; attempt < manager.keyCount; attempt++) {
-      const apiKey = manager.getNextKey();
-
-      try {
-        const res = await fetch(SARVAM_API_URL, {
-          method: 'POST',
-          headers: {
-            'api-subscription-key': apiKey,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'sarvam-30b', // Fixed case
-            messages: [systemMessage, ...messages],
-            temperature: 0.7,
-            max_tokens: 2000,
-            stream: true,
-          }),
-        });
-
-        if (res.ok) {
-          manager.reportSuccess(apiKey);
-          sarvamResponse = res;
-          break;
-        }
-
-        if (res.status === 429) {
-          const retryAfter = res.headers.get('retry-after');
-          manager.reportRateLimit(apiKey, retryAfter ? parseInt(retryAfter) * 1000 : 60000);
-          console.warn(`Chat: Key ${apiKey.slice(0, 12)}... rate-limited, trying next...`);
-          continue;
-        }
-
-        lastError = await res.text();
-        manager.reportFailure(apiKey);
-      } catch (err: any) {
-        lastError = err.message;
-        manager.reportFailure(apiKey);
-      }
-    }
-
-    if (!sarvamResponse) {
-      console.error('Chat: All keys failed. Last error:', lastError);
-      return new Response(JSON.stringify({ error: 'Failed to get AI response. Please try again.' }), {
+    if (!groqRes.ok) {
+      const errText = await groqRes.text();
+      console.error('[Ask AI Doctor API Error]', groqRes.status, errText);
+      return new Response(JSON.stringify({ error: `Groq AI Error (${groqRes.status}): ${errText}` }), {
         status: 502,
         headers: { 'Content-Type': 'application/json' },
       });
@@ -123,7 +94,7 @@ You are speaking with a patient named ${patientName}. Address them by name occas
 
     const stream = new ReadableStream({
       async start(controller) {
-        const reader = sarvamResponse!.body?.getReader();
+        const reader = groqRes.body?.getReader();
         if (!reader) {
           controller.close();
           return;
@@ -139,7 +110,7 @@ You are speaking with a patient named ${patientName}. Address them by name occas
 
             for (const line of lines) {
               if (line.startsWith('data: ')) {
-                const data = line.slice(6);
+                const data = line.slice(6).trim();
                 if (data === '[DONE]') {
                   controller.enqueue(encoder.encode(`data: [DONE]\n\n`));
                   break;
@@ -151,13 +122,13 @@ You are speaking with a patient named ${patientName}. Address them by name occas
                     controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
                   }
                 } catch {
-                  // skip unparseable chunks
+                  // skip unparseable SSE chunk
                 }
               }
             }
           }
-        } catch (error) {
-          console.error('Stream error:', error);
+        } catch (streamErr) {
+          console.error('[Ask AI Doctor Stream Error]', streamErr);
         } finally {
           controller.close();
           reader.releaseLock();
@@ -173,7 +144,7 @@ You are speaking with a patient named ${patientName}. Address them by name occas
       },
     });
   } catch (error: any) {
-    console.error('Chat API error:', error);
+    console.error('[Ask AI Doctor Error]', error);
     return new Response(JSON.stringify({ error: error.message || 'Something went wrong.' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

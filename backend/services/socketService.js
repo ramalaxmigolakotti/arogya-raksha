@@ -130,6 +130,100 @@ module.exports = function (io) {
       }
     });
 
+    // ── 4-Panel Real-Time Communication Channels ──
+
+    // 1. Role-based room subscriptions
+    socket.on('join_role_room', (role) => {
+      if (['patient', 'asha', 'doctor', 'ambulance', 'hospital_admin', 'pharmacy'].includes(role)) {
+        socket.join(`role:${role}`);
+        console.log(`Socket ${socket.id} joined role room: role:${role}`);
+      }
+    });
+
+    // ── Healthcare Journey Pipeline Events (End-to-End Tracking) ──
+    socket.on('create_healthcare_journey', (journey) => {
+      console.log(`🏥 New Healthcare Journey Started: ${journey.id} (Token #${journey.tokenNumber})`);
+      io.emit('journey_created', journey);
+      // Notify Doctor and Hospital Admin
+      io.to('role:doctor').to('role:hospital_admin').emit('cross_panel_toast', {
+        id: `toast-${Date.now()}`,
+        type: 'info',
+        title: 'New Patient Booked',
+        message: `${journey.patientName} booked Token #${journey.tokenNumber} for ${journey.doctorName} (${journey.hospitalName})`,
+      });
+    });
+
+    socket.on('update_journey_step', (data) => {
+      // data: { journeyId, step, statusNotes, updatedBy, extraData }
+      console.log(`📍 Journey ${data.journeyId} advanced to step: ${data.step}`);
+      io.emit('journey_updated', data);
+    });
+
+    // Digital Prescription Stream (Doctor -> Pharmacy & Patient)
+    socket.on('create_digital_prescription', (prescriptionData) => {
+      console.log(`📄 Digital Prescription Issued: ${prescriptionData.id} for ${prescriptionData.patientName}`);
+      io.emit('prescription_issued', prescriptionData);
+      io.to('role:pharmacy').emit('cross_panel_toast', {
+        id: `toast-${Date.now()}`,
+        type: 'success',
+        title: 'New Digital Prescription Received',
+        message: `Dr. ${prescriptionData.doctorName} issued Rx for ${prescriptionData.patientName}. Ready for dispensing.`,
+      });
+    });
+
+    // Pharmacy Dispense / Pack Update
+    socket.on('update_pharmacy_status', (dispenseData) => {
+      console.log(`💊 Pharmacy Update: ${dispenseData.prescriptionId} -> ${dispenseData.status}`);
+      io.emit('pharmacy_status_updated', dispenseData);
+    });
+
+    // 2. Ambulance Live GPS Tracking (EMR-2026-XXXX)
+    socket.on('ambulance_location_update', (data) => {
+      // Data: { dispatchId, lat, lng, speed, eta, status, vehicleNo, driverName, patientName, locationName }
+      io.emit('ambulance_location_stream', data);
+      socket.to('role:patient').to('role:doctor').to('role:asha').emit('responder_location', {
+        incidentId: data.dispatchId,
+        lat: data.lat,
+        lng: data.lng,
+        eta: data.eta,
+        status: data.status,
+      });
+    });
+
+    // 3. Emergency SOS Broadcast (EMR-2026-XXXX)
+    socket.on('trigger_emergency_sos', (sosData) => {
+      // Data: { dispatchId, patientName, village, location, message, priority, timestamp }
+      console.log(`🚨 Live Emergency SOS: ${sosData.dispatchId} from ${sosData.patientName}`);
+      io.emit('emergency_sos_alert', sosData);
+    });
+
+    // 4. ASHA Field Issue Tickets (TCK-2026-XXXX)
+    socket.on('create_asha_ticket', (ticket) => {
+      console.log(`🎫 New ASHA Ticket Created: ${ticket.id}`);
+      io.emit('ticket_created', ticket);
+    });
+
+    socket.on('update_asha_ticket', (ticket) => {
+      console.log(`🎫 ASHA Ticket Updated: ${ticket.id} -> ${ticket.status}`);
+      io.emit('ticket_updated', ticket);
+    });
+
+    // 5. Healthcare E-Commerce Order Tracking (ORD-2026-XXXX)
+    socket.on('update_order_status', (orderData) => {
+      console.log(`📦 Order Updated: ${orderData.id} -> ${orderData.status}`);
+      io.emit('order_updated', orderData);
+    });
+
+    // 6. Cross-panel Notification Toast Trigger
+    socket.on('send_cross_panel_toast', (notification) => {
+      // notification: { targetRole, title, message, type, id }
+      if (notification.targetRole) {
+        io.to(`role:${notification.targetRole}`).emit('cross_panel_toast', notification);
+      } else {
+        io.emit('cross_panel_toast', notification);
+      }
+    });
+
     socket.on('disconnect', () => {
       for (const [userId, socketId] of onlineUsers.entries()) {
         if (socketId === socket.id) {

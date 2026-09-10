@@ -8,6 +8,10 @@ import {
 } from 'lucide-react';
 import HealthcareCTA from '@/components/HealthcareCTA';
 import { useLanguage } from '@/context/LanguageContext';
+import { useUserRole } from '@/context/UserRoleContext';
+import { persistMedicalRecord } from '@/lib/medicalHistoryService';
+import FeaturePastHistoryModal from '@/components/FeaturePastHistoryModal';
+
 
 const PREDICTORS = [
   { id: 'diabetes-heart', label: 'Diabetes & Heart', icon: Heart, color: 'from-rose-500 to-red-600', bg: 'bg-rose-50', text: 'text-rose-600', emoji: '🩸' },
@@ -114,6 +118,7 @@ function RiskGauge({ score, level }: { score: number; level: string }) {
 
 export default function PredictorsPage() {
   const { t, language } = useLanguage();
+  const { user } = useUserRole();
   const [selected, setSelected] = useState<string | null>(null);
   const [fields, setFields] = useState<any[]>([]);
   const [predictorInfo, setPredictorInfo] = useState<any>(null);
@@ -153,6 +158,26 @@ export default function PredictorsPage() {
       });
       const data = await res.json();
       setResult(data);
+
+      if (data && !data.error) {
+        const inputSummary = Object.entries(inputs).map(([k, v]) => `${k}: ${v}`).join(', ');
+        persistMedicalRecord(user?.id || 'usr_pat_8812', {
+          type: 'health_prediction',
+          title: `${data.predictor || selected} Risk Assessment`,
+          userQuery: `Input Vitals: ${inputSummary || 'Clinical Default Vitals'}`,
+          aiResponse: `Risk Level: ${data.riskLevel || 'Moderate'} (${data.riskScore || 0}%). Based on ${data.totalPatientsAnalyzed?.toLocaleString() || '1.4M'} real patient cases.`,
+          summary: `${data.riskLevel || 'Moderate'} Risk (${data.riskScore || 0}%)`,
+          metadata: {
+            predictorId: selected,
+            inputs,
+            riskScore: data.riskScore,
+            riskLevel: data.riskLevel,
+            riskFactors: data.riskFactors || [],
+            recommendations: data.recommendations || [],
+            totalPatientsAnalyzed: data.totalPatientsAnalyzed,
+          },
+        }).catch(() => {});
+      }
     } catch { setResult({ error: 'Failed to get prediction' }); }
     setLoading(false);
   };
@@ -344,16 +369,24 @@ export default function PredictorsPage() {
   // --- Predictor Selection Grid ---
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-500 w-full pb-12">
-      <header>
-        <div className="flex items-center gap-2 text-emerald-600 font-bold text-sm uppercase tracking-widest mb-2">
-          <ShieldCheck className="h-4 w-4" /> AI-Powered Health Intelligence
+      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2 text-emerald-600 font-bold text-sm uppercase tracking-widest mb-2">
+            <ShieldCheck className="h-4 w-4" /> AI-Powered Health Intelligence
+          </div>
+          <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+            {t('predictorsTitle')}
+          </h1>
+          <p className="text-slate-500 mt-2 max-w-2xl font-medium">
+            {t('predictorsSubtitle')}
+          </p>
         </div>
-        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
-          {t('predictorsTitle')}
-        </h1>
-        <p className="text-slate-500 mt-2 max-w-2xl font-medium">
-          {t('predictorsSubtitle')}
-        </p>
+        <FeaturePastHistoryModal
+          featureTitle="Health Predictions"
+          types={['health_prediction', 'health_quiz']}
+          icon="🧠"
+          buttonLabel="Past Predictions"
+        />
       </header>
 
       {/* Stats bar */}

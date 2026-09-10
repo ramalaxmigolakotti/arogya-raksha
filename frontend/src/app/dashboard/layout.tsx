@@ -9,10 +9,13 @@ import ClerkApiProvider from '@/components/ClerkApiProvider';
 import { usePushNotifications } from '@/hooks/usePushNotifications';
 import { useState, useEffect } from 'react';
 import NotificationManager from '@/components/NotificationManager';
+import { useUserRole } from '@/context/UserRoleContext';
+import LoginScreen from '@/components/LoginScreen';
 
 
 function DashboardInner({ children }: { children: React.ReactNode }) {
   usePushNotifications();
+  const { isLoggedIn } = useUserRole();
 
   // SSR-safe: start as false, sync from sessionStorage after mount
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -32,6 +35,11 @@ function DashboardInner({ children }: { children: React.ReactNode }) {
     window.addEventListener('sidebarToggle', handler);
     return () => window.removeEventListener('sidebarToggle', handler);
   }, []);
+
+  // Show login screen if not logged in
+  if (!isLoggedIn) {
+    return <LoginScreen />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex transition-colors duration-300">

@@ -99,12 +99,15 @@ CREATE TABLE appointments (
   patient_phone TEXT,
   doctor_id UUID NOT NULL REFERENCES doctors(id) ON DELETE CASCADE,
   hospital_id UUID REFERENCES hospitals(id) ON DELETE SET NULL,
+  hospital_name TEXT,
+  appointment_token INTEGER,
+  order_id TEXT,
   date TIMESTAMPTZ NOT NULL,
   time_slot JSONB DEFAULT '{}',
   department TEXT,
   reason TEXT,
   status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'confirmed', 'cancelled', 'completed')),
-  payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'uploaded', 'verified', 'failed')),
+  payment_status TEXT DEFAULT 'pending' CHECK (payment_status IN ('pending', 'uploaded', 'verified', 'failed', 'paid')),
   payment_proof TEXT,
   notes TEXT,
   prescription TEXT,
@@ -239,6 +242,91 @@ CREATE INDEX idx_orders_user_id ON orders(user_id);
 CREATE INDEX idx_orders_user_email ON orders(user_email);
 CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_orders_payment_id ON orders(payment_id);
+
+-- ============================================================
+-- 11. AMBULANCE DISPATCH & TELEMETRY (Realtime GPS stream)
+-- ============================================================
+CREATE TABLE ambulance_dispatch (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  dispatch_id TEXT UNIQUE NOT NULL,
+  driver_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  patient_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  vehicle_no TEXT NOT NULL,
+  driver_name TEXT NOT NULL,
+  driver_phone TEXT,
+  patient_name TEXT,
+  pickup_location TEXT,
+  hospital_destination TEXT,
+  lat DOUBLE PRECISION NOT NULL DEFAULT 17.3850,
+  lng DOUBLE PRECISION NOT NULL DEFAULT 78.4867,
+  speed_kmh NUMERIC DEFAULT 45,
+  eta_minutes INTEGER DEFAULT 5,
+  status TEXT DEFAULT 'en_route' CHECK (status IN ('dispatched', 'en_route', 'arrived_scene', 'transporting', 'arrived_hospital', 'completed')),
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_ambulance_dispatch_id ON ambulance_dispatch(dispatch_id);
+CREATE INDEX idx_ambulance_driver_id ON ambulance_dispatch(driver_id);
+CREATE INDEX idx_ambulance_patient_id ON ambulance_dispatch(patient_id);
+CREATE INDEX idx_ambulance_status ON ambulance_dispatch(status);
+
+-- ============================================================
+-- 12. ASHA ISSUE TICKETS (Realtime Healthcare Issue Management)
+-- ============================================================
+CREATE TABLE issue_tickets (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  ticket_id TEXT UNIQUE NOT NULL,
+  asha_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  assigned_doctor_id UUID REFERENCES users(id) ON DELETE SET NULL,
+  asha_name TEXT NOT NULL,
+  village TEXT NOT NULL,
+  category TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT NOT NULL,
+  patient_name TEXT,
+  priority TEXT DEFAULT 'medium' CHECK (priority IN ('low', 'medium', 'high', 'critical')),
+  status TEXT DEFAULT 'open' CHECK (status IN ('open', 'in_progress', 'resolved')),
+  doctor_notes TEXT,
+  assigned_doctor TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_issue_tickets_id ON issue_tickets(ticket_id);
+CREATE INDEX idx_issue_tickets_asha_id ON issue_tickets(asha_id);
+CREATE INDEX idx_issue_tickets_status ON issue_tickets(status);
+CREATE INDEX idx_issue_tickets_priority ON issue_tickets(priority);
+
+-- ============================================================
+-- 13. PATIENT HEALTH RECORDS & AUDIT TRAIL (Lifetime History)
+-- ============================================================
+CREATE TABLE patient_health_records (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  record_type TEXT NOT NULL CHECK (record_type IN ('symptom_check', 'ai_doctor_consultation', 'health_prediction', 'medicine_scan', 'hospital_appointment', 'medicine_order')),
+  title TEXT NOT NULL,
+  user_query TEXT,
+  ai_response TEXT,
+  summary TEXT,
+  metadata JSONB DEFAULT '{}',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_patient_health_records_user_id ON patient_health_records(user_id);
+CREATE INDEX idx_patient_health_records_type ON patient_health_records(record_type);
+CREATE INDEX idx_patient_health_records_created ON patient_health_records(created_at DESC);
+
+-- ============================================================
+-- ENABLE SUPABASE REALTIME REPLICATION (CDC)
+-- ============================================================
+ALTER PUBLICATION supabase_realtime ADD TABLE appointments;
+ALTER PUBLICATION supabase_realtime ADD TABLE orders;
+ALTER PUBLICATION supabase_realtime ADD TABLE ambulance_dispatch;
+ALTER PUBLICATION supabase_realtime ADD TABLE issue_tickets;
+ALTER PUBLICATION supabase_realtime ADD TABLE patient_health_records;
+
 
 
 -- Full text search on medicines

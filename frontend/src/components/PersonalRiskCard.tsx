@@ -7,6 +7,7 @@ import {
   ChevronRight, Loader2, ShieldCheck, TrendingUp
 } from 'lucide-react';
 import Link from 'next/link';
+import { useUserRole } from '@/context/UserRoleContext';
 
 interface RiskScore {
   id: string;
@@ -105,20 +106,23 @@ function estimateRisks(profile: any): RiskScore[] {
 }
 
 export default function PersonalRiskCard() {
+  const { user } = useUserRole();
   const [risks, setRisks]   = useState<RiskScore[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasProfile, setHasProfile] = useState(false);
 
   useEffect(() => {
-    // Read medical profile from localStorage (set by profile page)
+    // Read medical profile from user-scoped localStorage
     try {
-      const raw = localStorage.getItem('medical_profile') || localStorage.getItem('arogya_medical_profile');
+      const userProfileKey = user?.id ? `arogya_medical_profile_${user.id}` : 'arogya_medical_profile';
+      const raw = localStorage.getItem(userProfileKey);
       const profile = raw ? JSON.parse(raw) : null;
-      if (profile && (profile.age || profile.weight || profile.glucoseLevel)) {
+      if (profile && (profile.age || profile.weight || profile.glucoseLevel || profile.bp_systolic)) {
         setHasProfile(true);
         setRisks(estimateRisks(profile));
       } else {
         // No profile — show placeholder scores
+        setHasProfile(false);
         setRisks([
           { id: 'diabetes-heart', label: 'Diabetes & Heart', risk: 0, level: 'low', icon: Heart,    color: 'text-rose-600',   gradientFrom: 'from-rose-500',   gradientTo: 'to-red-600',    insight: 'Complete your profile for personalized risk' },
           { id: 'kidney',         label: 'Kidney Health',   risk: 0, level: 'low', icon: Droplets,  color: 'text-blue-600',   gradientFrom: 'from-blue-500',   gradientTo: 'to-indigo-600', insight: 'Complete your profile for personalized risk' },
@@ -130,7 +134,7 @@ export default function PersonalRiskCard() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [user?.id]);
 
   const overallRisk = risks.length ? Math.round(risks.reduce((s, r) => s + r.risk, 0) / risks.length) : 0;
   const overallLevel = getRiskLevel(overallRisk);

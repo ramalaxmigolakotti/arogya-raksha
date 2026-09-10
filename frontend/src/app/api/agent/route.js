@@ -1,8 +1,68 @@
 import { NextResponse } from 'next/server';
 
 const GROQ_API_KEY = process.env.GROQ_API_KEY_DOCTOR || process.env.GROQ_API_KEY_SYMPTOMS || '';
+const GROQ_API_KEY_QUIZ = process.env.GROQ_API_KEY_QUIZ || GROQ_API_KEY;
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const MODEL = 'llama-3.3-70b-versatile';
+
+/**
+ * Intelligent Complexity Router for MediBot Agent:
+ * - 'vision': qwen/qwen3.8-27b (multimodal image & packaging analysis)
+ * - 'simple': openai/gpt-oss-20b (sub-second navigation, greetings, simple requests)
+ * - 'complex': openai/gpt-oss-120b (deep 120B medical reasoning, differential diagnosis, drug interactions)
+ * - 'moderate': qwen/qwen3.8-27b (standard clinical Q&A, multilingual Indian languages)
+ */
+function selectModelByComplexity(messages, imageBase64, language) {
+  if (imageBase64) {
+    return {
+      model: 'qwen/qwen3.8-27b',
+      complexity: 'vision',
+      reason: 'Multimodal vision query with medical image'
+    };
+  }
+
+  const lastUserMsg = [...(messages || [])].reverse().find(m => m.role === 'user' || !m.role)?.content || '';
+  const clean = typeof lastUserMsg === 'string' ? lastUserMsg.trim().toLowerCase() : '';
+
+  // 1. Simple / Low Complexity: Greetings & Quick Navigation
+  const isGreeting = /^(hi|hello|hey|namaste|vanakkam|good\s+(morning|afternoon|evening)|hola|sup)\b/i.test(clean);
+  const isNav = /^(go\s+to|open|navigate|show|take\s+me\s+to|bring\s+up)\s+(symptoms|quiz|medicines|hospitals|scanner|doctors|appointments|profile|emergency|reports)/i.test(clean);
+  const isShort = clean.length < 40 && !clean.includes('pain') && !clean.includes('fever') && !clean.includes('blood') && !clean.includes('ache');
+
+  if (isNav || (isGreeting && clean.length < 25) || (isShort && !clean.includes('symptom'))) {
+    return {
+      model: 'openai/gpt-oss-20b',
+      complexity: 'simple',
+      reason: 'Fast routing / simple greeting / direct navigation'
+    };
+  }
+
+  // 2. High Complexity: Deep Clinical Synthesis, Multi-symptom, Drug Interactions, Chronic Diseases
+  const complexKeywords = [
+    'interaction', 'contraindication', 'differential', 'chronic', 'diabetes',
+    'hypertension', 'blood pressure', 'chest pain', 'shortness of breath',
+    'heart', 'kidney', 'liver', 'prescription', 'side effect', 'abnormal',
+    'emergency', 'stroke', 'dosage calculation', 'pregnant', 'pregnancy'
+  ];
+  const symptomKeywords = ['fever', 'cough', 'headache', 'pain', 'vomit', 'nausea', 'rash', 'dizzy', 'weakness'];
+
+  const matchedComplex = complexKeywords.filter(k => clean.includes(k));
+  const matchedSymptoms = symptomKeywords.filter(k => clean.includes(k));
+
+  if (clean.length > 180 || matchedComplex.length >= 2 || (matchedComplex.length >= 1 && matchedSymptoms.length >= 2)) {
+    return {
+      model: 'openai/gpt-oss-120b',
+      complexity: 'complex',
+      reason: 'Deep clinical reasoning / multi-symptom differential diagnosis'
+    };
+  }
+
+  // 3. Moderate Complexity: Standard clinical Q&A & Native Indian Multilingual
+  return {
+    model: 'qwen/qwen3.8-27b',
+    complexity: 'moderate',
+    reason: 'Standard clinical consultation and native multilingual support'
+  };
+}
 
 // ─── AGENTIC TOOLS DEFINITION ─────────────────────────────────────────────────
 const TOOLS = [
@@ -31,9 +91,9 @@ const TOOLS = [
         type: 'object',
         properties: {
           symptoms: { type: 'array', items: { type: 'string' }, description: 'List of symptoms the patient has' },
-          age: { type: 'number', description: 'Patient age' },
-          duration: { type: 'string', description: 'How long the symptoms have been present' },
-          severity: { type: 'string', enum: ['mild', 'moderate', 'severe'], description: 'Severity of symptoms' }
+          age: { type: ['number', 'null'], description: 'Patient age' },
+          duration: { type: ['string', 'null'], description: 'How long the symptoms have been present' },
+          severity: { type: ['string', 'null'], description: 'Severity of symptoms (mild, moderate, severe)' }
         },
         required: ['symptoms']
       }
@@ -47,8 +107,8 @@ const TOOLS = [
       parameters: {
         type: 'object',
         properties: {
-          specialty: { type: 'string', description: 'Optional medical specialty needed' },
-          emergency: { type: 'boolean', description: 'Whether this is an emergency situation' }
+          specialty: { type: ['string', 'null'], description: 'Optional medical specialty needed' },
+          emergency: { type: ['boolean', 'null'], description: 'Whether this is an emergency situation' }
         }
       }
     }
@@ -62,7 +122,7 @@ const TOOLS = [
         type: 'object',
         properties: {
           symptoms: { type: 'array', items: { type: 'string' }, description: 'List of symptoms' },
-          severity: { type: 'string', description: 'Severity level' }
+          severity: { type: ['string', 'null'], description: 'Severity level' }
         },
         required: ['symptoms']
       }
@@ -76,9 +136,9 @@ const TOOLS = [
       parameters: {
         type: 'object',
         properties: {
-          topic: { type: 'string', description: 'Quiz topic: general_health, diabetes, heart, nutrition, mental_health' },
-          difficulty: { type: 'string', enum: ['easy', 'medium', 'hard'] },
-          num_questions: { type: 'number', description: 'Number of questions (3-10)' }
+          topic: { type: ['string', 'null'], description: 'Quiz topic: general_health, diabetes, heart, nutrition, mental_health' },
+          difficulty: { type: ['string', 'null'] },
+          num_questions: { type: ['number', 'null'], description: 'Number of questions (3-10)' }
         }
       }
     }
@@ -105,8 +165,8 @@ const TOOLS = [
       parameters: {
         type: 'object',
         properties: {
-          specialty: { type: 'string', description: 'Medical specialty needed' },
-          urgency: { type: 'string', enum: ['routine', 'urgent', 'emergency'] }
+          specialty: { type: ['string', 'null'], description: 'Medical specialty needed' },
+          urgency: { type: ['string', 'null'] }
         }
       }
     }
@@ -119,7 +179,7 @@ const TOOLS = [
       parameters: {
         type: 'object',
         properties: {
-          action: { type: 'string', enum: ['view', 'update_vitals', 'view_reports'] }
+          action: { type: ['string', 'null'] }
         }
       }
     }
@@ -132,7 +192,7 @@ const TOOLS = [
       parameters: {
         type: 'object',
         properties: {
-          metric: { type: 'string', description: 'Optional: specific metric like bmi, steps, calories, heart_rate' }
+          metric: { type: ['string', 'null'], description: 'Optional: specific metric like bmi, steps, calories, heart_rate' }
         }
       }
     }
@@ -368,11 +428,11 @@ Make questions relevant to Indian healthcare context. Vary difficulty. Return ON
 
   const res = await fetch(GROQ_API_URL, {
     method: 'POST',
-    headers: { Authorization: `Bearer ${GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+    headers: { Authorization: `Bearer ${GROQ_API_KEY_QUIZ}`, 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: MODEL,
+      model: 'qwen/qwen3.8-27b',
       messages: [{ role: 'user', content: prompt }],
-      temperature: 0.7,
+      temperature: 0.5,
       max_tokens: 2000,
     })
   });
@@ -434,6 +494,10 @@ export async function POST(req) {
       }
     }
 
+    // Select model dynamically based on query complexity
+    const { model: selectedModel, complexity, reason } = selectModelByComplexity(messages, imageBase64, language);
+    console.log(`[MediBot] Selected model: ${selectedModel} | Complexity: ${complexity} | Reason: ${reason}`);
+
     // ── Step 1: Call Groq with tools ──────────────────────────────────────────
     const groqRes = await fetch(GROQ_API_URL, {
       method: 'POST',
@@ -442,11 +506,11 @@ export async function POST(req) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: MODEL,
+        model: selectedModel,
         messages: [systemMessage, ...history],
         tools: TOOLS,
         tool_choice: 'auto',
-        temperature: 0.7,
+        temperature: complexity === 'complex' ? 0.3 : 0.6,
         max_tokens: 1500,
       })
     });
@@ -500,15 +564,15 @@ export async function POST(req) {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: MODEL,
+          model: selectedModel,
           messages: [
             systemMessage,
             ...history,
             assistantMsg,
             ...toolResultMessages
           ],
-          temperature: 0.7,
-          max_tokens: 800,
+          temperature: 0.6,
+          max_tokens: 1000,
         })
       });
 
@@ -527,6 +591,9 @@ export async function POST(req) {
       success: true,
       content: finalContent,
       toolResults,
+      modelUsed: selectedModel,
+      complexity,
+      reason,
     });
 
   } catch (error) {

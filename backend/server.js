@@ -100,6 +100,8 @@ const medicalProfileRoutes = require('./routes/medicalProfile');
 const notificationRoutes = require('./routes/notifications');
 const whatsappRoutes = require('./routes/whatsapp');
 const predictRoutes = require('./routes/predict');
+const queueRoutes = require('./routes/queue');
+const ticketRoutes = require('./routes/tickets');
 
 // Preload all 9 predictor datasets into memory
 require('./services/predictorDatasets').loadAll();
@@ -122,6 +124,8 @@ app.use('/api/medical-profile', medicalProfileRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/predict', predictRoutes);
+app.use('/api/queue', queueRoutes);
+app.use('/api/tickets', ticketRoutes);
 
 // Health check
 const { redisHealth } = require('./services/redisService');

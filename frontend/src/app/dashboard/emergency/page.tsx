@@ -5,10 +5,13 @@ import {
   PhoneCall, AlertTriangle, ShieldAlert, Navigation, Hospital,
   FileHeart, BellRing, Clock, X, User, Phone, MapPin,
   Ambulance, HeartPulse, Loader2, CheckCircle2, Truck,
-  Radio, ChevronRight, Activity
+  Radio, ChevronRight, Activity, ShieldCheck, CreditCard, Sparkles
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useUserRole } from '@/context/UserRoleContext';
 import dynamic from 'next/dynamic';
+import RazorpayCheckout from '@/components/RazorpayCheckout';
+import { persistMedicalRecord } from '@/lib/medicalHistoryService';
 
 const MapComponent = dynamic(() => import('@/components/ui/MapComponent'), { ssr: false });
 
@@ -19,6 +22,10 @@ interface AmbulanceForm {
   location: string;
   emergencyType: string;
   notes: string;
+  ambulanceType?: 'govt_108' | 'private_als';
+  paymentStatus?: 'free_govt' | 'paid';
+  paymentAmount?: number;
+  paymentId?: string;
 }
 
 type TrackingStage = 'dispatched' | 'enroute' | 'arriving' | 'arrived';
@@ -164,6 +171,22 @@ function AmbulanceTracker({ form, onClose }: { form: AmbulanceForm; onClose: () 
             </div>
           </div>
 
+          {/* Ambulance & Payment Tier */}
+          <div className="bg-slate-50 rounded-xl p-3.5 border border-slate-200 text-xs space-y-1">
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 font-bold">Ambulance Unit:</span>
+              <span className="font-extrabold text-slate-800">
+                {form.ambulanceType === 'private_als' ? 'Private ALS Cardiac ICU on Wheels' : 'Govt 108 Emergency Ambulance'}
+              </span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-slate-500 font-bold">Billing Status:</span>
+              <span className={`font-black ${form.paymentStatus === 'paid' ? 'text-blue-600' : 'text-emerald-600'}`}>
+                {form.paymentStatus === 'paid' ? `₹1,200 PAID (${form.paymentId || 'Razorpay Verified'})` : '100% FREE (Govt 108)'}
+              </span>
+            </div>
+          </div>
+
           {/* Patient Info */}
           <div className="bg-rose-50 rounded-xl p-4 border border-rose-100">
             <p className="text-xs font-bold text-rose-600 uppercase tracking-wider mb-2">Patient Details</p>
@@ -190,6 +213,7 @@ function AmbulanceBookingModal({ onClose, onBooked }: {
   const [form, setForm] = useState<AmbulanceForm>({
     name: '', phone: '', location: '', emergencyType: 'Cardiac Emergency', notes: ''
   });
+  const [ambulanceTier, setAmbulanceTier] = useState<'govt_108' | 'private_als'>('govt_108');
   const [estimatedArrival] = useState(() => Math.floor(Math.random() * 8) + 5);
 
   // Auto-fill location from localStorage
@@ -203,9 +227,15 @@ function AmbulanceBookingModal({ onClose, onBooked }: {
     } catch { /* ignore */ }
   }, []);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleGovtSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onBooked(form);
+    onBooked({
+      ...form,
+      ambulanceType: 'govt_108',
+      paymentStatus: 'free_govt',
+      paymentAmount: 0,
+      paymentId: 'GOVT-108-FREE',
+    });
   };
 
   const emergencyTypes = [
@@ -235,7 +265,7 @@ function AmbulanceBookingModal({ onClose, onBooked }: {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <div className="p-6 space-y-5">
           {/* Estimated arrival banner */}
           <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-xl border border-amber-200">
             <Clock className="h-5 w-5 text-amber-600 flex-shrink-0" />
@@ -250,7 +280,7 @@ function AmbulanceBookingModal({ onClose, onBooked }: {
                 <User className="h-3.5 w-3.5 inline mr-1" /> Patient Name
               </label>
               <input required value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })}
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-all"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-all font-semibold"
                 placeholder="Full name" />
             </div>
             <div>
@@ -258,7 +288,7 @@ function AmbulanceBookingModal({ onClose, onBooked }: {
                 <Phone className="h-3.5 w-3.5 inline mr-1" /> Phone
               </label>
               <input required type="tel" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })}
-                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-all"
+                className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-all font-semibold"
                 placeholder="+91 98765 43210" />
             </div>
           </div>
@@ -268,7 +298,7 @@ function AmbulanceBookingModal({ onClose, onBooked }: {
               <MapPin className="h-3.5 w-3.5 inline mr-1" /> Pickup Location
             </label>
             <input required value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-all"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-all font-semibold"
               placeholder="Your current address" />
           </div>
 
@@ -277,7 +307,7 @@ function AmbulanceBookingModal({ onClose, onBooked }: {
               <HeartPulse className="h-3.5 w-3.5 inline mr-1" /> Emergency Type
             </label>
             <select value={form.emergencyType} onChange={(e) => setForm({ ...form, emergencyType: e.target.value })}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-all bg-white">
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-all bg-white font-semibold">
               {emergencyTypes.map(t => <option key={t} value={t}>{t}</option>)}
             </select>
           </div>
@@ -285,15 +315,82 @@ function AmbulanceBookingModal({ onClose, onBooked }: {
           <div>
             <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Additional Notes</label>
             <textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })}
-              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-all resize-none"
+              className="w-full border border-slate-200 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-400 transition-all resize-none font-semibold"
               rows={2} placeholder="E.g., patient condition, landmarks near pickup…" />
           </div>
 
-          <button type="submit"
-            className="w-full bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-rose-500/30 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2">
-            <Ambulance className="h-5 w-5" /> Dispatch Ambulance Now
-          </button>
-        </form>
+          {/* Ambulance Tier Selector */}
+          <div>
+            <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">
+              Select Ambulance Tier
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                type="button"
+                onClick={() => setAmbulanceTier('govt_108')}
+                className={`p-3.5 rounded-2xl border-2 text-left transition-all ${
+                  ambulanceTier === 'govt_108'
+                    ? 'border-emerald-500 bg-emerald-50/70 ring-2 ring-emerald-500/20'
+                    : 'border-slate-200 bg-white hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-black text-slate-900">Govt 108 Emergency</span>
+                  <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full">FREE</span>
+                </div>
+                <p className="text-[11px] text-slate-500 font-medium">Basic Life Support (BLS) • 100% Subsidized by Govt</p>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setAmbulanceTier('private_als')}
+                className={`p-3.5 rounded-2xl border-2 text-left transition-all ${
+                  ambulanceTier === 'private_als'
+                    ? 'border-rose-500 bg-rose-50/70 ring-2 ring-rose-500/20'
+                    : 'border-slate-200 bg-white hover:bg-slate-50'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <span className="text-xs font-black text-slate-900">Private ALS Cardiac</span>
+                  <span className="text-[10px] font-black bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full">₹1,200</span>
+                </div>
+                <p className="text-[11px] text-slate-500 font-medium">ICU on Wheels • Ventilator • Paramedic Doctor</p>
+              </button>
+            </div>
+          </div>
+
+          {/* Action / Payment Button */}
+          {ambulanceTier === 'govt_108' ? (
+            <button
+              type="button"
+              onClick={handleGovtSubmit}
+              className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold py-3.5 rounded-2xl shadow-lg shadow-emerald-600/25 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm"
+            >
+              <Ambulance className="h-5 w-5" /> Dispatch 108 Free Ambulance Now
+            </button>
+          ) : (
+            <div className="space-y-2">
+              <RazorpayCheckout
+                amount={1200}
+                itemName="Private ALS Cardiac ICU Ambulance"
+                itemDescription={`Advanced Life Support Dispatch for ${form.name || 'Patient'} at ${form.location || 'Current Address'}`}
+                userName={form.name}
+                userPhone={form.phone}
+                buttonText="Pay ₹1,200 & Dispatch ALS Ambulance"
+                buttonClassName="w-full bg-gradient-to-r from-rose-600 to-red-700 hover:from-rose-700 hover:to-red-800 text-white font-black py-3.5 rounded-2xl shadow-lg shadow-rose-600/30 transition-all hover:-translate-y-0.5 flex items-center justify-center gap-2 text-sm"
+                onSuccess={(paymentId) => {
+                  onBooked({
+                    ...form,
+                    ambulanceType: 'private_als',
+                    paymentStatus: 'paid',
+                    paymentAmount: 1200,
+                    paymentId,
+                  });
+                }}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -301,9 +398,24 @@ function AmbulanceBookingModal({ onClose, onBooked }: {
 
 // ——— Main Page ———
 export default function Emergency() {
+  const { user } = useUserRole();
   const { t, language } = useLanguage();
   const [showAmbulanceModal, setShowAmbulanceModal] = useState(false);
   const [trackingForm, setTrackingForm] = useState<AmbulanceForm | null>(null);
+
+  const handleAmbulanceBooked = (form: AmbulanceForm) => {
+    setShowAmbulanceModal(false);
+    setTrackingForm(form);
+
+    persistMedicalRecord(user?.id || 'usr_pat_8812', {
+      type: 'emergency_sos',
+      title: `Ambulance Dispatched: ${form.ambulanceType === 'private_als' ? 'Private ALS' : '108 Govt'}`,
+      userQuery: `Emergency dispatch for ${form.name} at ${form.location} (${form.emergencyType})`,
+      aiResponse: `Ambulance unit dispatched. Billing: ${form.paymentStatus === 'paid' ? `₹1,200 PAID (ID: ${form.paymentId})` : '100% FREE 108'}.`,
+      summary: `Ambulance for ${form.name} • ${form.emergencyType}`,
+      metadata: { ...form },
+    }).catch(() => {});
+  };
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-500 w-full pb-12">
@@ -430,10 +542,7 @@ export default function Emergency() {
     {showAmbulanceModal && (
       <AmbulanceBookingModal
         onClose={() => setShowAmbulanceModal(false)}
-        onBooked={(form) => {
-          setShowAmbulanceModal(false);
-          setTrackingForm(form);
-        }}
+        onBooked={handleAmbulanceBooked}
       />
     )}
 
