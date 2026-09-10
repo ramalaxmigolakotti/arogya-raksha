@@ -1,0 +1,138 @@
+{
+  "name": "Arogya Raksha Notifications",
+  "nodes": [
+    {
+      "parameters": {
+        "path": "arogya-notify",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        250,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.body.channel}}",
+              "value2": "email"
+            },
+            {
+              "value1": "={{$json.body.channel}}",
+              "value2": "both"
+            }
+          ]
+        }
+      },
+      "name": "Should Send Email?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        500,
+        200
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{$json.body.channel}}",
+              "value2": "sms"
+            },
+            {
+              "value1": "={{$json.body.channel}}",
+              "value2": "both"
+            }
+          ]
+        }
+      },
+      "name": "Should Send SMS?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        500,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "fromEmail": "notifications@arogyaraksha.in",
+        "toEmail": "={{$node[\"Webhook\"].json[\"body\"][\"email\"]}}",
+        "subject": "={{$node[\"Webhook\"].json[\"body\"][\"subject\"]}}",
+        "html": "={{$node[\"Webhook\"].json[\"body\"][\"message\"]}}",
+        "options": {}
+      },
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 1,
+      "position": [
+        750,
+        150
+      ],
+      "notes": "Configure your SMTP/Gmail credentials here"
+    },
+    {
+      "parameters": {
+        "from": "ArogyaSMS",
+        "to": "={{$node[\"Webhook\"].json[\"body\"][\"phone\"]}}",
+        "message": "={{$node[\"Webhook\"].json[\"body\"][\"message\"]}}"
+      },
+      "name": "Send SMS (Twilio)",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [
+        750,
+        350
+      ],
+      "notes": "Configure your Twilio credentials here"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Should Send Email?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Should Send SMS?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Send Email?": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Should Send SMS?": {
+      "main": [
+        [
+          {
+            "node": "Send SMS (Twilio)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {}
+}
