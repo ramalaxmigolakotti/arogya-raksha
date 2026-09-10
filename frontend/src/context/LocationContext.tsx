@@ -135,64 +135,10 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     setError('');
 
-    // 1️⃣ Check valid cache first (skip if old version)
-    try {
-      const cached = localStorage.getItem(STORAGE_KEY);
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (parsed._v === CACHE_VERSION && parsed.lat && parsed.lng && parsed.city) {
-          setLocation(parsed);
-          setLoading(false);
-          // Still refresh in background silently
-        } else {
-          localStorage.removeItem(STORAGE_KEY); // bust old cache
-        }
-      }
-    } catch {}
-
-    // 2️⃣ Try HIGH ACCURACY GPS (device GPS chip — most precise)
-    const gpsPromise = new Promise<LocationData | null>((resolve) => {
-      if (!navigator.geolocation) { resolve(null); return; }
-      navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-          const { latitude: lat, longitude: lng, accuracy } = pos.coords;
-          console.info(`[GPS] Accuracy: ${accuracy}m  Coords: ${lat}, ${lng}`);
-          const geo = await reverseGeocode(lat, lng);
-          resolve({
-            lat, lng,
-            city:        geo.city        || 'Unknown',
-            area:        geo.area        || '',
-            fullAddress: geo.fullAddress || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
-          });
-        },
-        (err) => {
-          console.warn('[GPS] Error:', err.message);
-          resolve(null);
-        },
-        { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
-      );
-    });
-
-    // 3️⃣ IP location runs in parallel (much faster ~1s)
-    const ipPromise = getIPLocation();
-
-    // Race: use IP first (fast), then override with GPS when it arrives (accurate)
-    const ipLoc = await ipPromise;
-    if (ipLoc && !isBengaluru(ipLoc.lat, ipLoc.lng)) {
-      console.info(`[IP Location] City: ${ipLoc.city}`);
-      saveLocation(ipLoc); // show fast result immediately
-    }
-
-    // Then wait for GPS and override if it's better
-    const gpsLoc = await gpsPromise;
-    if (gpsLoc && !isBengaluru(gpsLoc.lat, gpsLoc.lng)) {
-      console.info(`[GPS Location] City: ${gpsLoc.city}`);
-      saveLocation(gpsLoc); // GPS overrides IP (more precise coordinates)
-    } else if (!ipLoc && !gpsLoc) {
-      // Both failed — keep default (Kismatpur)
-      setLoading(false);
-    }
-  }, [reverseGeocode, saveLocation, getIPLocation]);
+    // Force Himayat Nagar / Kismatpur for the demo!
+    saveLocation(HYDERABAD);
+    setLoading(false);
+  }, [saveLocation]);
 
   // Listen for localStorage changes from other components (e.g. Hospitals page)
   useEffect(() => {
