@@ -180,10 +180,10 @@ export async function authenticateWithPasskey(fallbackUser?: { email?: string; n
       return { success: false, error: 'Biometric verification did not return an assertion.' };
     }
 
-    const matched = stored.find((p) => p.id === assertion.id) || stored[0];
-    const email = matched?.userEmail || localStorage.getItem('arogya-last-email') || 'patient@arogyaraksha.in';
-    const name = matched?.userName || 'Verified Biometric User';
-    const role = matched?.userRole || localStorage.getItem('app-user-role') || 'patient';
+    const matched = (fallbackUser?.email ? stored.find(p => p.userEmail?.toLowerCase() === fallbackUser.email?.toLowerCase()) : null) || stored.find((p) => p.id === assertion.id) || stored[0];
+    const email = fallbackUser?.email || matched?.userEmail || localStorage.getItem('arogya-last-email') || 'patient@arogyaraksha.in';
+    const name = fallbackUser?.name || matched?.userName || 'Verified Biometric User';
+    const role = fallbackUser?.role || matched?.userRole || localStorage.getItem('app-user-role') || 'patient';
 
     return {
       success: true,

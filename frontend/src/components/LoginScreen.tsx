@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useUserRole, UserRole, DEFAULT_PROFILES } from '@/context/UserRoleContext';
 
 const roles = [
@@ -97,6 +97,16 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [phone, setPhone] = useState('');
   
+  // Auto-restore last logged in email
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const last = localStorage.getItem('arogya-last-email');
+      if (last) {
+        setEmail(last);
+      }
+    }
+  }, []);
+
   // Feedback
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -121,11 +131,12 @@ export default function LoginScreen() {
 
   // 0b. Handle Passkey / Biometric Sign In
   const handlePasskeySignIn = async () => {
+    const targetEmail = (email.trim() || localStorage.getItem('arogya-last-email') || '').trim();
     setError('');
     setSuccessMsg('');
     setPasskeyLoading(true);
     const res = await signInWithPasskey({
-      email: email.trim() || undefined,
+      email: targetEmail || undefined,
       name: name.trim() || undefined,
       role: selectedRole,
     });
@@ -133,7 +144,7 @@ export default function LoginScreen() {
       setError(res.error || 'Biometric authentication was cancelled or not found.');
     } else {
       if (res.isNewRegistration) {
-        setSuccessMsg('🎉 Passkey created & registered on this device! Welcome to Arogya Raksha!');
+        setSuccessMsg(`🎉 Passkey created & registered for ${targetEmail || 'your account'}! Loading dashboard...`);
       } else {
         setSuccessMsg('Biometric passkey verified! Loading your dashboard...');
       }
@@ -143,18 +154,23 @@ export default function LoginScreen() {
 
   // 0c. Handle Register Passkey on this device
   const handleRegisterPasskey = async () => {
+    const targetEmail = (email.trim() || localStorage.getItem('arogya-last-email') || '').trim();
+    if (!targetEmail) {
+      setError('Please enter your Email Address below so this device Passkey is linked to your medical profile!');
+      return;
+    }
     setError('');
-    setSuccessMsg('');
+    setSuccessMsg(`Preparing Passkey registration for ${targetEmail}... Touch your sensor or enter PIN when prompted.`);
     setPasskeyLoading(true);
     const res = await registerPasskey({
-      email: email.trim() || undefined,
+      email: targetEmail,
       name: name.trim() || undefined,
       role: selectedRole,
     });
     if (!res.success) {
       setError(res.error || 'Could not register passkey on this device.');
     } else {
-      setSuccessMsg('🎉 Device Passkey created! You can now log in with Windows Hello, Face ID or Touch ID.');
+      setSuccessMsg(`🎉 Device Passkey created for ${targetEmail}! Logged in successfully.`);
     }
     setPasskeyLoading(false);
   };
@@ -364,8 +380,14 @@ export default function LoginScreen() {
                 ) : (
                   <>
                     <span className="text-base">🔑</span>
-                    <span>Sign in with Passkey (Biometrics)</span>
-                    <span className="text-[10px] bg-teal-400/20 text-teal-300 px-2 py-0.5 rounded-full border border-teal-400/30 font-semibold uppercase tracking-wider">Touch / Face ID</span>
+                    {email.trim() ? (
+                      <span className="truncate max-w-[260px]">
+                        Sign in as <strong className="text-teal-300 underline underline-offset-2">{email.trim()}</strong>
+                      </span>
+                    ) : (
+                      <span>Sign in with Passkey (Biometrics)</span>
+                    )}
+                    <span className="text-[10px] bg-teal-400/20 text-teal-300 px-2 py-0.5 rounded-full border border-teal-400/30 font-semibold uppercase tracking-wider shrink-0">Touch / Face ID</span>
                   </>
                 )}
               </button>

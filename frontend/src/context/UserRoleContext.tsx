@@ -606,16 +606,52 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
         return { success: false, error: res.error || 'Biometric authentication failed.' };
       }
 
-      const verifiedRole = (res.user.role as UserRole) || fallback?.role || 'patient';
+      const verifiedEmail = (res.user.email || fallback?.email || localStorage.getItem('arogya-last-email') || '').trim();
+      let verifiedName = res.user.name || fallback?.name;
+      let verifiedRole = (res.user.role as UserRole) || fallback?.role || 'patient';
+      let realUserId = `usr_${verifiedEmail.replace(/[^a-zA-Z0-9]/g, '_')}`;
+      let userPhone = '';
+
+      // Query Supabase directly by email to restore real user ID, Name & Medical records!
+      if (verifiedEmail && isSupabaseConfigured) {
+        try {
+          const { data: dbUser } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', verifiedEmail)
+            .maybeSingle();
+
+          if (dbUser) {
+            realUserId = dbUser.id;
+            if (dbUser.name) verifiedName = dbUser.name;
+            if (dbUser.role) verifiedRole = dbUser.role as UserRole;
+            if (dbUser.phone) userPhone = dbUser.phone;
+          }
+
+          // Check user_medical_profiles for user's full name (e.g. Sameer)
+          const { data: medProf } = await supabase
+            .from('user_medical_profiles')
+            .select('*')
+            .eq('user_id', realUserId)
+            .maybeSingle();
+
+          if (medProf?.full_name) {
+            verifiedName = medProf.full_name;
+          }
+        } catch (dbErr) {
+          console.warn('Passkey Supabase profile lookup notice:', dbErr);
+        }
+      }
+
       const defaultP = DEFAULT_PROFILES[verifiedRole] || DEFAULT_PROFILES.patient;
       const profile: AuthUser = {
-        id: `passkey-${Date.now()}`,
-        name: res.user.name || fallback?.name || 'Verified Biometric User',
-        email: res.user.email || fallback?.email || 'patient@arogyaraksha.in',
+        id: realUserId,
+        name: verifiedName || defaultP.name,
+        email: verifiedEmail || defaultP.email,
         role: verifiedRole,
         badgeId: defaultP.badgeId,
         avatar: defaultP.avatar || '🔐',
-        phone: defaultP.phone || '',
+        phone: userPhone || defaultP.phone || '',
         hospitalName: defaultP.hospitalName,
         village: defaultP.village,
       };
@@ -626,6 +662,9 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('app-user-role', verifiedRole);
       localStorage.setItem('app-user-profile', JSON.stringify(profile));
       localStorage.setItem('app-logged-in', 'true');
+      if (verifiedEmail) {
+        localStorage.setItem('arogya-last-email', verifiedEmail);
+      }
       window.dispatchEvent(new CustomEvent('user-role-changed', { detail: verifiedRole }));
       return { success: true, isNewRegistration: res.isNewRegistration };
     } catch (err: any) {
@@ -639,23 +678,53 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
     role?: UserRole;
   }): Promise<{ success: boolean; error?: string }> => {
     try {
-      const targetEmail = params?.email || user.email || 'patient@arogyaraksha.in';
-      const targetName = params?.name || user.name || 'Arogya User';
-      const targetRole = params?.role || role || 'patient';
+      let targetEmail = (params?.email || user.email || localStorage.getItem('arogya-last-email') || '').trim();
+      let targetName = params?.name || user.name;
+      let targetRole = params?.role || role || 'patient';
+      let realUserId = user.id;
+
+      // Query Supabase directly by email to link passkey to existing user record
+      if (targetEmail && isSupabaseConfigured) {
+        try {
+          const { data: dbUser } = await supabase
+            .from('users')
+            .select('*')
+            .eq('email', targetEmail)
+            .maybeSingle();
+
+          if (dbUser) {
+            realUserId = dbUser.id;
+            if (dbUser.name) targetName = dbUser.name;
+            if (dbUser.role) targetRole = dbUser.role as UserRole;
+          }
+
+          const { data: medProf } = await supabase
+            .from('user_medical_profiles')
+            .select('*')
+            .eq('user_id', realUserId)
+            .maybeSingle();
+
+          if (medProf?.full_name) {
+            targetName = medProf.full_name;
+          }
+        } catch (dbErr) {
+          console.warn('Passkey registration Supabase user lookup notice:', dbErr);
+        }
+      }
 
       const res = await registerDevicePasskey({
-        id: `usr-${Date.now()}`,
-        email: targetEmail,
-        name: targetName,
+        id: realUserId || `usr-${Date.now()}`,
+        email: targetEmail || 'patient@arogyaraksha.in',
+        name: targetName || 'Arogya User',
         role: targetRole,
       });
 
       if (res.success) {
         const defaultP = DEFAULT_PROFILES[targetRole] || DEFAULT_PROFILES.patient;
         const profile: AuthUser = {
-          id: `passkey-${Date.now()}`,
-          name: targetName,
-          email: targetEmail,
+          id: realUserId,
+          name: targetName || defaultP.name,
+          email: targetEmail || defaultP.email,
           role: targetRole,
           badgeId: defaultP.badgeId,
           avatar: defaultP.avatar || '🔐',
@@ -669,6 +738,9 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
         localStorage.setItem('app-user-role', targetRole);
         localStorage.setItem('app-user-profile', JSON.stringify(profile));
         localStorage.setItem('app-logged-in', 'true');
+        if (targetEmail) {
+          localStorage.setItem('arogya-last-email', targetEmail);
+        }
         window.dispatchEvent(new CustomEvent('user-role-changed', { detail: targetRole }));
       }
       return res;
