@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const Doctor = require('../models/Doctor');
 const { sendWelcomeEmail } = require('../services/emailService');
+const supabase = require('../supabaseClient');
 
 // Register
 router.post('/register', async (req, res) => {
@@ -88,6 +89,22 @@ router.get('/verify', async (req, res) => {
     res.json({ success: true, user: User.sanitize(user) });
   } catch (error) {
     res.status(401).json({ success: false, message: 'Invalid token.' });
+  }
+});
+
+// Auto-confirm user email in Supabase Auth
+router.post('/confirm-user', async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ success: false, message: 'Email required' });
+    const { data } = await supabase.auth.admin.listUsers();
+    const user = data?.users?.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+    if (user) {
+      await supabase.auth.admin.updateUserById(user.id, { email_confirm: true });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
   }
 });
 

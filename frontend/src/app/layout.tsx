@@ -35,6 +35,11 @@ export const metadata: Metadata = {
   },
 };
 
+import { UserRoleProvider } from "@/context/UserRoleContext";
+import { SmartQueueProvider } from "@/context/SmartQueueContext";
+import { RealtimeProvider } from "@/context/RealtimeContext";
+import { HealthcareJourneyProvider } from "@/context/HealthcareJourneyContext";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -49,16 +54,24 @@ export default function RootLayout({
         >
           <ThemeProvider>
             <LanguageProvider>
-              {children}
-              <Toaster
-                position="top-right"
-                toastOptions={{
-                  duration: 4000,
-                  style: { background: '#1e293b', color: '#f1f5f9', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '14px' },
-                  success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
-                  error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
-                }}
-              />
+              <UserRoleProvider>
+                <RealtimeProvider>
+                  <SmartQueueProvider>
+                    <HealthcareJourneyProvider>
+                      {children}
+                      <Toaster
+                        position="top-right"
+                        toastOptions={{
+                          duration: 4000,
+                          style: { background: '#1e293b', color: '#f1f5f9', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '14px' },
+                          success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
+                          error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
+                        }}
+                      />
+                    </HealthcareJourneyProvider>
+                  </SmartQueueProvider>
+                </RealtimeProvider>
+              </UserRoleProvider>
             </LanguageProvider>
           </ThemeProvider>
         </body>

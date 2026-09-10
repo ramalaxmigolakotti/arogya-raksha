@@ -10,7 +10,10 @@ import {
 import RazorpayCheckout from '@/components/RazorpayCheckout';
 import { useLanguage } from '@/context/LanguageContext';
 import { useLocation } from '@/context/LocationContext';
+import { useUserRole } from '@/context/UserRoleContext';
 import HealthcareCTA from '@/components/HealthcareCTA';
+import { persistMedicalRecord } from '@/lib/medicalHistoryService';
+import FeaturePastHistoryModal from '@/components/FeaturePastHistoryModal';
 
 // ——— Types ———
 interface NearbyPharmacy {
@@ -165,7 +168,7 @@ function MedicineSearchSection({ onOrder }: { onOrder: (name: string) => void })
                       <h4 className="font-bold text-slate-800 text-sm line-clamp-2 leading-snug">{m.name}</h4>
                       <p className="text-xs text-slate-400 line-clamp-1 mt-0.5">{m.manufacturer}</p>
                     </div>
-                    {m.price > 0 && (
+                    {Number(m.price) > 0 && (
                       <span className="bg-emerald-100 text-emerald-700 text-xs font-black px-2 py-0.5 rounded-lg flex-shrink-0 ml-2">
                         ₹{m.price}
                       </span>
@@ -356,6 +359,7 @@ function OrderRefillModal({
   onClose: () => void;
   onOrder: (order: OrderDetails) => void;
 }) {
+  const { user } = useUserRole();
   const [selectedPharmacy, setSelectedPharmacy] = useState<NearbyPharmacy | null>(null);
   const [mode, setMode] = useState<'delivery' | 'pickup'>('delivery');
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -366,6 +370,23 @@ function OrderRefillModal({
 
   const handlePaymentSuccess = (paymentId: string) => {
     setPaymentSuccess(true);
+    if (selectedPharmacy) {
+      persistMedicalRecord(user?.id || 'usr_pat_8812', {
+        type: 'medicine_order',
+        title: `Medicine Order: ${medicine}`,
+        userQuery: `Ordered ${medicine} from ${selectedPharmacy.name} via ${mode === 'delivery' ? 'Home Delivery' : 'Store Pickup'}`,
+        aiResponse: `Order confirmed. Payment ID: ${paymentId}. Pharmacy: ${selectedPharmacy.name}. Delivery Mode: ${mode}. Amount: ₹${totalAmount}.`,
+        summary: `${medicine} • ₹${totalAmount} (${mode})`,
+        metadata: {
+          medicineName: medicine,
+          pharmacyName: selectedPharmacy.name,
+          pharmacyAddress: selectedPharmacy.address,
+          deliveryMode: mode,
+          totalAmount,
+          paymentId,
+        },
+      }).catch(console.warn);
+    }
     setTimeout(() => {
       if (selectedPharmacy) {
         onOrder({ medicine, pharmacy: selectedPharmacy, mode });
@@ -562,13 +583,21 @@ export default function Medicines() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-8 duration-500 w-full pb-12">
       <header className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 w-full">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Medicine Tracker</h1>
-          <p className="text-slate-500 mt-1 font-medium text-lg">Never miss a dose with intelligent reminders.</p>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight">Medicine Tracker & Finder</h1>
+          <p className="text-slate-500 mt-1 font-medium text-lg">Never miss a dose with intelligent reminders and Jan Aushadhi access.</p>
         </div>
-        <button className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-slate-900/20 transition-all hover:-translate-y-0.5">
-          <PlusSquare className="h-5 w-5" />
-          Add Prescription
-        </button>
+        <div className="flex items-center gap-3 flex-wrap">
+          <FeaturePastHistoryModal
+            featureTitle="Medicine Orders"
+            types={['medicine_order']}
+            icon="💊"
+            buttonLabel="Past Orders"
+          />
+          <button className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-slate-900/20 transition-all hover:-translate-y-0.5">
+            <PlusSquare className="h-5 w-5" />
+            Add Prescription
+          </button>
+        </div>
       </header>
 
       {/* Medicine Search - 253K Real Dataset */}

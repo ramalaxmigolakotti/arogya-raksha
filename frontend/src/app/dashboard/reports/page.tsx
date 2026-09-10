@@ -9,6 +9,9 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from '@/context/LanguageContext';
+import { useUserRole } from '@/context/UserRoleContext';
+import { persistMedicalRecord } from '@/lib/medicalHistoryService';
+import FeaturePastHistoryModal from '@/components/FeaturePastHistoryModal';
 
 /* ─── Types ──────────────────────────────────────────────────────────────── */
 interface Parameter {
@@ -91,6 +94,7 @@ async function extractPDFText(file: File): Promise<string> {
 
 /* ─── Component ──────────────────────────────────────────────────────────── */
 export default function MedicalReports() {
+  const { user } = useUserRole();
   const [dragOver, setDragOver]       = useState(false);
   const [file, setFile]               = useState<File | null>(null);
   const [preview, setPreview]         = useState<string | null>(null);
@@ -149,6 +153,25 @@ export default function MedicalReports() {
       const data = await res.json();
       if (!res.ok || data.error) throw new Error(data.error || 'Analysis failed');
       setResult(data.result);
+
+      if (data.result) {
+        persistMedicalRecord(user?.id || 'usr_pat_8812', {
+          type: 'medical_report_analysis',
+          title: `Report: ${data.result.reportTitle || file.name}`,
+          userQuery: `Uploaded report file: ${file.name} (${Math.round(file.size / 1024)} KB)`,
+          aiResponse: data.result.summary || data.result.overallStatus,
+          summary: `${data.result.overallStatus || 'Completed'} • Urgency: ${data.result.urgencyLevel?.toUpperCase()}`,
+          metadata: {
+            fileName: file.name,
+            fileSizeKB: Math.round(file.size / 1024),
+            urgencyLevel: data.result.urgencyLevel,
+            overallStatus: data.result.overallStatus,
+            parametersCount: data.result.parameters?.length || 0,
+            abnormalFindingsCount: data.result.abnormalFindings?.length || 0,
+            doctorConsult: data.result.doctorConsult,
+          },
+        }).catch(console.warn);
+      }
     } catch (e: any) {
       setError(e.message || 'Failed to analyze report. Please try again.');
     } finally {
@@ -170,16 +193,24 @@ export default function MedicalReports() {
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 w-full pb-16 max-w-4xl mx-auto">
 
       {/* Header */}
-      <header>
-        <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
-          <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 rounded-xl">
-            <Sparkles className="h-6 w-6 text-white" />
-          </div>
-          AI Report Analyzer
-        </h1>
-        <p className="text-slate-500 mt-2 text-base font-medium">
-          Upload any lab report — AI extracts values, flags abnormals, and explains everything in plain language.
-        </p>
+      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-extrabold text-slate-900 tracking-tight flex items-center gap-3">
+            <div className="bg-gradient-to-br from-emerald-500 to-teal-600 p-2.5 rounded-xl">
+              <Sparkles className="h-6 w-6 text-white" />
+            </div>
+            AI Report Analyzer
+          </h1>
+          <p className="text-slate-500 mt-2 text-base font-medium">
+            Upload any lab report — AI extracts values, flags abnormals, and explains everything in plain language.
+          </p>
+        </div>
+        <FeaturePastHistoryModal
+          featureTitle="Medical Reports"
+          types={['medical_report_analysis']}
+          icon="📄"
+          buttonLabel="Past Reports"
+        />
       </header>
 
       {/* Upload Zone */}

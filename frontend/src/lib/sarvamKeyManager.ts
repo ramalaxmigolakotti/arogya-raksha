@@ -24,7 +24,7 @@ export function getSarvamKeyManager() {
       return key;
     },
     reportSuccess: (key: string) => {},
-    reportRateLimit: (key: string, retryAfter: number) => {},
+    reportRateLimit: (key: string, retryAfter?: number) => {},
     reportFailure: (key: string) => {}
   };
 }

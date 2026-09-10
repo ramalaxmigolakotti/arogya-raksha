@@ -97,8 +97,8 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     } catch {}
 
     try {
-      // Fallback: ip-api.com — free alternative
-      const res  = await fetch('http://ip-api.com/json/?fields=lat,lon,city,regionName,country', { signal: AbortSignal.timeout(5000) });
+      // Fallback: ip-api.com — HTTPS free alternative
+      const res  = await fetch('https://ip-api.com/json/?fields=lat,lon,city,regionName,country', { signal: AbortSignal.timeout(5000) });
       const data = await res.json();
       if (data.lat && data.lon && data.city) {
         return {

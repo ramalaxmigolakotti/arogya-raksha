@@ -68,7 +68,7 @@ Rules:
 - Use very common Indian brands (Crocin, Dolo, Combiflam, Gelusil, ORS, Vicks, Zincovit, etc.)`;
 
     const { content } = await callGroq('symptoms', {
-      model:      GROQ_MODELS.LLAMA_33_70B,
+      model:      GROQ_MODELS.BALANCED,
       messages:   [
         { role: 'system', content: systemPrompt },
         { role: 'user',   content: userPrompt },

@@ -49,7 +49,7 @@ interface LanguageContextType {
 }
 
 // ─── TRANSLATIONS ───────────────────────────────────────────────────────────
-const translations: Record<Language, Record<string, string>> = {
+const translations: Record<string, Record<string, string>> = {
   en: {
     // Nav & Dashboard
     dashboard: 'Dashboard',
@@ -293,12 +293,8 @@ const translations: Record<Language, Record<string, string>> = {
     afternoon: 'Afternoon',
     evening: 'Evening',
     specialty: 'Select Specialty',
-    patientName: 'Patient Name',
     phoneNumber: 'Phone Number',
-    specialty: 'Specialty',
-    selectDate: 'Select Date',
     selectTime: 'Select Time',
-    reasonForVisit: 'Reason for Visit',
     confirmBooking: 'Confirm Booking',
 
     // Health Predictors
@@ -372,26 +368,12 @@ const translations: Record<Language, Record<string, string>> = {
     manufacturer: 'Manufacturer',
     type: 'Type',
     uses: 'Uses',
-    diagnosticCentre: 'Diagnostic Centre',
     bookNow: 'Book Now',
-    doctors: 'Doctors',
     findDoctors: 'Find Doctors',
     videoCall: 'Video Call',
     reports: 'Reports',
     healthcareNavigator: 'Healthcare Navigator',
     navigating: 'Navigating to',
-    disclaimerText: 'Always consult a licensed doctor before taking any medication.',
-    confirmBooking: 'Confirm Booking',
-    cancel: 'Cancel',
-    medicalProfile: 'Medical Profile',
-    patientName: 'Your name',
-    specialty: 'Select Specialty',
-    reasonForVisit: 'Reason for visit',
-    predictorsTitle: 'Health Predictors',
-    predictorsSubtitle: 'Get personalized health risk assessments powered by real medical datasets.',
-    analyticsTitle: 'Health Analytics',
-    poweredByAI: 'Powered by Groq AI',
-    bookAppointment: 'Book Appointment',
   },
 
   hi: {
@@ -638,12 +620,6 @@ const translations: Record<Language, Record<string, string>> = {
     searchMedicine: 'दवा खोजें',
     price: 'मूल्य',
     manufacturer: 'निर्माता',
-    reasonForVisit: 'मिलने का कारण',
-    predictorsTitle: 'स्वास्थ्य भविष्यवक्ता',
-    predictorsSubtitle: 'वास्तविक चिकित्सा डेटासेट द्वारा संचालित व्यक्तिगत स्वास्थ्य जोखिम मूल्यांकन प्राप्त करें।',
-    analyticsTitle: 'स्वास्थ्य विश्लेषण',
-    poweredByAI: 'AI द्वारा संचालित',
-    bookAppointment: 'अपॉइंटमेंट बुक करें',
   },
 
   te: {
@@ -911,18 +887,6 @@ const translations: Record<Language, Record<string, string>> = {
     timing: 'సమయం',
     purpose: 'ఉద్దేశ్యం',
     navigating: 'నావిగేట్ చేస్తోంది',
-    disclaimerText: 'ఏ మందు తీసుకునే ముందు లైసెన్స్ ఉన్న వైద్యుడిని సంప్రదించండి.',
-    confirmBooking: 'బుకింగ్ నిర్ధారించండి',
-    cancel: 'రద్దు',
-    medicalProfile: 'వైద్య ప్రొఫైల్',
-    patientName: 'మీ పేరు',
-    specialty: 'విశేషజ్ఞత ఎంచుకోండి',
-    reasonForVisit: 'సందర్శన కారణం',
-    predictorsTitle: 'ఆరోగ్య అంచనాలు',
-    predictorsSubtitle: 'నిజమైన వైద్య డేటా ఆధారంగా వ్యక్తిగత ఆరోగ్య ప్రమాద అంచనాలు.',
-    analyticsTitle: 'ఆరోగ్య విశ్లేషణ',
-    poweredByAI: 'AI ద్వారా',
-    bookAppointment: 'అపాయింట్‌మెంట్ బుక్ చేయండి',
   },
 
   ta: {
@@ -1179,18 +1143,6 @@ const translations: Record<Language, Record<string, string>> = {
     reports: 'அறிக்கைகள்',
     healthcareNavigator: 'சுகாதார வழிகாட்டி',
     navigating: 'செல்கிறது',
-    disclaimerText: 'மருந்து எடுக்கும் முன் உரிமம் பெற்ற மருத்துவரை அணுகவும்.',
-    confirmBooking: 'முன்பதிவை உறுதிப்படுத்து',
-    cancel: 'ரத்து',
-    medicalProfile: 'மருத்துவ சுயவிவரம்',
-    patientName: 'உங்கள் பெயர்',
-    specialty: 'நிபுணத்துவம் தேர்ந்தெடுக்கவும்',
-    reasonForVisit: 'சந்திப்பு காரணம்',
-    predictorsTitle: 'ஆரோக்கிய கணிப்புகள்',
-    predictorsSubtitle: 'உண்மையான மருத்துவ தரவு அடிப்படையில் தனிப்பயன் ஆரோக்கிய ஆபத்து மதிப்பீடு.',
-    analyticsTitle: 'ஆரோக்கிய பகுப்பாய்வு',
-    poweredByAI: 'AI இயக்கம்',
-    bookAppointment: 'சந்திப்பு முன்பதிவு',
   },
 
   kn: {
@@ -1373,8 +1325,6 @@ const translations: Record<Language, Record<string, string>> = {
     reports: 'ವರದಿಗಳು',
     healthcareNavigator: 'ಆರೋಗ್ಯ ಮಾರ್ಗದರ್ಶಿ',
     navigating: 'ನ್ಯಾವಿಗೇಟ್ ಆಗುತ್ತಿದೆ',
-    cancel: 'ರದ್ದುಮಾಡಿ',
-    medicalProfile: 'ವೈದ್ಯಕೀಯ ಪ್ರೊಫೈಲ್',
   },
 
   mr: {

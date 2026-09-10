@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import {
   Activity, MessageSquare, Mail, MapPin, Phone,
@@ -125,8 +125,8 @@ export default function Footer() {
                 { icon: Youtube, href: '#', color: 'hover:bg-red-50 hover:text-red-600' },
               ].map((s, i) => (
                 <a key={i} href={s.href} target={s.href !== '#' ? '_blank' : undefined} rel={s.href !== '#' ? 'noopener noreferrer' : undefined}
-                  className={`p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 transition-all ${s.color} shadow-sm hover:shadow-md`}>
-                  {typeof s.icon === 'function' ? <s.icon /> : <s.icon className="h-4 w-4" />}
+                  className={`p-2.5 bg-white border border-slate-200 rounded-xl text-slate-400 transition-all ${s.color} shadow-sm hover:shadow-md flex items-center justify-center`}>
+                  {React.createElement(s.icon as any, { className: 'h-4 w-4' })}
                 </a>
               ))}
             </div>

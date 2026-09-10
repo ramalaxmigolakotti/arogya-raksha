@@ -29,6 +29,20 @@ router.post('/', auth, async (req, res) => {
       console.error('Order email failed:', err.message)
     );
 
+    // Emit real-time order update to sockets
+    const ioInstance = require('../ioInstance');
+    const io = ioInstance.getIo();
+    if (io) {
+      io.emit('order_updated', order);
+      io.emit('cross_panel_toast', {
+        id: Date.now().toString(),
+        targetRole: 'patient',
+        type: 'success',
+        title: `📦 Order Confirmed (${order.orderNumber || order.id})`,
+        message: `Your medicine order of ₹${order.totalAmount} has been placed successfully.`,
+      });
+    }
+
     res.status(201).json({ success: true, order });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

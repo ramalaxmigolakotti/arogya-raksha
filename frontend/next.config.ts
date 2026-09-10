@@ -13,9 +13,6 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true, // Fix TS errors separately
   },
-  eslint: {
-    ignoreDuringBuilds: true, // Faster builds
-  },
   // Optimize large package imports — tree-shake only what's used
   experimental: {
     optimizePackageImports: [

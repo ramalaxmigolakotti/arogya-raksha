@@ -10,6 +10,8 @@ import {
 import { quizCategories, QuizCategory, QuizQuestion } from './quizData';
 import HealthcareCTA from '@/components/HealthcareCTA';
 import { useLanguage } from '@/context/LanguageContext';
+import { useUserRole } from '@/context/UserRoleContext';
+import { persistMedicalRecord } from '@/lib/medicalHistoryService';
 
 type Screen = 'categories' | 'quiz' | 'results';
 
@@ -24,6 +26,7 @@ interface AIQuizCategory {
 }
 
 export default function QuizPage() {
+  const { user } = useUserRole();
   const { t, language } = useLanguage();
   const [screen, setScreen] = useState<Screen>('categories');
   const [selectedCategory, setSelectedCategory] = useState<AIQuizCategory | null>(null);
@@ -107,8 +110,24 @@ export default function QuizPage() {
       setShowExplanation(false);
     } else {
       setScreen('results');
+      const totalQuestions = selectedCategory!.questions.length;
+      const pct = Math.round((score / totalQuestions) * 100);
+      persistMedicalRecord(user?.id || 'usr_pat_8812', {
+        type: 'health_quiz',
+        title: `Health Assessment: ${selectedCategory!.name}`,
+        userQuery: `Completed ${selectedCategory!.name} quiz (${totalQuestions} questions)`,
+        aiResponse: `Score: ${score}/${totalQuestions} (${pct}%). Awareness level: ${pct >= 80 ? 'Excellent' : pct >= 50 ? 'Moderate' : 'Needs Attention'}.`,
+        summary: `${selectedCategory!.name} • ${score}/${totalQuestions} (${pct}%)`,
+        metadata: {
+          category: selectedCategory!.name,
+          categoryId: selectedCategory!.id,
+          score,
+          totalQuestions,
+          percentage: pct,
+        },
+      }).catch(console.warn);
     }
-  }, [currentQ, selectedCategory]);
+  }, [currentQ, selectedCategory, score]);
 
   const resetQuiz = useCallback(() => {
     setScreen('categories');

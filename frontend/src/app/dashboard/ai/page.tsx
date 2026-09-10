@@ -5,6 +5,10 @@ import { Send, Bot, User, Paperclip, MoreVertical, Sparkles, Activity, Loader2, 
 import { useUser } from '@clerk/nextjs';
 import HealthcareCTA from '@/components/HealthcareCTA';
 import { useLanguage } from '@/context/LanguageContext';
+import { useUserRole } from '@/context/UserRoleContext';
+import { persistMedicalRecord } from '@/lib/medicalHistoryService';
+import FeaturePastHistoryModal from '@/components/FeaturePastHistoryModal';
+
 
 interface Message {
   id: number;
@@ -15,8 +19,9 @@ interface Message {
 
 export default function AIAssistant() {
   const { user } = useUser();
+  const { user: userProfile } = useUserRole();
   const { t, language } = useLanguage();
-  const firstName = user?.firstName || 'there';
+  const firstName = user?.firstName || userProfile?.name?.split(' ')[0] || 'there';
 
   const [messages, setMessages] = useState<Message[]>([]);
 
@@ -128,6 +133,21 @@ export default function AIAssistant() {
             }
           }
         }
+
+        // Auto-save consultation to persistent authenticated history
+        if (fullText.trim()) {
+          persistMedicalRecord(userProfile?.id || 'usr_pat_8812', {
+            type: 'ai_doctor_consultation',
+            title: `AI Consultation: ${userMessage.text.slice(0, 45)}...`,
+            userQuery: userMessage.text,
+            aiResponse: fullText,
+            summary: fullText.slice(0, 160),
+            metadata: {
+              language,
+              time: userMessage.time,
+            },
+          }).catch(() => {});
+        }
       }
     } catch (error: any) {
       setMessages(prev =>
@@ -187,8 +207,14 @@ export default function AIAssistant() {
             </div>
          </div>
          <div className="flex items-center gap-2">
+            <FeaturePastHistoryModal
+              featureTitle="AI Consultations"
+              types={['ai_doctor_consultation', 'symptom_check']}
+              icon="🤖"
+              buttonLabel="Past Consultations"
+            />
             <button onClick={clearChat}
-              className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 text-sm font-semibold rounded-lg flex items-center gap-2 transition-colors border border-slate-200">
+              className="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-600 text-sm font-semibold rounded-xl flex items-center gap-2 transition-colors border border-slate-200">
                <Trash2 className="h-4 w-4" /> {t('clearChat')}
             </button>
          </div>

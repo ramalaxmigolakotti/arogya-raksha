@@ -10,7 +10,10 @@ import {
 } from 'lucide-react';
 import RazorpayCheckout from '@/components/RazorpayCheckout';
 import { useLanguage } from '@/context/LanguageContext';
+import { useUserRole } from '@/context/UserRoleContext';
 import HealthcareCTA from '@/components/HealthcareCTA';
+import { persistMedicalRecord } from '@/lib/medicalHistoryService';
+import FeaturePastHistoryModal from '@/components/FeaturePastHistoryModal';
 
 /* ═══════════ DATA ═══════════ */
 
@@ -59,9 +62,10 @@ const healthDepartments = [
 
 /* ═══════════ BOOKING MODAL WITH RAZORPAY ═══════════ */
 function BookTestModal({ test, onClose }: { test: { name: string; price: number; duration: string }; onClose: () => void }) {
+  const { user } = useUserRole();
   const [step, setStep] = useState(1);
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [name, setName] = useState(user?.name || '');
+  const [phone, setPhone] = useState(user?.phone || '');
   const [date, setDate] = useState('');
   const [slot, setSlot] = useState('');
 
@@ -73,6 +77,23 @@ function BookTestModal({ test, onClose }: { test: { name: string; price: number;
 
   const handlePaymentSuccess = (paymentId: string) => {
     setStep(3);
+    persistMedicalRecord(user?.id || 'usr_pat_8812', {
+      type: 'diagnostic_booking',
+      title: `Lab Test: ${test.name}`,
+      userQuery: `Booked ${test.name} for ${name || 'Patient'} on ${date} at ${slot}`,
+      aiResponse: `Diagnostic test confirmed. Payment ID: ${paymentId}. Sample collection scheduled for ${date}, ${slot}.`,
+      summary: `${test.name} • ₹${test.price} PAID`,
+      metadata: {
+        testName: test.name,
+        price: test.price,
+        paymentId,
+        date,
+        slot,
+        patientName: name,
+        phone,
+      },
+    }).catch(console.warn);
+
     const msg = `🏥 Diagnostic Test Booking — PAID ✅\n\n🧪 Test: ${test.name}\n💰 Paid: ₹${test.price}\n💳 Payment ID: ${paymentId}\n📅 Date: ${date}\n⏰ Slot: ${slot}\n👤 Name: ${name}\n📱 Phone: ${phone}\n\nPayment completed. Please confirm.`;
     setTimeout(() => { window.open(`https://wa.me/917981502973?text=${encodeURIComponent(msg)}`, '_blank'); }, 1500);
   };
@@ -215,7 +236,7 @@ export default function DiagnosticCentrePage() {
             <p className="text-white/70 text-sm lg:text-base font-medium mb-6 max-w-md">
               State-of-the-art diagnostic lab & eye care centre. Accurate results, affordable prices, trusted by 50,000+ patients.
             </p>
-            <div className="flex gap-3 flex-wrap">
+            <div className="flex gap-3 flex-wrap items-center">
               <a href="tel:+917981502973" className="bg-white text-violet-700 font-black px-6 py-3 rounded-2xl shadow-xl hover:scale-105 transition-all flex items-center gap-2 text-sm">
                 <Phone className="h-4 w-4" /> Call Now
               </a>
@@ -223,6 +244,13 @@ export default function DiagnosticCentrePage() {
                 className="bg-[#25D366] text-white font-black px-6 py-3 rounded-2xl shadow-xl hover:scale-105 transition-all flex items-center gap-2 text-sm">
                 <MessageSquare className="h-4 w-4" /> WhatsApp
               </a>
+              <FeaturePastHistoryModal
+                featureTitle="Lab Bookings"
+                types={['diagnostic_booking']}
+                icon="🔬"
+                buttonLabel="My Past Bookings"
+                className="bg-white/20 hover:bg-white text-white hover:text-violet-900 border-white/30 backdrop-blur-md px-5 py-3 rounded-2xl text-sm"
+              />
             </div>
           </div>
         </div>

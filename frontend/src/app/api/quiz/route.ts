@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getSarvamKeyManager } from '@/lib/sarvamKeyManager';
-
-const SARVAM_API_URL = 'https://api.sarvam.ai/v1/chat/completions';
+import { callGroq, parseGroqJSON, GROQ_MODELS } from '@/lib/groqClient';
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,7 +11,7 @@ export async function POST(req: NextRequest) {
       en: 'English', hi: 'Hindi (हिंदी)', te: 'Telugu (తెలుగు)', ta: 'Tamil (தமிழ்)',
       kn: 'Kannada (ಕನ್ನಡ)', mr: 'Marathi (मराठी)', bn: 'Bengali (বাংলা)', bho: 'Bhojpuri (भोजपुरी)',
       gu: 'Gujarati (ગુજરાતી)', pa: 'Punjabi (ਪੰਜਾਬੀ)', or: 'Odia (ଓଡ଼ିଆ)', as: 'Assamese (অসমীয়া)',
-      ur: 'Urdu (اردو)', ml: 'Malayalam (മലയാളം)', mai: 'Maithili (मैथिली)', sat: 'Santali (ᱥᱟᱱᱛﺎᱲᱤ)',
+      ur: 'Urdu (اردو)', ml: 'Malayalam (മലയാളം)', mai: 'Maithili (मैथिली)', sat: 'Santali (ᱥᱟᱱᱛᱟᱲᱤ)',
       kok: 'Konkani (कोंकणी)', doi: 'Dogri (डोगरी)', ks: 'Kashmiri (کٲشُر)', mni: 'Manipuri (মেইতেই)',
       ne: 'Nepali (नेपाली)', sd: 'Sindhi (سنڌي)', sa: 'Sanskrit (संस्कृतम्)',
     };
@@ -23,65 +21,62 @@ export async function POST(req: NextRequest) {
 
     const prompt = `Generate a health quiz about "${topic}" for Indian users of Arogya Raksha health app.
 
-Respond ONLY with valid JSON (no markdown, no extra text):
+Respond ONLY with valid JSON:
 {
-  "categoryName": "<topic name>",
-  "categoryIcon": "<single relevant emoji>",
+  "categoryName": "${topic}",
+  "categoryIcon": "🩺",
   "questions": [
     {
       "question": "<clear health question about ${topic}>",
-      "options": ["<option A>", "<option B>", "<option C>", "<option D>"],
-      "correctAnswer": <0|1|2|3>,
-      "explanation": "<brief explanation of why the answer is correct, with health tip>"
+      "options": ["<option 1>", "<option 2>", "<option 3>", "<option 4>"],
+      "correctAnswer": 0,
+      "explanation": "<brief explanation why the answer is correct with health tip>"
     }
   ]
 }
 
 Rules:
-- Generate exactly 10 questions
+- Generate 5 to 7 high-quality questions
 - Questions must be educational and India-relevant
 - Mix easy, medium and hard questions
-- correctAnswer is the index (0=A, 1=B, 2=C, 3=D) of the correct option
+- correctAnswer is 0-indexed number (0, 1, 2, or 3)
 - Explanations should be informative (1-2 sentences)
 - Cover different aspects of ${topic}${langInstruction}`;
 
-    const manager = getSarvamKeyManager();
-    let response: any = null;
+    let content = '';
 
-    for (let attempt = 0; attempt < manager.keyCount; attempt++) {
-      const apiKey = manager.getNextKey();
-      try {
-        const res = await fetch(SARVAM_API_URL, {
-          method: 'POST',
-          headers: { 'api-subscription-key': apiKey, 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            model: 'sarvam-30b',
-            messages: [
-              { role: 'system', content: 'You are a health education AI. Generate quiz JSON only. No markdown.' },
-              { role: 'user', content: prompt },
-            ],
-            temperature: 0.7,
-            max_tokens: 3000,
-          }),
-        });
-
-        if (res.ok) { manager.reportSuccess(apiKey); response = await res.json(); break; }
-        if (res.status === 429) { manager.reportRateLimit(apiKey); continue; }
-        manager.reportFailure(apiKey);
-      } catch { manager.reportFailure(apiKey); }
-    }
-
-    if (!response) return NextResponse.json({ error: 'Quiz generation unavailable. Please try again.' }, { status: 502 });
-
-    const content = response.choices?.[0]?.message?.content || '';
-
-    let parsed: any;
     try {
-      const clean = content.replace(/```json|```/g, '').trim();
-      parsed = JSON.parse(clean);
-    } catch {
-      return NextResponse.json({ error: 'Failed to parse quiz. Please try again.' }, { status: 500 });
+      const res = await callGroq('quiz', {
+        model: GROQ_MODELS.QUIZ,
+        messages: [
+          { role: 'system', content: 'You are an expert health education AI. Respond with valid JSON only.' },
+          { role: 'user', content: prompt }
+        ],
+        temperature: 0.5,
+        max_tokens: 1600,
+        response_format: { type: 'json_object' }
+      });
+      content = res.content;
+    } catch (groqErr: any) {
+      if (groqErr.message?.includes('429') || groqErr.message?.includes('rate_limit') || groqErr.message?.includes('OTPM')) {
+        console.warn('[Quiz API] Primary model rate-limited, switching to high-throughput secondary model (openai/gpt-oss-20b)');
+        const fallbackRes = await callGroq('quiz', {
+          model: 'openai/gpt-oss-20b',
+          messages: [
+            { role: 'system', content: 'You are an expert health education AI. Respond with valid JSON only.' },
+            { role: 'user', content: prompt }
+          ],
+          temperature: 0.5,
+          max_tokens: 1600,
+          response_format: { type: 'json_object' }
+        });
+        content = fallbackRes.content;
+      } else {
+        throw groqErr;
+      }
     }
+
+    const parsed = parseGroqJSON(content);
 
     // Validate structure
     if (!parsed.questions || !Array.isArray(parsed.questions) || parsed.questions.length === 0) {
@@ -95,6 +90,7 @@ Rules:
       success: true,
     });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error('[Quiz API Error]', error.message);
+    return NextResponse.json({ error: error.message || 'Failed to generate quiz' }, { status: 500 });
   }
 }
