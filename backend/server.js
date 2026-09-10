@@ -99,15 +99,10 @@ const healthRoutes = require('./routes/health');
 
 const mediaRoutes = require('./routes/media');
 const doctorProfileRoutes = require('./routes/doctorProfiles');
-const crisisRoutes = require('./routes/crisis');
 const medicalProfileRoutes = require('./routes/medicalProfile');
 const notificationRoutes = require('./routes/notifications');
 const whatsappRoutes = require('./routes/whatsapp');
-const elderCareRoutes = require('./routes/elderCare');
-const ashaRoutes = require('./routes/asha');
 const healthshareRoutes = require('./routes/healthshare');
-const phcRoutes = require('./routes/phc');
-const phcDatabaseRoutes = require('./routes/phcDatabase');
 const predictRoutes = require('./routes/predict');
 
 // Preload all 9 predictor datasets into memory
@@ -129,15 +124,10 @@ app.use('/api/health', healthRoutes);
 
 app.use('/api/media', mediaRoutes);
 app.use('/api/doctor-profiles', doctorProfileRoutes);
-app.use('/api/crisis', crisisRoutes);
 app.use('/api/medical-profile', medicalProfileRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
-app.use('/api/elder-care', elderCareRoutes);
-app.use('/api/asha', ashaRoutes);
 app.use('/api/healthshare', healthshareRoutes);
-app.use('/api/phc', phcRoutes);
-app.use('/api/phc-db', phcDatabaseRoutes);
 app.use('/api/predict', predictRoutes);
 
 // Health check
@@ -152,30 +142,8 @@ app.get('/api/health', async (req, res) => {
   });
 });
 
-// Socket.io — chat + crisis + responder location forwarding
+// Socket.io — chat + telemedicine
 require('./services/socketService')(io);
-
-// Responder location relay — ambulance driver → patient crisis screen
-io.on('connection', (socket) => {
-  // ── Hospital Portal: join its own room so incoming_patient events reach it ──
-  socket.on('hospital_join', (hospitalId) => {
-    socket.join('hospital_portal');
-    console.log(`[Hospital] Socket ${socket.id} joined hospital_portal (${hospitalId})`);
-  });
-
-  // ── Incident room: guest SOS + responder app join per-incident room ──
-  socket.on('join_incident', (incidentId) => {
-    socket.join(`incident_${incidentId}`);
-    console.log(`[Crisis] Socket ${socket.id} joined incident_${incidentId}`);
-  });
-
-  // ── Responder GPS location relay → guest crisis screen ──
-  socket.on('responder_location', (data) => {
-    // Broadcast to everyone watching this incident
-    socket.broadcast.emit('responder_location', data);
-    io.emit(`responder_location_${data.incidentId}`, data);
-  });
-});
 
 
 // Error handling middleware

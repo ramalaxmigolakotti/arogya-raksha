@@ -5,8 +5,8 @@ import {
   LayoutDashboard, Bot, Stethoscope, Pill, FileText,
   Heart, Calendar, Siren, Settings, ScanLine, MapPin,
   Globe, ChevronDown, User, Brain, Microscope, Camera, BriefcaseMedical,
-  Menu, X, Navigation, CreditCard, Sparkles, Building2, Radio, BarChart2,
-  Users, HeartHandshake, Share2, Map, ChevronLeft, ChevronRight, Mic
+  Menu, X, Navigation, CreditCard, Sparkles, Building2, BarChart2,
+  Share2, ChevronLeft, ChevronRight, Mic
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useLanguage, Language } from '@/context/LanguageContext';
@@ -39,12 +39,8 @@ export default function Sidebar() {
   const menuItems = [
     { icon: LayoutDashboard, label: t('dashboard'), href: '/dashboard' },
     { icon: Navigation, label: 'Healthcare Navigator', href: '/dashboard/healthcare-navigator', featured: true },
-    { icon: Radio, label: 'Crisis Command', href: '/dashboard/crisis', crisis: true },
     { icon: Heart, label: 'My Medical Profile', href: '/dashboard/profile', profile: true },
     { icon: BarChart2, label: 'Health Analytics', href: '/dashboard/analytics' },
-    { icon: Users, label: 'ASHA Workers', href: '/dashboard/asha', featured: true },
-    { icon: HeartHandshake, label: 'Elder Care', href: '/dashboard/elder-care', featured: true },
-    { icon: Map, label: 'PHC Finder', href: '/dashboard/phc-finder' },
     { icon: Share2, label: 'Resource Sharing', href: '/dashboard/healthshare' },
     { icon: Mic, label: '🎙️ Voice AI Doctor', href: '/dashboard/voice-agent', featured: true },
     { icon: Bot, label: t('askAIDoctor'), href: '/dashboard/ai' },

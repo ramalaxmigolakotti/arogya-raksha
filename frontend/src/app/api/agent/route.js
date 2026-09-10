@@ -14,7 +14,7 @@ const TOOLS = [
       parameters: {
         type: 'object',
         properties: {
-          page: { type: 'string', description: 'Page name like: symptoms, hospitals, medicines, scanner, doctors, appointments, predictors, analytics, profile, quiz, emergency, healthcare-navigator, asha, elder-care, reports, phc-finder' },
+          page: { type: 'string', description: 'Page name like: symptoms, hospitals, medicines, scanner, doctors, appointments, predictors, analytics, profile, quiz, emergency, healthcare-navigator, reports' },
           reason: { type: 'string', description: 'Why we are navigating there' },
           filter: { type: 'string', description: 'Optional: filter to apply on the target page' }
         },
@@ -153,11 +153,7 @@ const PAGE_URLS = {
   quiz: '/dashboard/quiz',
   emergency: '/dashboard/emergency',
   'healthcare-navigator': '/dashboard/healthcare-navigator',
-  asha: '/dashboard/asha',
-  'elder-care': '/dashboard/elder-care',
   reports: '/dashboard/reports',
-  'phc-finder': '/dashboard/phc-finder',
-  crisis: '/dashboard/crisis',
 };
 
 // ─── TOOL EXECUTOR ─────────────────────────────────────────────────────────────

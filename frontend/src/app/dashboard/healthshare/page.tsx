@@ -249,11 +249,11 @@ export default function HealthShareDashboard() {
       <AIFeatureConnector 
         features={[
           {
-            title: "PHC / CHC Finder",
-            description: "Find your local Primary Health Centre.",
+            title: "Healthcare Navigator",
+            description: "Guided navigation for nearby health facilities and care pathways.",
             icon: MapPin,
-            href: "/dashboard/phc-finder",
-            reason: "AI Insight: Need equipment immediately? Local PHCs might have it.",
+            href: "/dashboard/healthcare-navigator",
+            reason: "AI Insight: Need professional assistance? Find certified local healthcare facilities.",
             color: "text-emerald-600",
             bg: "bg-emerald-100"
           },
@@ -267,11 +267,11 @@ export default function HealthShareDashboard() {
             bg: "bg-blue-100"
           },
           {
-            title: "Crisis Command",
-            description: "Request emergency supplies directly to crisis centers.",
+            title: "Emergency Services",
+            description: "Access instant emergency contacts and blood donor networks.",
             icon: AlertTriangle,
-            href: "/dashboard/crisis",
-            reason: "AI Insight: Is this an emergency? Use the Crisis module instead.",
+            href: "/dashboard/emergency",
+            reason: "AI Insight: Is this an urgent medical situation? Reach out to emergency services.",
             color: "text-red-600",
             bg: "bg-red-100"
           }

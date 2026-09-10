@@ -53,7 +53,6 @@ const ROUTE_MAP = {
   "doctors": "/dashboard/doctors",
   "doctor_dashboard": "/dashboard/doctor-dashboard",
   "analytics": "/dashboard/analytics",
-  "crisis": "/dashboard/crisis",
   "video_call": "/dashboard/video-call",
 };
 
@@ -162,7 +161,6 @@ export const AGENT_TOOLS = [
               "doctors",
               "doctor_dashboard",
               "analytics",
-              "crisis",
               "video_call",
             ],
             description: "Target page to navigate to",
@@ -545,7 +543,6 @@ APP PAGES YOU CAN NAVIGATE TO:
 - doctors → Doctor Directory (browse and book doctors)
 - doctor_dashboard → Doctor Dashboard (for doctors to manage their practice)
 - analytics → Health Analytics & Trends
-- crisis → Crisis Response Center
 - video_call → Video Call with Doctor
 
 HEALTH RISK PREDICTORS (use run_health_predictor tool):
