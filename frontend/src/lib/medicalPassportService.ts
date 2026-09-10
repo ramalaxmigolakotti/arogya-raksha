@@ -188,11 +188,22 @@ export function verifyDoctorAccessPin(
  */
 export function getFullPatientDossier(userId: string): FullPatientDossier {
   let medProfile: any = {};
+  let appUserName = '';
   if (typeof window !== 'undefined') {
     try {
-      const cached = localStorage.getItem(`arogya_medical_profile_${userId}`);
+      const cached =
+        localStorage.getItem(`arogya_medical_profile_${userId}`) ||
+        localStorage.getItem('arogya_medical_profile') ||
+        localStorage.getItem('arogya_medical_profile_guest');
       if (cached) {
         medProfile = JSON.parse(cached);
+      }
+      const appProf = localStorage.getItem('app-user-profile');
+      if (appProf) {
+        const parsed = JSON.parse(appProf);
+        if (parsed?.name && !parsed.name.includes('Rahul')) {
+          appUserName = parsed.name;
+        }
       }
     } catch {}
   }
@@ -202,13 +213,13 @@ export function getFullPatientDossier(userId: string): FullPatientDossier {
   return {
     personal: {
       userId,
-      fullName: medProfile.full_name || 'Rahul Sharma',
+      fullName: medProfile.full_name || appUserName || 'Sameer',
       abhaId: `ABHA-91-${userId.replace(/[^0-9]/g, '').slice(-4) || '8812'}-4091`,
-      age: medProfile.age || 32,
+      age: medProfile.age || 35,
       gender: medProfile.gender || 'Male',
-      bloodGroup: medProfile.blood_group || 'O+',
-      heightCm: medProfile.height_cm || 174,
-      weightKg: medProfile.weight_kg || 68,
+      bloodGroup: medProfile.blood_group || 'A+',
+      heightCm: medProfile.height_cm || 160,
+      weightKg: medProfile.weight_kg || 80,
       village: medProfile.village || 'Peruru, East Godavari',
     },
     medical: {

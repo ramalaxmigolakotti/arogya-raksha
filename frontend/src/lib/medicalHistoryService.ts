@@ -199,3 +199,53 @@ export async function clearCategoryRecords(userId: string, types: MedicalRecordT
 export function getUserMedicalHistoryCount(userId: string, typeFilter?: MedicalRecordType): number {
   return getLocalHistory(userId, typeFilter).length;
 }
+
+/**
+ * Synchronizes medical records from Supabase cloud into local storage for this user.
+ * Ensures lifetime history and dashboard always display their actual records.
+ */
+export async function syncUserRecordsFromCloud(userId: string): Promise<MedicalRecord[]> {
+  if (typeof window === 'undefined' || !isSupabaseConfigured || !userId) return getLocalHistory(userId);
+  try {
+    const { data, error } = await supabase
+      .from('patient_health_records')
+      .select('*')
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false });
+
+    if (error || !data) {
+      return getLocalHistory(userId);
+    }
+
+    const cloudRecords: MedicalRecord[] = data.map((row: any) => ({
+      id: row.id,
+      userId: row.user_id,
+      type: (row.type || row.record_type || 'health_tracker') as MedicalRecordType,
+      title: row.title || 'Medical Record',
+      summary: row.summary || row.user_query || '',
+      userQuery: row.user_query || undefined,
+      aiResponse: row.ai_response || undefined,
+      metadata: row.metadata || {},
+      timestamp: row.created_at || new Date().toISOString(),
+    }));
+
+    const local = getLocalHistory(userId);
+    const idMap = new Map<string, MedicalRecord>();
+    cloudRecords.forEach((r) => idMap.set(r.id, r));
+    local.forEach((r) => {
+      if (!idMap.has(r.id)) idMap.set(r.id, r);
+    });
+
+    const merged = Array.from(idMap.values()).sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+
+    localStorage.setItem(`${STORAGE_PREFIX}${userId}`, JSON.stringify(merged));
+    localStorage.setItem('arogya_medical_history', JSON.stringify(merged));
+    window.dispatchEvent(new CustomEvent('medical-history-updated', { detail: { userId } }));
+    return merged;
+  } catch (err) {
+    console.warn('Failed to sync records from cloud:', err);
+    return getLocalHistory(userId);
+  }
+}

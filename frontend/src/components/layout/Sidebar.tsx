@@ -224,6 +224,9 @@ export default function Sidebar() {
               <span className="text-base">{roleIcon}</span>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-extrabold text-white truncate">{user?.name || roleLabel}</p>
+                {user?.email && (
+                  <p className="text-[10px] text-slate-400 truncate leading-tight mt-0.5" title={user.email}>{user.email}</p>
+                )}
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="text-[9px] text-emerald-400 font-mono font-black truncate">{user?.badgeId || role}</span>
                   <span className="text-[9px] text-slate-500 font-medium">({role})</span>

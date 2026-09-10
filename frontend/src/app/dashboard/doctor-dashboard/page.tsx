@@ -9,6 +9,7 @@ import {
   Globe, FileText, CheckCircle2, X
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
+import { useUserRole } from '@/context/UserRoleContext';
 import api from '@/lib/api';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -290,7 +291,7 @@ function DoctorProfileForm({ userId }: { userId: string }) {
 
 export default function DoctorDashboardPage() {
   const { t, language } = useLanguage();
-  const { user } = useUser();
+  const { user } = useUserRole();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');

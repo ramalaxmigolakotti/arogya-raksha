@@ -65,13 +65,13 @@ export function getActiveMedicalProfile(userId?: string): ExtractedMedicalProfil
   // Fall back to the patient dossier defaults
   const dossier: FullPatientDossier = getFullPatientDossier(uid);
 
-  const fullName = raw?.full_name || dossier.personal.fullName || 'Rahul Sharma';
-  const age = raw?.age || dossier.personal.age || 32;
+  const fullName = raw?.full_name || dossier.personal.fullName || 'Sameer';
+  const age = raw?.age || dossier.personal.age || 35;
   const rawGender = (raw?.gender || dossier.personal.gender || 'Male').toLowerCase();
   const gender = rawGender.startsWith('f') ? 'Female' : 'Male';
-  const bloodGroup = raw?.blood_group || dossier.personal.bloodGroup || 'O+';
-  const heightCm = Number(raw?.height_cm || dossier.personal.heightCm || 174);
-  const weightKg = Number(raw?.weight_kg || dossier.personal.weightKg || 68);
+  const bloodGroup = raw?.blood_group || dossier.personal.bloodGroup || 'A+';
+  const heightCm = Number(raw?.height_cm || dossier.personal.heightCm || 160);
+  const weightKg = Number(raw?.weight_kg || dossier.personal.weightKg || 80);
 
   const calculatedBmi =
     heightCm > 0 && weightKg > 0

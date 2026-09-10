@@ -1,16 +1,18 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import Link from 'next/link';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage, Language } from '@/context/LanguageContext';
 import { useUserRole } from '@/context/UserRoleContext';
+import { SupabasePasskeyItem } from '@/lib/passkeyHelper';
 import {
   User, Heart, Sun, Moon, Monitor, Bell, Shield,
   Camera, CheckCircle2, ChevronRight, Save, Loader2,
   Globe, Lock, LogOut, Trash2, Edit2, Upload, Languages, Key
 } from 'lucide-react';
 
-type SettingsTab = 'profile' | 'appearance' | 'notifications' | 'privacy';
+type SettingsTab = 'profile' | 'appearance' | 'notifications' | 'security';
 
 const THEME_OPTIONS = [
   { value: 'light',  label: 'Light',  icon: Sun,     desc: 'Clean bright interface' },
@@ -30,7 +32,15 @@ const LANGUAGE_OPTIONS: { value: Language; label: string; native: string; flag: 
 ];
 
 export default function SettingsPage() {
-  const { user, updateUserProfile, registerPasskey, logout } = useUserRole();
+  const {
+    user,
+    updateUserProfile,
+    registerPasskey,
+    listPasskeys,
+    renamePasskey,
+    deletePasskey,
+    logout,
+  } = useUserRole();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
 
@@ -38,11 +48,19 @@ export default function SettingsPage() {
   const [displayName, setDisplayName] = useState('');
   const [bio, setBio] = useState('');
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [avatarUploading, setAvatarUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [passkeyMsg, setPasskeyMsg] = useState('');
-  const [passkeyLoading, setPasskeyLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Passkey Management State
+  const [passkeys, setPasskeys] = useState<SupabasePasskeyItem[]>([]);
+  const [passkeysLoading, setPasskeysLoading] = useState(false);
+  const [passkeyMsg, setPasskeyMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [passkeyRegistering, setPasskeyRegistering] = useState(false);
+  const [renamingId, setRenamingId] = useState<string | null>(null);
+  const [renamingName, setRenamingName] = useState('');
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
 
   const [notifs, setNotifs] = useState({
     sos_alerts: true,
@@ -51,6 +69,115 @@ export default function SettingsPage() {
     health_tips: false,
     marketing: false,
   });
+
+  const loadPasskeys = async () => {
+    setPasskeysLoading(true);
+    try {
+      const res = await listPasskeys();
+      if (res.success && res.passkeys) {
+        setPasskeys(res.passkeys);
+      }
+    } catch (e) {
+      console.warn('Failed to load passkeys:', e);
+    } finally {
+      setPasskeysLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'security') {
+      loadPasskeys();
+    }
+  }, [activeTab]);
+
+  const handleAddPasskey = async () => {
+    setPasskeyRegistering(true);
+    setPasskeyMsg(null);
+    try {
+      const res = await registerPasskey('Arogya Rakshaa Passkey');
+      if (res.success) {
+        setPasskeyMsg({ type: 'success', text: 'Passkey added successfully' });
+        await loadPasskeys();
+      } else {
+        setPasskeyMsg({
+          type: 'error',
+          text: res.error || 'Passkey registration cancelled or failed.',
+        });
+      }
+    } catch (err: any) {
+      setPasskeyMsg({
+        type: 'error',
+        text: err?.message || 'Passkey registration failed.',
+      });
+    } finally {
+      setPasskeyRegistering(false);
+    }
+  };
+
+  const handleStartRename = (pk: SupabasePasskeyItem) => {
+    setRenamingId(pk.id);
+    setRenamingName(pk.friendly_name || 'Arogya Rakshaa Passkey');
+  };
+
+  const handleSaveRename = async (pkId: string) => {
+    if (!renamingName.trim()) return;
+    setActionLoadingId(pkId);
+    setPasskeyMsg(null);
+    try {
+      const res = await renamePasskey(pkId, renamingName.trim());
+      if (res.success) {
+        setPasskeyMsg({ type: 'success', text: 'Passkey renamed successfully.' });
+        setRenamingId(null);
+        await loadPasskeys();
+      } else {
+        setPasskeyMsg({ type: 'error', text: res.error || 'Failed to rename passkey.' });
+      }
+    } catch (e: any) {
+      setPasskeyMsg({ type: 'error', text: e?.message || 'Failed to rename passkey.' });
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const handleDeletePasskey = async (pkId: string, friendlyName?: string) => {
+    if (
+      !confirm(
+        `Are you sure you want to remove "${friendlyName || 'this passkey'}"? You will no longer be able to use it to sign in on this device.`
+      )
+    ) {
+      return;
+    }
+    setActionLoadingId(pkId);
+    setPasskeyMsg(null);
+    try {
+      const res = await deletePasskey(pkId);
+      if (res.success) {
+        setPasskeyMsg({ type: 'success', text: 'Passkey removed successfully.' });
+        await loadPasskeys();
+      } else {
+        setPasskeyMsg({ type: 'error', text: res.error || 'Failed to remove passkey.' });
+      }
+    } catch (e: any) {
+      setPasskeyMsg({ type: 'error', text: e?.message || 'Failed to remove passkey.' });
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
+  const formatDate = (isoString?: string) => {
+    if (!isoString) return 'Never';
+    try {
+      const d = new Date(isoString);
+      if (isNaN(d.getTime())) return isoString;
+      return d.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+    } catch {
+      return isoString;
+    }
+  };
 
   useEffect(() => {
     if (user) {
@@ -88,18 +215,6 @@ export default function SettingsPage() {
     }
   };
 
-  const handleCreatePasskey = async () => {
-    setPasskeyLoading(true);
-    setPasskeyMsg('');
-    const res = await registerPasskey();
-    if (res.success) {
-      setPasskeyMsg('Passkey registered successfully! You can sign in using Windows Hello, Face ID, or Touch ID.');
-    } else {
-      setPasskeyMsg(res.error || 'Passkey registration cancelled.');
-    }
-    setPasskeyLoading(false);
-  };
-
   const saveNotifs = () => {
     localStorage.setItem('arogya-notifs', JSON.stringify(notifs));
     setSaved(true);
@@ -110,7 +225,7 @@ export default function SettingsPage() {
     { key: 'profile',       label: t('profile') || 'Profile',         icon: User },
     { key: 'appearance',    label: t('appearance') || 'Appearance',   icon: resolvedTheme === 'dark' ? Moon : Sun },
     { key: 'notifications', label: t('notifications') || 'Notifications', icon: Bell },
-    { key: 'privacy',       label: t('privacy') || 'Privacy',         icon: Shield },
+    { key: 'security',      label: 'Security',                        icon: Shield },
   ];
 
   if (!user) {
@@ -163,7 +278,7 @@ export default function SettingsPage() {
                   ) : (
                     <div className="h-full w-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center">
                       <span className="text-3xl font-black text-white">
-                        {(user?.firstName || 'U')[0].toUpperCase()}
+                        {(user?.name || 'U')[0].toUpperCase()}
                       </span>
                     </div>
                   )}
@@ -175,8 +290,8 @@ export default function SettingsPage() {
                 )}
               </div>
               <div>
-                <p className="font-bold text-slate-900 dark:text-white text-lg">{user?.fullName || 'Your Name'}</p>
-                <p className="text-sm text-slate-500 dark:text-slate-400">{user?.primaryEmailAddress?.emailAddress}</p>
+                <p className="font-bold text-slate-900 dark:text-white text-lg">{user?.name || 'Your Name'}</p>
+                <p className="text-sm text-slate-500 dark:text-slate-400">{user?.email}</p>
                 <div className="flex gap-2 mt-3">
                   <button onClick={() => fileRef.current?.click()}
                     className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition-colors shadow-lg shadow-indigo-500/20">
@@ -208,7 +323,7 @@ export default function SettingsPage() {
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">{t('email')}</label>
-              <input value={user?.primaryEmailAddress?.emailAddress || ''} disabled
+              <input value={user?.email || ''} disabled
                 className="w-full border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-400 rounded-xl px-3 py-2.5 text-sm cursor-not-allowed" />
             </div>
             <div>
@@ -395,17 +510,167 @@ export default function SettingsPage() {
         </div>
       )}
 
-      {/* ─── PRIVACY TAB ─── */}
-      {activeTab === 'privacy' && (
-        <div className="space-y-4">
+      {/* ─── SECURITY TAB (GitHub-Style Passkeys) ─── */}
+      {activeTab === 'security' && (
+        <div className="space-y-6">
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm p-6 sm:p-8 space-y-6">
+            
+            {/* Header */}
+            <div>
+              <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Security</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Manage your credentials, passkeys, and biometric device authentication.
+              </p>
+            </div>
+
+            <hr className="border-slate-200 dark:border-slate-700" />
+
+            {/* Passkeys Section */}
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                  <Key className="h-4 w-4 text-teal-600 dark:text-teal-400" />
+                  Passkeys
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Passkeys allow you to sign in safely using your fingerprint, Face ID, Windows Hello, or device PIN.
+                </p>
+              </div>
+
+              {/* Feedback Alert */}
+              {passkeyMsg && (
+                <div
+                  className={`text-xs p-3.5 rounded-xl font-semibold flex items-center gap-2 ${
+                    passkeyMsg.type === 'success'
+                      ? 'bg-emerald-500/10 border border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
+                      : 'bg-rose-500/10 border border-rose-500/30 text-rose-700 dark:text-rose-300'
+                  }`}
+                >
+                  <span>{passkeyMsg.type === 'success' ? '✓' : '⚠️'}</span>
+                  <span>{passkeyMsg.text}</span>
+                </div>
+              )}
+
+              {/* Passkeys List */}
+              <div className="space-y-3 pt-2">
+                {passkeysLoading ? (
+                  <div className="p-8 flex flex-col items-center justify-center text-slate-400 gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin text-teal-500" />
+                    <span className="text-xs">Loading registered passkeys…</span>
+                  </div>
+                ) : passkeys.length === 0 ? (
+                  <div className="p-6 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 text-center space-y-2 bg-slate-50/50 dark:bg-slate-900/30">
+                    <div className="inline-flex p-3 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400">
+                      <Key className="h-5 w-5" />
+                    </div>
+                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300">No passkeys registered yet</p>
+                    <p className="text-[11px] text-slate-500 max-w-sm mx-auto">
+                      Add a passkey to sign in to Arogya Rakshaa using biometric sensors (Windows Hello, Touch ID, Face ID) without typing a password.
+                    </p>
+                  </div>
+                ) : (
+                  passkeys.map((pk) => (
+                    <div
+                      key={pk.id}
+                      className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-slate-300 dark:hover:border-slate-600"
+                    >
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-emerald-600 dark:text-emerald-400 font-bold text-sm">✓</span>
+                          {renamingId === pk.id ? (
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="text"
+                                value={renamingName}
+                                onChange={(e) => setRenamingName(e.target.value)}
+                                className="px-2.5 py-1 text-xs rounded-lg border border-teal-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white outline-none"
+                                autoFocus
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter') handleSaveRename(pk.id);
+                                  if (e.key === 'Escape') setRenamingId(null);
+                                }}
+                              />
+                              <button
+                                onClick={() => handleSaveRename(pk.id)}
+                                disabled={actionLoadingId === pk.id}
+                                className="text-[11px] px-2.5 py-1 bg-teal-600 text-white rounded font-bold hover:bg-teal-700 disabled:opacity-60"
+                              >
+                                Save
+                              </button>
+                              <button
+                                onClick={() => setRenamingId(null)}
+                                className="text-[11px] px-2.5 py-1 text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="font-bold text-sm text-slate-900 dark:text-white">
+                              {pk.friendly_name || 'Arogya Rakshaa Passkey'}
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-slate-500 dark:text-slate-400 pl-5 space-y-0.5">
+                          <p>Added: {formatDate(pk.created_at)}</p>
+                          <p>Last used: {formatDate(pk.last_used_at)}</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 pl-5 sm:pl-0">
+                        {renamingId !== pk.id && (
+                          <button
+                            onClick={() => handleStartRename(pk)}
+                            disabled={actionLoadingId === pk.id}
+                            className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold transition-colors disabled:opacity-50"
+                          >
+                            Rename
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDeletePasskey(pk.id, pk.friendly_name)}
+                          disabled={actionLoadingId === pk.id}
+                          className="px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-900/50 hover:bg-red-50 dark:hover:bg-red-950/40 text-red-600 dark:text-red-400 text-xs font-semibold transition-colors disabled:opacity-50"
+                        >
+                          {actionLoadingId === pk.id ? 'Removing…' : 'Remove'}
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {/* Add a passkey button */}
+              <div className="pt-2">
+                <button
+                  onClick={handleAddPasskey}
+                  disabled={passkeyRegistering}
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs bg-teal-600 hover:bg-teal-700 text-white shadow-md shadow-teal-500/20 transition-all hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-60"
+                >
+                  {passkeyRegistering ? (
+                    <>
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      <span>Waiting for device prompt…</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>+</span>
+                      <span>Add a passkey</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Data & Privacy Controls */}
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 space-y-4">
             <h2 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
-              <Lock className="h-4 w-4" /> {t('privacy')}
+              <Lock className="h-4 w-4" /> Data & Privacy Controls
             </h2>
             {[
               { label: 'Medical Profile Visibility', desc: 'Only visible to you — never shared without consent', val: 'Private', color: 'emerald' },
-              { label: 'SOS Incident Data',  desc: 'Shared with hotel staff + hospital during emergencies only', val: 'Emergency Only', color: 'amber' },
-              { label: 'Location Data',      desc: 'Used only for hospital proximity search', val: 'App Only', color: 'blue' },
+              { label: 'SOS Incident Data',  desc: 'Shared with emergency services during active incidents only', val: 'Emergency Only', color: 'amber' },
+              { label: 'Location Data',      desc: 'Used only for hospital and ambulance proximity calculation', val: 'App Only', color: 'blue' },
             ].map(item => (
               <div key={item.label} className="flex items-center justify-between py-3 border-b border-slate-100 dark:border-slate-700 last:border-0">
                 <div>
@@ -419,53 +684,6 @@ export default function SettingsPage() {
                 }`}>{item.val}</span>
               </div>
             ))}
-          </div>
-
-          {/* Passkeys & Biometrics Section */}
-          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-teal-500/30 dark:border-teal-500/20 shadow-sm p-6 space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-sm font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider flex items-center gap-2">
-                  <Key className="h-4 w-4" /> Passkeys & Device Biometrics
-                </h2>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
-                  Log in instantly with Windows Hello, Mac Touch ID, Face ID, or your device biometric sensor.
-                </p>
-              </div>
-              <span className="text-[10px] bg-teal-500/20 text-teal-700 dark:text-teal-300 font-bold px-2.5 py-1 rounded-full border border-teal-500/30">
-                Supabase Active
-              </span>
-            </div>
-
-            {passkeyMsg && (
-              <div className="text-xs p-3 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-700 dark:text-teal-300 font-medium">
-                {passkeyMsg}
-              </div>
-            )}
-
-            <div className="flex items-center justify-between pt-2">
-              <div className="text-xs text-slate-600 dark:text-slate-300">
-                <p className="font-semibold">Registered to this device</p>
-                <p className="text-[11px] text-slate-400">Relying Party: localhost / Arogya Raksha</p>
-              </div>
-              <button
-                onClick={handleCreatePasskey}
-                disabled={passkeyLoading}
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs bg-teal-600 hover:bg-teal-700 text-white shadow-lg shadow-teal-500/20 transition-all disabled:opacity-60"
-              >
-                {passkeyLoading ? (
-                  <>
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    <span>Verifying Sensor…</span>
-                  </>
-                ) : (
-                  <>
-                    <Key className="h-3.5 w-3.5" />
-                    <span>+ Add New Passkey</span>
-                  </>
-                )}
-              </button>
-            </div>
           </div>
 
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 space-y-3">

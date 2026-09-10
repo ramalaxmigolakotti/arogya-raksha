@@ -1,21 +1,25 @@
 /**
- * WebAuthn Passkey Helper for Arogya Raksha
- * Works with Supabase Passkey configuration (Relying Party: localhost / domain)
- * Supports Windows Hello, Face ID, Touch ID, Android Biometrics & Security Keys
+ * Production-Quality Supabase Auth WebAuthn Passkey System for Arogya Rakshaa
+ * Works like GitHub's passkey system:
+ * - Direct browser/device WebAuthn APIs via Supabase Auth GoTrue
+ * - No custom QR codes or fake device trust
+ * - Zero private key storage in database or frontend
+ * - Cryptographically verified by Supabase Auth backend
+ * - Cross-device sync via native FIDO2 / Passkey managers (iCloud Keychain, Google Password Manager, Windows Hello)
  */
 
-export interface PasskeyCredentialData {
+import { supabase, isSupabaseConfigured } from './supabaseClient';
+
+export interface SupabasePasskeyItem {
   id: string;
-  rawId: string;
-  type: string;
-  userEmail: string;
-  userName: string;
-  userRole: string;
-  createdAt: string;
+  friendly_name?: string;
+  created_at: string;
+  last_used_at?: string;
 }
 
-const PASSKEY_STORAGE_KEY = 'arogya_registered_passkeys';
-
+/**
+ * Checks if the current browser and platform support WebAuthn Passkeys.
+ */
 export async function isPasskeySupported(): Promise<boolean> {
   if (typeof window === 'undefined') return false;
   if (!window.PublicKeyCredential) return false;
@@ -29,170 +33,275 @@ export async function isPasskeySupported(): Promise<boolean> {
   }
 }
 
-export function getStoredPasskeys(): PasskeyCredentialData[] {
-  if (typeof window === 'undefined') return [];
-  try {
-    const raw = localStorage.getItem(PASSKEY_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
+/**
+ * Formats Supabase Auth and WebAuthn errors into clear, user-friendly messages.
+ */
+export function formatPasskeyError(err: any): string {
+  if (!err) return 'An unexpected passkey error occurred.';
 
-export function saveStoredPasskey(passkey: PasskeyCredentialData) {
-  if (typeof window === 'undefined') return;
-  const list = getStoredPasskeys();
-  // Avoid duplicates by id or userEmail
-  const filtered = list.filter((p) => p.id !== passkey.id && p.userEmail !== passkey.userEmail);
-  filtered.push(passkey);
-  localStorage.setItem(PASSKEY_STORAGE_KEY, JSON.stringify(filtered));
+  const code = (err.code || err.name || '').toString().toLowerCase();
+  const msg = (err.message || '').toString().toLowerCase();
+
+  // 1. Not found or ceremony cancelled
+  if (
+    code.includes('notallowed') ||
+    code.includes('aborted') ||
+    code.includes('cancel') ||
+    msg.includes('notallowed') ||
+    msg.includes('cancelled') ||
+    msg.includes('canceled') ||
+    msg.includes('no credential') ||
+    msg.includes('not found') ||
+    code === 'webauthn_credential_not_found'
+  ) {
+    return 'No passkey is available on this device. Please sign in using your email/Google account and add a passkey from Security Settings.';
+  }
+
+  // 2. Passkey disabled on Supabase project
+  if (code.includes('disabled') || msg.includes('disabled') || code === 'passkey_disabled') {
+    return 'Passkey authentication is not enabled in your Supabase project. Please enable it in Authentication → Passkeys in your Supabase Dashboard.';
+  }
+
+  // 3. Credential already registered
+  if (code.includes('already_registered') || code.includes('exists') || code === 'webauthn_credential_exists') {
+    return 'A passkey for this device or account is already registered.';
+  }
+
+  // 4. Challenge expired / timed out
+  if (code.includes('expired') || code.includes('timeout') || code === 'webauthn_challenge_expired') {
+    return 'Passkey ceremony timed out. Please try again.';
+  }
+
+  // 5. Verification failed
+  if (code.includes('verification_failed') || code === 'webauthn_verification_failed') {
+    return 'Passkey cryptographic verification failed. Please try again or sign in with your password.';
+  }
+
+  // 6. Email not confirmed
+  if (code.includes('email_not_confirmed') || msg.includes('email not confirmed')) {
+    return 'Your email address is not verified. Please verify your email before using passkeys.';
+  }
+
+  // 7. User banned / deactivated
+  if (code.includes('user_banned') || msg.includes('banned') || msg.includes('deactivated')) {
+    return 'This account has been deactivated.';
+  }
+
+  // 8. Unsupported browser
+  if (msg.includes('support') && msg.includes('webauthn')) {
+    return 'Your current browser does not support WebAuthn passkeys. Please use a modern browser like Chrome, Edge, or Safari.';
+  }
+
+  return err.message || 'Passkey authentication failed. Please try again.';
 }
 
 /**
- * Register a new device passkey via WebAuthn
+ * Sign in with a Passkey (discoverable credential ceremony).
+ * Does NOT require the user to enter an email first.
+ * The browser's native passkey picker discovers the registered passkey.
  */
-export async function registerDevicePasskey(
-  user: { id: string; email: string; name: string; role?: string }
-): Promise<{ success: boolean; error?: string; credential?: PasskeyCredentialData }> {
-  if (typeof window === 'undefined' || !window.PublicKeyCredential) {
-    return { success: false, error: 'WebAuthn passkeys are not supported on this browser.' };
-  }
-
-  try {
-    const hostname = window.location.hostname;
-    const challenge = window.crypto.getRandomValues(new Uint8Array(32));
-    const userIdBuffer = new TextEncoder().encode(user.id || user.email);
-
-    const credential = (await navigator.credentials.create({
-      publicKey: {
-        challenge,
-        rp: {
-          name: 'arogya rakshaa',
-          id: hostname === 'localhost' ? 'localhost' : hostname,
-        },
-        user: {
-          id: userIdBuffer,
-          name: user.email || 'user@arogyaraksha.in',
-          displayName: user.name || user.email || 'Arogya Raksha User',
-        },
-        pubKeyCredParams: [
-          { alg: -7, type: 'public-key' },  // ES256 (ECDSA w/ SHA-256)
-          { alg: -257, type: 'public-key' }, // RS256 (RSASSA-PKCS1-v1_5 w/ SHA-256)
-        ],
-        authenticatorSelection: {
-          userVerification: 'preferred',
-          residentKey: 'preferred',
-        },
-        timeout: 60000,
-        attestation: 'none',
-      },
-    })) as PublicKeyCredential | null;
-
-    if (!credential) {
-      return { success: false, error: 'No biometric credential received from authenticator.' };
-    }
-
-    const passkeyData: PasskeyCredentialData = {
-      id: credential.id,
-      rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))),
-      type: credential.type,
-      userEmail: user.email || 'user@arogyaraksha.in',
-      userName: user.name || 'Arogya User',
-      userRole: user.role || 'patient',
-      createdAt: new Date().toISOString(),
-    };
-
-    saveStoredPasskey(passkeyData);
-    return { success: true, credential: passkeyData };
-  } catch (err: any) {
-    if (err.name === 'NotAllowedError') {
-      return { success: false, error: 'Passkey creation was cancelled in the system dialog.' };
-    }
-    return { success: false, error: err.message || 'Passkey creation failed.' };
-  }
-}
-
-/**
- * Authenticate with device passkey / biometric sensor
- * If no passkey has been registered yet, seamlessly initiates passkey creation!
- */
-export async function authenticateWithPasskey(fallbackUser?: { email?: string; name?: string; role?: string }): Promise<{
+export async function signInWithSupabasePasskey(): Promise<{
   success: boolean;
-  user?: { email: string; name: string; role: string };
+  user?: any;
+  session?: any;
   error?: string;
-  isNewRegistration?: boolean;
 }> {
-  if (typeof window === 'undefined' || !window.PublicKeyCredential) {
-    return { success: false, error: 'WebAuthn passkeys are not supported on this browser.' };
+  if (typeof window === 'undefined') {
+    return { success: false, error: 'Cannot authenticate passkey on server side.' };
   }
 
-  const stored = getStoredPasskeys();
+  if (!isSupabaseConfigured) {
+    return { success: false, error: 'Supabase client is not configured.' };
+  }
 
-  // If no passkey registered yet on this device, prompt Windows Hello / Touch ID to create one!
-  if (stored.length === 0) {
-    const defaultEmail = fallbackUser?.email || localStorage.getItem('arogya-last-email') || 'patient@arogyaraksha.in';
-    const defaultName = fallbackUser?.name || 'Arogya Raksha User';
-    const defaultRole = fallbackUser?.role || localStorage.getItem('app-user-role') || 'patient';
-
-    const regResult = await registerDevicePasskey({
-      id: `usr-${Date.now()}`,
-      email: defaultEmail,
-      name: defaultName,
-      role: defaultRole,
-    });
-
-    if (!regResult.success) {
-      return { success: false, error: regResult.error };
-    }
-
+  const supported = await isPasskeySupported();
+  if (!supported) {
     return {
-      success: true,
-      user: {
-        email: regResult.credential?.userEmail || defaultEmail,
-        name: regResult.credential?.userName || defaultName,
-        role: regResult.credential?.userRole || defaultRole,
-      },
-      isNewRegistration: true,
+      success: false,
+      error: 'WebAuthn passkeys are not supported on this browser or platform.',
     };
   }
 
   try {
-    const hostname = window.location.hostname;
-    const challenge = window.crypto.getRandomValues(new Uint8Array(32));
+    // Calling Supabase official signInWithPasskey API
+    const res = await supabase.auth.signInWithPasskey();
 
-    // Prepare allowCredentials for the known passkeys on this device
-    const allowCredentials: PublicKeyCredentialDescriptor[] = stored.map((p) => ({
-      id: Uint8Array.from(atob(p.rawId), (c) => c.charCodeAt(0)),
-      type: 'public-key',
-    }));
-
-    const assertion = (await navigator.credentials.get({
-      publicKey: {
-        challenge,
-        rpId: hostname === 'localhost' ? 'localhost' : hostname,
-        allowCredentials: allowCredentials.length > 0 ? allowCredentials : undefined,
-        userVerification: 'preferred',
-        timeout: 60000,
-      },
-    })) as PublicKeyCredential | null;
-
-    if (!assertion) {
-      return { success: false, error: 'Biometric verification did not return an assertion.' };
+    if (res.error) {
+      return {
+        success: false,
+        error: formatPasskeyError(res.error),
+      };
     }
 
-    const matched = (fallbackUser?.email ? stored.find(p => p.userEmail?.toLowerCase() === fallbackUser.email?.toLowerCase()) : null) || stored.find((p) => p.id === assertion.id) || stored[0];
-    const email = fallbackUser?.email || matched?.userEmail || localStorage.getItem('arogya-last-email') || 'patient@arogyaraksha.in';
-    const name = fallbackUser?.name || matched?.userName || 'Verified Biometric User';
-    const role = fallbackUser?.role || matched?.userRole || localStorage.getItem('app-user-role') || 'patient';
+    if (!res.data?.session || !res.data?.user) {
+      return {
+        success: false,
+        error: 'No active session returned after passkey authentication.',
+      };
+    }
 
     return {
       success: true,
-      user: { email, name, role },
+      user: res.data.user,
+      session: res.data.session,
     };
   } catch (err: any) {
-    if (err.name === 'NotAllowedError') {
-      return { success: false, error: 'Biometric prompt was cancelled.' };
-    }
-    return { success: false, error: err.message || 'Biometric authentication failed.' };
+    return {
+      success: false,
+      error: formatPasskeyError(err),
+    };
   }
 }
+
+/**
+ * Register a new Passkey for the currently authenticated user.
+ * Opens native prompt (Windows Hello, Touch ID, Face ID, PIN, or Password Manager).
+ */
+export async function registerSupabasePasskey(friendlyName?: string): Promise<{
+  success: boolean;
+  data?: any;
+  error?: string;
+}> {
+  if (typeof window === 'undefined') {
+    return { success: false, error: 'Cannot register passkey on server side.' };
+  }
+
+  if (!isSupabaseConfigured) {
+    return { success: false, error: 'Supabase client is not configured.' };
+  }
+
+  const supported = await isPasskeySupported();
+  if (!supported) {
+    return {
+      success: false,
+      error: 'WebAuthn passkeys are not supported on this browser or platform.',
+    };
+  }
+
+  // Ensure user is authenticated before registering a passkey
+  const { data: sessionData } = await supabase.auth.getSession();
+  if (!sessionData?.session?.user) {
+    return {
+      success: false,
+      error: 'You must be signed in to add a passkey. Please sign in first.',
+    };
+  }
+
+  try {
+    // Calling Supabase official registerPasskey API
+    const res = await supabase.auth.registerPasskey();
+
+    if (res.error) {
+      return {
+        success: false,
+        error: formatPasskeyError(res.error),
+      };
+    }
+
+    // Optionally update friendly name if provided and passkey ID is available
+    if (friendlyName && res.data?.id && typeof supabase.auth.passkey?.update === 'function') {
+      try {
+        await supabase.auth.passkey.update({
+          passkeyId: res.data.id,
+          friendlyName,
+        });
+      } catch (nameErr) {
+        console.warn('Could not update passkey friendly name:', nameErr);
+      }
+    }
+
+    return {
+      success: true,
+      data: res.data,
+    };
+  } catch (err: any) {
+    return {
+      success: false,
+      error: formatPasskeyError(err),
+    };
+  }
+}
+
+/**
+ * Lists all passkeys registered for the current authenticated user from Supabase Auth.
+ */
+export async function listSupabasePasskeys(): Promise<{
+  success: boolean;
+  passkeys: SupabasePasskeyItem[];
+  error?: string;
+}> {
+  if (!isSupabaseConfigured || typeof window === 'undefined') {
+    return { success: true, passkeys: [] };
+  }
+
+  try {
+    if (typeof supabase.auth.passkey?.list === 'function') {
+      const res = await supabase.auth.passkey.list();
+      if (res.error) {
+        return { success: false, passkeys: [], error: formatPasskeyError(res.error) };
+      }
+      return { success: true, passkeys: (res.data || []) as SupabasePasskeyItem[] };
+    }
+    return { success: true, passkeys: [] };
+  } catch (err: any) {
+    return { success: false, passkeys: [], error: formatPasskeyError(err) };
+  }
+}
+
+/**
+ * Renames a registered passkey.
+ */
+export async function renameSupabasePasskey(
+  passkeyId: string,
+  friendlyName: string
+): Promise<{ success: boolean; error?: string }> {
+  if (!isSupabaseConfigured) {
+    return { success: false, error: 'Supabase client is not configured.' };
+  }
+
+  try {
+    if (typeof supabase.auth.passkey?.update === 'function') {
+      const res = await supabase.auth.passkey.update({
+        passkeyId,
+        friendlyName,
+      });
+      if (res.error) {
+        return { success: false, error: formatPasskeyError(res.error) };
+      }
+      return { success: true };
+    }
+    return { success: false, error: 'Passkey rename is not supported on this client.' };
+  } catch (err: any) {
+    return { success: false, error: formatPasskeyError(err) };
+  }
+}
+
+/**
+ * Deletes/revokes a registered passkey.
+ */
+export async function deleteSupabasePasskey(
+  passkeyId: string
+): Promise<{ success: boolean; error?: string }> {
+  if (!isSupabaseConfigured) {
+    return { success: false, error: 'Supabase client is not configured.' };
+  }
+
+  try {
+    if (typeof supabase.auth.passkey?.delete === 'function') {
+      const res = await supabase.auth.passkey.delete({
+        passkeyId,
+      });
+      if (res.error) {
+        return { success: false, error: formatPasskeyError(res.error) };
+      }
+      return { success: true };
+    }
+    return { success: false, error: 'Passkey delete is not supported on this client.' };
+  } catch (err: any) {
+    return { success: false, error: formatPasskeyError(err) };
+  }
+}
+
+// Backward-compatibility aliases for existing imports
+export const authenticateWithPasskey = signInWithSupabasePasskey;
+export const registerDevicePasskey = registerSupabasePasskey;

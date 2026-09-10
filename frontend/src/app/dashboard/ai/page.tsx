@@ -17,10 +17,9 @@ interface Message {
 }
 
 export default function AIAssistant() {
-  const { user } = useUser();
   const { user: userProfile } = useUserRole();
   const { t, language } = useLanguage();
-  const firstName = user?.firstName || userProfile?.name?.split(' ')[0] || 'there';
+  const firstName = userProfile?.name?.split(' ')[0] || 'there';
 
   const [messages, setMessages] = useState<Message[]>([]);
 
@@ -93,7 +92,7 @@ export default function AIAssistant() {
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: conversationHistory, userName: user?.firstName || 'User', language }),
+        body: JSON.stringify({ messages: conversationHistory, userName: userProfile?.name?.split(' ')[0] || 'User', language }),
       });
 
       if (!response.ok) {

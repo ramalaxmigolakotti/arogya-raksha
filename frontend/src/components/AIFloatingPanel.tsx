@@ -37,11 +37,11 @@ export default function AIFloatingPanel({ featureName, context, quickPrompts = [
       setMessages([{
         id: Date.now(),
         role: 'ai',
-        text: `Hi ${user?.firstName || 'there'}! I'm your AI assistant for **${featureName}**. How can I help you?`,
+        text: `Hi ${user?.name?.split(' ')[0] || 'there'}! I'm your AI assistant for **${featureName}**. How can I help you?`,
         time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
       }]);
     }
-  }, [isOpen, messages.length, featureName, user?.firstName]);
+  }, [isOpen, messages.length, featureName, user?.name]);
 
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -84,7 +84,7 @@ export default function AIFloatingPanel({ featureName, context, quickPrompts = [
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ messages: conversationHistory, userName: user?.firstName || 'User', language }),
+        body: JSON.stringify({ messages: conversationHistory, userName: user?.name?.split(' ')[0] || 'User', language }),
       });
 
       if (!response.ok) throw new Error('Failed to get AI response');

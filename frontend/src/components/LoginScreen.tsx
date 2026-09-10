@@ -85,7 +85,7 @@ const roles = [
 ];
 
 export default function LoginScreen() {
-  const { login, signUpWithSupabase, signInWithSupabase, signInWithGoogle, signInWithPasskey, registerPasskey, resetAllTestData } = useUserRole();
+  const { login, signUpWithSupabase, signInWithSupabase, signInWithGoogle, signInWithPasskey, resetAllTestData } = useUserRole();
 
   // Mode: 'signin' | 'signup' | 'quick_pass'
   const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'quick_pass'>('signin');
@@ -124,53 +124,24 @@ export default function LoginScreen() {
     setGoogleLoading(true);
     const res = await signInWithGoogle(selectedRole);
     if (!res.success) {
-      setError(res.error || 'Failed to initialize Google Sign In');
+      setError((res as any).error || 'Failed to initialize Google Sign In');
       setGoogleLoading(false);
     }
   };
 
-  // 0b. Handle Passkey / Biometric Sign In
+  // 0b. Handle Passkey / Biometric Sign In (discoverable WebAuthn credential)
   const handlePasskeySignIn = async () => {
-    const targetEmail = (email.trim() || localStorage.getItem('arogya-last-email') || '').trim();
     setError('');
     setSuccessMsg('');
     setPasskeyLoading(true);
-    const res = await signInWithPasskey({
-      email: targetEmail || undefined,
-      name: name.trim() || undefined,
-      role: selectedRole,
-    });
+    const res = await signInWithPasskey();
     if (!res.success) {
-      setError(res.error || 'Biometric authentication was cancelled or not found.');
+      setError(
+        res.error ||
+          'No passkey is available on this device. Please sign in using your email/Google account and add a passkey from Security Settings.'
+      );
     } else {
-      if (res.isNewRegistration) {
-        setSuccessMsg(`🎉 Passkey created & registered for ${targetEmail || 'your account'}! Loading dashboard...`);
-      } else {
-        setSuccessMsg('Biometric passkey verified! Loading your dashboard...');
-      }
-    }
-    setPasskeyLoading(false);
-  };
-
-  // 0c. Handle Register Passkey on this device
-  const handleRegisterPasskey = async () => {
-    const targetEmail = (email.trim() || localStorage.getItem('arogya-last-email') || '').trim();
-    if (!targetEmail) {
-      setError('Please enter your Email Address below so this device Passkey is linked to your medical profile!');
-      return;
-    }
-    setError('');
-    setSuccessMsg(`Preparing Passkey registration for ${targetEmail}... Touch your sensor or enter PIN when prompted.`);
-    setPasskeyLoading(true);
-    const res = await registerPasskey({
-      email: targetEmail,
-      name: name.trim() || undefined,
-      role: selectedRole,
-    });
-    if (!res.success) {
-      setError(res.error || 'Could not register passkey on this device.');
-    } else {
-      setSuccessMsg(`🎉 Device Passkey created for ${targetEmail}! Logged in successfully.`);
+      setSuccessMsg('Passkey verified! Loading your dashboard...');
     }
     setPasskeyLoading(false);
   };
@@ -362,48 +333,27 @@ export default function LoginScreen() {
             </button>
 
             {/* Supabase WebAuthn Passkey Button */}
-            <div className="space-y-1.5">
-              <button
-                type="button"
-                onClick={handlePasskeySignIn}
-                disabled={passkeyLoading || loading}
-                className="w-full py-3 px-4 bg-gradient-to-r from-emerald-500/15 via-teal-500/20 to-cyan-500/15 hover:from-emerald-500/25 hover:via-teal-500/30 hover:to-cyan-500/25 text-white font-bold text-sm rounded-xl border border-teal-500/40 shadow-lg shadow-teal-500/10 flex items-center justify-center gap-2.5 transition-all hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-60"
-              >
-                {passkeyLoading ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4 text-teal-300" viewBox="0 0 24 24" fill="none">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                    </svg>
-                    <span>Waiting for Fingerprint / Windows Hello…</span>
-                  </>
-                ) : (
-                  <>
-                    <span className="text-base">🔑</span>
-                    {email.trim() ? (
-                      <span className="truncate max-w-[260px]">
-                        Sign in as <strong className="text-teal-300 underline underline-offset-2">{email.trim()}</strong>
-                      </span>
-                    ) : (
-                      <span>Sign in with Passkey (Biometrics)</span>
-                    )}
-                    <span className="text-[10px] bg-teal-400/20 text-teal-300 px-2 py-0.5 rounded-full border border-teal-400/30 font-semibold uppercase tracking-wider shrink-0">Touch / Face ID</span>
-                  </>
-                )}
-              </button>
-
-              <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 pt-1">
-                <span>First time on this computer?</span>
-                <button
-                  type="button"
-                  onClick={handleRegisterPasskey}
-                  disabled={passkeyLoading || loading}
-                  className="text-teal-400 hover:text-teal-300 font-bold underline transition-colors"
-                >
-                  Create Device Passkey
-                </button>
-              </div>
-            </div>
+            <button
+              type="button"
+              onClick={handlePasskeySignIn}
+              disabled={passkeyLoading || loading || googleLoading}
+              className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-500/15 via-teal-500/20 to-cyan-500/15 hover:from-emerald-500/25 hover:via-teal-500/30 hover:to-cyan-500/25 text-white font-bold text-sm rounded-xl border border-teal-500/40 shadow-lg shadow-teal-500/10 flex items-center justify-center gap-2.5 transition-all hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-60"
+            >
+              {passkeyLoading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-teal-300" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  <span>Discovering passkey on this device…</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-base">🔑</span>
+                  <span>Sign in with a passkey</span>
+                </>
+              )}
+            </button>
 
             <div className="flex items-center gap-3 my-3">
               <div className="flex-1 h-px bg-white/15"></div>
@@ -522,29 +472,6 @@ export default function LoginScreen() {
                     <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
                   </svg>
                   <span>Quick Sign Up with Google</span>
-                </>
-              )}
-            </button>
-
-            {/* Register Device Passkey Option */}
-            <button
-              type="button"
-              onClick={handleRegisterPasskey}
-              disabled={passkeyLoading || loading}
-              className="w-full py-3 px-4 bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 font-bold text-sm rounded-xl border border-teal-500/30 flex items-center justify-center gap-2.5 transition-all hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-60"
-            >
-              {passkeyLoading ? (
-                <>
-                  <svg className="animate-spin h-4 w-4 text-teal-300" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                  </svg>
-                  <span>Registering Device Passkey…</span>
-                </>
-              ) : (
-                <>
-                  <span className="text-base">🛡️</span>
-                  <span>Register Device Passkey (Windows Hello / Touch ID)</span>
                 </>
               )}
             </button>
