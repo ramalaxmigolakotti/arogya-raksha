@@ -29,7 +29,7 @@ const LocationContext = createContext<LocationContextType>({
 export const useLocation = () => useContext(LocationContext);
 
 const STORAGE_KEY   = 'arogya_user_location';
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 
 // Hyderabad (Himayat Nagar / Kismatpur) as the trusted default
 const HYDERABAD: LocationData = {
@@ -135,10 +135,57 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     setError('');
 
-    // Force Himayat Nagar / Kismatpur for the demo!
+    // 1️⃣ Try browser GPS first (most accurate)
+    if (typeof navigator !== 'undefined' && navigator.geolocation) {
+      try {
+        const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 8000,
+            maximumAge: 0, // always fresh — no cached GPS position
+          });
+        });
+
+        const { latitude: lat, longitude: lng } = position.coords;
+        // Reject if suspiciously off (e.g. browser returning 0,0)
+        if (lat !== 0 && lng !== 0) {
+          const geo = await reverseGeocode(lat, lng);
+          saveLocation({
+            lat, lng,
+            city:        geo.city        || 'Unknown',
+            area:        geo.area        || '',
+            fullAddress: geo.fullAddress || `${lat.toFixed(4)}, ${lng.toFixed(4)}`,
+          });
+          return;
+        }
+      } catch {
+        // GPS denied or timed out — fall through
+      }
+    }
+
+    // 2️⃣ Check localStorage cache (skip if Bengaluru — likely stale)
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (parsed._v === CACHE_VERSION && parsed.lat && parsed.lng && parsed.city && !isBengaluru(parsed.lat, parsed.lng)) {
+          saveLocation(parsed);
+          return;
+        }
+      }
+    } catch {}
+
+    // 3️⃣ IP-based geolocation (city-level, no permission needed)
+    const ipLoc = await getIPLocation();
+    if (ipLoc) {
+      saveLocation(ipLoc);
+      return;
+    }
+
+    // 4️⃣ Last resort: Hyderabad default
     saveLocation(HYDERABAD);
-    setLoading(false);
-  }, [saveLocation]);
+    setError('Could not detect location — using default.');
+  }, [reverseGeocode, saveLocation, getIPLocation]);
 
   // Listen for localStorage changes from other components (e.g. Hospitals page)
   useEffect(() => {
