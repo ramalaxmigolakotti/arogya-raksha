@@ -113,7 +113,7 @@ export default function SettingsPage() {
     { key: 'privacy',       label: t('privacy') || 'Privacy',         icon: Shield },
   ];
 
-  if (!isLoaded) {
+  if (!user) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />

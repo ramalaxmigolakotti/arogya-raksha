@@ -105,7 +105,7 @@ function TagInput({ values, onChange, placeholder }: {
 
 export default function MedicalProfilePage() {
   const { t, language } = useLanguage();
-  const { user, isLoaded } = useUser();
+  const { user: userProfile } = useUserRole();
   const [profile, setProfile] = useState<Profile>({
     conditions: [], current_medications: [], allergies: [], preferred_hospitals: [],
     has_insurance: false, organ_donor: false,
@@ -116,8 +116,7 @@ export default function MedicalProfilePage() {
   const [saved, setSaved] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
 
-  const { user: userProfile } = useUserRole();
-  const activeUserId = userProfile?.id || user?.id || 'usr_pat_8812';
+  const activeUserId = userProfile?.id || 'usr_pat_8812';
   const [historyRecords, setHistoryRecords] = useState<MedicalRecord[]>([]);
   const [historyFilter, setHistoryFilter] = useState<string>('all');
   const [historySearch, setHistorySearch] = useState<string>('');
@@ -198,7 +197,7 @@ export default function MedicalProfilePage() {
   // Load from local storage scoped strictly to this user
   useEffect(() => {
     // 1. Reset state to clean defaults whenever activeUserId changes
-    const currentUserName = userProfile?.name || user?.fullName || `${user?.firstName || ''} ${user?.lastName || ''}`.trim();
+    const currentUserName = userProfile?.name || '';
     setProfile({
       full_name: currentUserName || '',
       conditions: [],
@@ -227,7 +226,7 @@ export default function MedicalProfilePage() {
     } catch (e) {
       console.warn('[Profile] Local cache read error:', e);
     }
-  }, [activeUserId, userKey, userProfile?.name, user?.fullName, user?.firstName, user?.lastName]);
+  }, [activeUserId, userKey, userProfile?.name]);
 
   // Non-blocking background sync from Supabase for the active user
   useEffect(() => {
