@@ -13,11 +13,16 @@ export async function POST(req: NextRequest) {
     }
 
     const LANG_NAMES: Record<string, string> = {
-      en: 'English', hi: 'Hindi', te: 'Telugu', ta: 'Tamil',
-      kn: 'Kannada', mr: 'Marathi', bn: 'Bengali', bho: 'Bhojpuri',
+      en: 'English', hi: 'Hindi (हिंदी)', te: 'Telugu (తెలుగు)', ta: 'Tamil (தமிழ்)',
+      kn: 'Kannada (ಕನ್ನಡ)', mr: 'Marathi (मराठी)', bn: 'Bengali (বাংলা)', bho: 'Bhojpuri (भोजपुरी)',
+      gu: 'Gujarati (ગુજરાતી)', pa: 'Punjabi (ਪੰਜਾਬੀ)', or: 'Odia (ଓଡ଼ିଆ)', as: 'Assamese (অসমীয়া)',
+      ur: 'Urdu (اردو)', ml: 'Malayalam (മലയാളം)', mai: 'Maithili (मैथिली)', sat: 'Santali (ᱥᱟᱱᱛᱟᱲᱤ)',
+      kok: 'Konkani (कोंकणी)', doi: 'Dogri (डोगरी)', ks: 'Kashmiri (کٲشُر)', mni: 'Manipuri (মেইতেই)',
+      ne: 'Nepali (नेपाली)', sd: 'Sindhi (سنڌي)', sa: 'Sanskrit (संस्कृतम्)',
     };
+    const targetLangName = LANG_NAMES[language || 'en'] || 'English';
     const langInstruction = language && language !== 'en'
-      ? `\n\nIMPORTANT: Respond ENTIRELY in ${LANG_NAMES[language] || 'English'}.` : '';
+      ? `\n\nIMPORTANT: Respond ENTIRELY in ${targetLangName} using native script for description, benefits, sideEffects, warnings, dosage, and Indian brand details. Keep JSON structure intact.` : '';
 
     // ── STEP 1: Llama 4 Scout VISION — Read the ACTUAL image ─────────────────
     // This is a real vision call — the model SEES the image and reads ALL text

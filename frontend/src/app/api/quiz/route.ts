@@ -10,12 +10,16 @@ export async function POST(req: NextRequest) {
     if (!topic) return NextResponse.json({ error: 'Topic is required.' }, { status: 400 });
 
     const LANG_NAMES: Record<string, string> = {
-      en: 'English', hi: 'Hindi', te: 'Telugu', ta: 'Tamil',
-      kn: 'Kannada', mr: 'Marathi', bn: 'Bengali', bho: 'Bhojpuri',
+      en: 'English', hi: 'Hindi (हिंदी)', te: 'Telugu (తెలుగు)', ta: 'Tamil (தமிழ்)',
+      kn: 'Kannada (ಕನ್ನಡ)', mr: 'Marathi (मराठी)', bn: 'Bengali (বাংলা)', bho: 'Bhojpuri (भोजपुरी)',
+      gu: 'Gujarati (ગુજરાતી)', pa: 'Punjabi (ਪੰਜਾਬੀ)', or: 'Odia (ଓଡ଼ିଆ)', as: 'Assamese (অসমীয়া)',
+      ur: 'Urdu (اردو)', ml: 'Malayalam (മലയാളം)', mai: 'Maithili (मैथिली)', sat: 'Santali (ᱥᱟᱱᱛﺎᱲᱤ)',
+      kok: 'Konkani (कोंकणी)', doi: 'Dogri (डोगरी)', ks: 'Kashmiri (کٲشُر)', mni: 'Manipuri (মেইতেই)',
+      ne: 'Nepali (नेपाली)', sd: 'Sindhi (سنڌي)', sa: 'Sanskrit (संस्कृतम्)',
     };
     const langName = LANG_NAMES[language || 'en'] || 'English';
     const langInstruction = language && language !== 'en'
-      ? `\n\nCRITICAL: Write ALL questions, options and explanations ENTIRELY in ${langName}.` : '';
+      ? `\n\nCRITICAL: Write ALL questions, options and explanations ENTIRELY in ${langName} using native script.` : '';
 
     const prompt = `Generate a health quiz about "${topic}" for Indian users of Arogya Raksha health app.
 

@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import {
   ScanLine, Upload, Stethoscope, Heart, Activity, Droplets,
   ChevronRight, Pill, MapPin, Star, Building2, ArrowUpRight,
-  FileUp, Thermometer, CheckCircle2,
+  FileUp, Thermometer, CheckCircle2, AlertCircle, Navigation,
   User, Lock, BadgeAlert, Siren
 } from 'lucide-react';
 import { useLocation } from '@/context/LocationContext';
@@ -16,6 +16,7 @@ import DiagnosticServices from '@/components/DiagnosticServices';
 import Testimonials from '@/components/Testimonials';
 import HealthcareCTA from '@/components/HealthcareCTA';
 import GeminiBadge from '@/components/GeminiBadge';
+import PersonalRiskCard from '@/components/PersonalRiskCard';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
@@ -97,6 +98,9 @@ export default function Dashboard() {
       </header>
 
 
+
+      {/* ── PERSONAL RISK CARD ── */}
+      <PersonalRiskCard />
 
       {/* ── MEDICAL PROFILE CARD ── */}
       {profileLoaded && (
