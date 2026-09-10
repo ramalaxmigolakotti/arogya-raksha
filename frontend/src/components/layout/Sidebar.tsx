@@ -3,10 +3,10 @@
 import Link from 'next/link';
 import {
   LayoutDashboard, Bot, Stethoscope, Pill, FileText,
-  Heart, Calendar, Siren, Settings, ScanLine, MapPin,
-  Globe, ChevronDown, User, Brain, Microscope, Camera, BriefcaseMedical,
-  Menu, X, Navigation, CreditCard, Sparkles, Building2, BarChart2,
-  Share2, ChevronLeft, ChevronRight, Mic
+  Heart, Siren, Settings, ScanLine, MapPin,
+  Globe, ChevronDown, User, Brain, Microscope, BriefcaseMedical,
+  Menu, X, CreditCard, Sparkles, Building2,
+  ChevronLeft, ChevronRight
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useLanguage, Language } from '@/context/LanguageContext';
@@ -38,11 +38,7 @@ export default function Sidebar() {
 
   const menuItems = [
     { icon: LayoutDashboard, label: t('dashboard'), href: '/dashboard' },
-    { icon: Navigation, label: 'Healthcare Navigator', href: '/dashboard/healthcare-navigator', featured: true },
     { icon: Heart, label: 'My Medical Profile', href: '/dashboard/profile', profile: true },
-    { icon: BarChart2, label: 'Health Analytics', href: '/dashboard/analytics' },
-    { icon: Share2, label: 'Resource Sharing', href: '/dashboard/healthshare' },
-    { icon: Mic, label: '🎙️ Voice AI Doctor', href: '/dashboard/voice-agent', featured: true },
     { icon: Bot, label: t('askAIDoctor'), href: '/dashboard/ai' },
     { icon: Stethoscope, label: t('symptomChecker'), href: '/dashboard/symptoms' },
     { icon: Pill, label: t('medicineFinder'), href: '/dashboard/medicines' },
@@ -50,12 +46,10 @@ export default function Sidebar() {
     { icon: User, label: 'Doctors', href: '/dashboard/doctors' },
     { icon: BriefcaseMedical, label: 'Doctor Dashboard', href: '/dashboard/doctor-dashboard' },
     { icon: Microscope, label: 'Diagnostic Centre', href: '/dashboard/diagnostic-centre' },
-    { icon: Camera, label: 'Media Gallery', href: '/dashboard/media' },
     { icon: Building2, label: t('hospitals'), href: '/dashboard/hospitals' },
     { icon: Brain, label: t('healthPredictors'), href: '/dashboard/predictors' },
     { icon: FileText, label: t('medicalReports'), href: '/dashboard/reports' },
     { icon: Heart, label: t('healthTracker'), href: '/dashboard/quiz' },
-    { icon: Calendar, label: t('appointments'), href: '/dashboard/appointments' },
     { icon: Siren, label: t('emergency'), href: '/dashboard/emergency' },
     { icon: Settings, label: t('settings'), href: '/dashboard/settings' },
   ];
