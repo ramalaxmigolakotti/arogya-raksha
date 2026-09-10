@@ -72,17 +72,16 @@ export async function registerDevicePasskey(
         },
         user: {
           id: userIdBuffer,
-          name: user.email,
-          displayName: user.name || user.email.split('@')[0],
+          name: user.email || 'user@arogyaraksha.in',
+          displayName: user.name || user.email || 'Arogya Raksha User',
         },
         pubKeyCredParams: [
           { alg: -7, type: 'public-key' },  // ES256 (ECDSA w/ SHA-256)
           { alg: -257, type: 'public-key' }, // RS256 (RSASSA-PKCS1-v1_5 w/ SHA-256)
         ],
         authenticatorSelection: {
-          authenticatorAttachment: 'platform', // Windows Hello, Touch ID, Face ID
           userVerification: 'preferred',
-          requireResidentKey: false,
+          residentKey: 'preferred',
         },
         timeout: 60000,
         attestation: 'none',
@@ -90,15 +89,15 @@ export async function registerDevicePasskey(
     })) as PublicKeyCredential | null;
 
     if (!credential) {
-      return { success: false, error: 'No biometric credential received.' };
+      return { success: false, error: 'No biometric credential received from authenticator.' };
     }
 
     const passkeyData: PasskeyCredentialData = {
       id: credential.id,
       rawId: btoa(String.fromCharCode(...new Uint8Array(credential.rawId))),
       type: credential.type,
-      userEmail: user.email,
-      userName: user.name,
+      userEmail: user.email || 'user@arogyaraksha.in',
+      userName: user.name || 'Arogya User',
       userRole: user.role || 'patient',
       createdAt: new Date().toISOString(),
     };
@@ -107,34 +106,64 @@ export async function registerDevicePasskey(
     return { success: true, credential: passkeyData };
   } catch (err: any) {
     if (err.name === 'NotAllowedError') {
-      return { success: false, error: 'Passkey registration was cancelled or timed out.' };
+      return { success: false, error: 'Passkey creation was cancelled in the system dialog.' };
     }
-    return { success: false, error: err.message || 'Passkey registration failed.' };
+    return { success: false, error: err.message || 'Passkey creation failed.' };
   }
 }
 
 /**
  * Authenticate with device passkey / biometric sensor
+ * If no passkey has been registered yet, seamlessly initiates passkey creation!
  */
-export async function authenticateWithPasskey(): Promise<{
+export async function authenticateWithPasskey(fallbackUser?: { email?: string; name?: string; role?: string }): Promise<{
   success: boolean;
   user?: { email: string; name: string; role: string };
   error?: string;
+  isNewRegistration?: boolean;
 }> {
   if (typeof window === 'undefined' || !window.PublicKeyCredential) {
     return { success: false, error: 'WebAuthn passkeys are not supported on this browser.' };
   }
 
+  const stored = getStoredPasskeys();
+
+  // If no passkey registered yet on this device, prompt Windows Hello / Touch ID to create one!
+  if (stored.length === 0) {
+    const defaultEmail = fallbackUser?.email || localStorage.getItem('arogya-last-email') || 'patient@arogyaraksha.in';
+    const defaultName = fallbackUser?.name || 'Arogya Raksha User';
+    const defaultRole = fallbackUser?.role || localStorage.getItem('app-user-role') || 'patient';
+
+    const regResult = await registerDevicePasskey({
+      id: `usr-${Date.now()}`,
+      email: defaultEmail,
+      name: defaultName,
+      role: defaultRole,
+    });
+
+    if (!regResult.success) {
+      return { success: false, error: regResult.error };
+    }
+
+    return {
+      success: true,
+      user: {
+        email: regResult.credential?.userEmail || defaultEmail,
+        name: regResult.credential?.userName || defaultName,
+        role: regResult.credential?.userRole || defaultRole,
+      },
+      isNewRegistration: true,
+    };
+  }
+
   try {
     const hostname = window.location.hostname;
     const challenge = window.crypto.getRandomValues(new Uint8Array(32));
-    const stored = getStoredPasskeys();
 
-    // Prepare allowCredentials if known passkeys exist on this device
+    // Prepare allowCredentials for the known passkeys on this device
     const allowCredentials: PublicKeyCredentialDescriptor[] = stored.map((p) => ({
       id: Uint8Array.from(atob(p.rawId), (c) => c.charCodeAt(0)),
       type: 'public-key',
-      transports: ['internal'],
     }));
 
     const assertion = (await navigator.credentials.get({
@@ -151,9 +180,7 @@ export async function authenticateWithPasskey(): Promise<{
       return { success: false, error: 'Biometric verification did not return an assertion.' };
     }
 
-    // Match matched credential to stored passkey or default verified user
     const matched = stored.find((p) => p.id === assertion.id) || stored[0];
-
     const email = matched?.userEmail || localStorage.getItem('arogya-last-email') || 'patient@arogyaraksha.in';
     const name = matched?.userName || 'Verified Biometric User';
     const role = matched?.userRole || localStorage.getItem('app-user-role') || 'patient';
@@ -164,7 +191,7 @@ export async function authenticateWithPasskey(): Promise<{
     };
   } catch (err: any) {
     if (err.name === 'NotAllowedError') {
-      return { success: false, error: 'Biometric verification was cancelled.' };
+      return { success: false, error: 'Biometric prompt was cancelled.' };
     }
     return { success: false, error: err.message || 'Biometric authentication failed.' };
   }

@@ -111,8 +111,8 @@ interface UserRoleContextType {
     password: string;
   }) => Promise<{ success: boolean; error?: string }>;
   signInWithGoogle: (preferredRole?: UserRole) => Promise<{ success: boolean; error?: string }>;
-  signInWithPasskey: () => Promise<{ success: boolean; error?: string }>;
-  registerPasskey: () => Promise<{ success: boolean; error?: string }>;
+  signInWithPasskey: (fallback?: { email?: string; name?: string; role?: UserRole }) => Promise<{ success: boolean; error?: string; isNewRegistration?: boolean }>;
+  registerPasskey: (params?: { email?: string; name?: string; role?: UserRole }) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   updateUserProfile: (updates: Partial<AuthUser>) => void;
   resetAllTestData: () => Promise<void>;
@@ -597,19 +597,21 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const signInWithPasskey = async (): Promise<{ success: boolean; error?: string }> => {
+  const signInWithPasskey = async (
+    fallback?: { email?: string; name?: string; role?: UserRole }
+  ): Promise<{ success: boolean; error?: string; isNewRegistration?: boolean }> => {
     try {
-      const res = await authenticateWithPasskey();
+      const res = await authenticateWithPasskey(fallback);
       if (!res.success || !res.user) {
         return { success: false, error: res.error || 'Biometric authentication failed.' };
       }
 
-      const verifiedRole = (res.user.role as UserRole) || 'patient';
+      const verifiedRole = (res.user.role as UserRole) || fallback?.role || 'patient';
       const defaultP = DEFAULT_PROFILES[verifiedRole] || DEFAULT_PROFILES.patient;
       const profile: AuthUser = {
         id: `passkey-${Date.now()}`,
-        name: res.user.name,
-        email: res.user.email,
+        name: res.user.name || fallback?.name || 'Verified Biometric User',
+        email: res.user.email || fallback?.email || 'patient@arogyaraksha.in',
         role: verifiedRole,
         badgeId: defaultP.badgeId,
         avatar: defaultP.avatar || '🔐',
@@ -625,20 +627,50 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
       localStorage.setItem('app-user-profile', JSON.stringify(profile));
       localStorage.setItem('app-logged-in', 'true');
       window.dispatchEvent(new CustomEvent('user-role-changed', { detail: verifiedRole }));
-      return { success: true };
+      return { success: true, isNewRegistration: res.isNewRegistration };
     } catch (err: any) {
       return { success: false, error: err?.message || 'Passkey authentication failed.' };
     }
   };
 
-  const registerPasskey = async (): Promise<{ success: boolean; error?: string }> => {
+  const registerPasskey = async (params?: {
+    email?: string;
+    name?: string;
+    role?: UserRole;
+  }): Promise<{ success: boolean; error?: string }> => {
     try {
+      const targetEmail = params?.email || user.email || 'patient@arogyaraksha.in';
+      const targetName = params?.name || user.name || 'Arogya User';
+      const targetRole = params?.role || role || 'patient';
+
       const res = await registerDevicePasskey({
-        id: user.id || user.email || `usr-${Date.now()}`,
-        email: user.email || 'user@arogyaraksha.in',
-        name: user.name || 'Arogya User',
-        role: role,
+        id: `usr-${Date.now()}`,
+        email: targetEmail,
+        name: targetName,
+        role: targetRole,
       });
+
+      if (res.success) {
+        const defaultP = DEFAULT_PROFILES[targetRole] || DEFAULT_PROFILES.patient;
+        const profile: AuthUser = {
+          id: `passkey-${Date.now()}`,
+          name: targetName,
+          email: targetEmail,
+          role: targetRole,
+          badgeId: defaultP.badgeId,
+          avatar: defaultP.avatar || '🔐',
+          phone: defaultP.phone || '',
+          hospitalName: defaultP.hospitalName,
+          village: defaultP.village,
+        };
+        setUser(profile);
+        setRoleState(targetRole);
+        setIsLoggedIn(true);
+        localStorage.setItem('app-user-role', targetRole);
+        localStorage.setItem('app-user-profile', JSON.stringify(profile));
+        localStorage.setItem('app-logged-in', 'true');
+        window.dispatchEvent(new CustomEvent('user-role-changed', { detail: targetRole }));
+      }
       return res;
     } catch (err: any) {
       return { success: false, error: err?.message || 'Failed to register passkey.' };

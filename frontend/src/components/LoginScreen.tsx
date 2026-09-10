@@ -124,11 +124,19 @@ export default function LoginScreen() {
     setError('');
     setSuccessMsg('');
     setPasskeyLoading(true);
-    const res = await signInWithPasskey();
+    const res = await signInWithPasskey({
+      email: email.trim() || undefined,
+      name: name.trim() || undefined,
+      role: selectedRole,
+    });
     if (!res.success) {
       setError(res.error || 'Biometric authentication was cancelled or not found.');
     } else {
-      setSuccessMsg('Biometric passkey verified! Loading your dashboard...');
+      if (res.isNewRegistration) {
+        setSuccessMsg('🎉 Passkey created & registered on this device! Welcome to Arogya Raksha!');
+      } else {
+        setSuccessMsg('Biometric passkey verified! Loading your dashboard...');
+      }
     }
     setPasskeyLoading(false);
   };
@@ -138,11 +146,15 @@ export default function LoginScreen() {
     setError('');
     setSuccessMsg('');
     setPasskeyLoading(true);
-    const res = await registerPasskey();
+    const res = await registerPasskey({
+      email: email.trim() || undefined,
+      name: name.trim() || undefined,
+      role: selectedRole,
+    });
     if (!res.success) {
       setError(res.error || 'Could not register passkey on this device.');
     } else {
-      setSuccessMsg('Device Passkey created! You can now log in with Windows Hello, Face ID or Touch ID.');
+      setSuccessMsg('🎉 Device Passkey created! You can now log in with Windows Hello, Face ID or Touch ID.');
     }
     setPasskeyLoading(false);
   };
@@ -334,28 +346,42 @@ export default function LoginScreen() {
             </button>
 
             {/* Supabase WebAuthn Passkey Button */}
-            <button
-              type="button"
-              onClick={handlePasskeySignIn}
-              disabled={passkeyLoading || loading}
-              className="w-full py-3 px-4 bg-gradient-to-r from-emerald-500/15 via-teal-500/20 to-cyan-500/15 hover:from-emerald-500/25 hover:via-teal-500/30 hover:to-cyan-500/25 text-white font-bold text-sm rounded-xl border border-teal-500/40 shadow-lg shadow-teal-500/10 flex items-center justify-center gap-2.5 transition-all hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-60"
-            >
-              {passkeyLoading ? (
-                <>
-                  <svg className="animate-spin h-4 w-4 text-teal-300" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
-                  </svg>
-                  <span>Verifying Biometric Passkey…</span>
-                </>
-              ) : (
-                <>
-                  <span className="text-base">🔑</span>
-                  <span>Sign in with Passkey (Biometrics)</span>
-                  <span className="text-[10px] bg-teal-400/20 text-teal-300 px-2 py-0.5 rounded-full border border-teal-400/30 font-semibold uppercase tracking-wider">Touch / Face ID</span>
-                </>
-              )}
-            </button>
+            <div className="space-y-1.5">
+              <button
+                type="button"
+                onClick={handlePasskeySignIn}
+                disabled={passkeyLoading || loading}
+                className="w-full py-3 px-4 bg-gradient-to-r from-emerald-500/15 via-teal-500/20 to-cyan-500/15 hover:from-emerald-500/25 hover:via-teal-500/30 hover:to-cyan-500/25 text-white font-bold text-sm rounded-xl border border-teal-500/40 shadow-lg shadow-teal-500/10 flex items-center justify-center gap-2.5 transition-all hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-60"
+              >
+                {passkeyLoading ? (
+                  <>
+                    <svg className="animate-spin h-4 w-4 text-teal-300" viewBox="0 0 24 24" fill="none">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                    </svg>
+                    <span>Waiting for Fingerprint / Windows Hello…</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="text-base">🔑</span>
+                    <span>Sign in with Passkey (Biometrics)</span>
+                    <span className="text-[10px] bg-teal-400/20 text-teal-300 px-2 py-0.5 rounded-full border border-teal-400/30 font-semibold uppercase tracking-wider">Touch / Face ID</span>
+                  </>
+                )}
+              </button>
+
+              <div className="flex items-center justify-center gap-1.5 text-[11px] text-slate-400 pt-1">
+                <span>First time on this computer?</span>
+                <button
+                  type="button"
+                  onClick={handleRegisterPasskey}
+                  disabled={passkeyLoading || loading}
+                  className="text-teal-400 hover:text-teal-300 font-bold underline transition-colors"
+                >
+                  Create Device Passkey
+                </button>
+              </div>
+            </div>
 
             <div className="flex items-center gap-3 my-3">
               <div className="flex-1 h-px bg-white/15"></div>
