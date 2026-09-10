@@ -1,5 +1,7 @@
-import { redirect } from 'next/navigation';
+'use client';
 
-export default function LoginRedirect() {
-  redirect('/sign-in');
+import LoginScreen from '@/components/LoginScreen';
+
+export default function LoginPage() {
+  return <LoginScreen />;
 }

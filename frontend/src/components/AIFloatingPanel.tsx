@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Bot, Send, X, Loader2, Sparkles, ChevronUp, User } from 'lucide-react';
-import { useUser } from '@clerk/nextjs';
 import { useLanguage } from '@/context/LanguageContext';
+import { useUserRole } from '@/context/UserRoleContext';
 
 interface Message {
   id: number;
@@ -23,7 +23,7 @@ interface AIFloatingPanelProps {
 }
 
 export default function AIFloatingPanel({ featureName, context, quickPrompts = [], quickLinks = [] }: AIFloatingPanelProps) {
-  const { user } = useUser();
+  const { user } = useUserRole();
   const { t, language } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);

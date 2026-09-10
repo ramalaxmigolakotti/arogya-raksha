@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import { authenticateWithPasskey, registerDevicePasskey } from '@/lib/passkeyHelper';
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://zjitgtmigelfhejzdhdy.supabase.co';
 const supabaseAnonKey =
@@ -110,6 +111,8 @@ interface UserRoleContextType {
     password: string;
   }) => Promise<{ success: boolean; error?: string }>;
   signInWithGoogle: (preferredRole?: UserRole) => Promise<{ success: boolean; error?: string }>;
+  signInWithPasskey: () => Promise<{ success: boolean; error?: string }>;
+  registerPasskey: () => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   updateUserProfile: (updates: Partial<AuthUser>) => void;
   resetAllTestData: () => Promise<void>;
@@ -594,6 +597,54 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signInWithPasskey = async (): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await authenticateWithPasskey();
+      if (!res.success || !res.user) {
+        return { success: false, error: res.error || 'Biometric authentication failed.' };
+      }
+
+      const verifiedRole = (res.user.role as UserRole) || 'patient';
+      const defaultP = DEFAULT_PROFILES[verifiedRole] || DEFAULT_PROFILES.patient;
+      const profile: AuthUser = {
+        id: `passkey-${Date.now()}`,
+        name: res.user.name,
+        email: res.user.email,
+        role: verifiedRole,
+        badgeId: defaultP.badgeId,
+        avatar: defaultP.avatar || '🔐',
+        phone: defaultP.phone || '',
+        hospitalName: defaultP.hospitalName,
+        village: defaultP.village,
+      };
+
+      setUser(profile);
+      setRoleState(verifiedRole);
+      setIsLoggedIn(true);
+      localStorage.setItem('app-user-role', verifiedRole);
+      localStorage.setItem('app-user-profile', JSON.stringify(profile));
+      localStorage.setItem('app-logged-in', 'true');
+      window.dispatchEvent(new CustomEvent('user-role-changed', { detail: verifiedRole }));
+      return { success: true };
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Passkey authentication failed.' };
+    }
+  };
+
+  const registerPasskey = async (): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const res = await registerDevicePasskey({
+        id: user.id || user.email || `usr-${Date.now()}`,
+        email: user.email || 'user@arogyaraksha.in',
+        name: user.name || 'Arogya User',
+        role: role,
+      });
+      return res;
+    } catch (err: any) {
+      return { success: false, error: err?.message || 'Failed to register passkey.' };
+    }
+  };
+
   const updateUserProfile = (updates: Partial<AuthUser>) => {
     setUser((prev) => {
       const updated = { ...prev, ...updates };
@@ -644,6 +695,8 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
         signUpWithSupabase,
         signInWithSupabase,
         signInWithGoogle,
+        signInWithPasskey,
+        registerPasskey,
         logout,
         updateUserProfile,
         resetAllTestData,
@@ -666,6 +719,8 @@ export function useUserRole() {
       signUpWithSupabase: async () => ({ success: true }),
       signInWithSupabase: async () => ({ success: true }),
       signInWithGoogle: async () => ({ success: true }),
+      signInWithPasskey: async () => ({ success: true }),
+      registerPasskey: async () => ({ success: true }),
       logout: async () => {},
       updateUserProfile: () => {},
       resetAllTestData: async () => {},

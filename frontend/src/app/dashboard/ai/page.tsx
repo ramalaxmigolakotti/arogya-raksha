@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Send, Bot, User, Paperclip, MoreVertical, Sparkles, Activity, Loader2, Trash2 } from 'lucide-react';
-import { useUser } from '@clerk/nextjs';
 import HealthcareCTA from '@/components/HealthcareCTA';
 import { useLanguage } from '@/context/LanguageContext';
 import { useUserRole } from '@/context/UserRoleContext';

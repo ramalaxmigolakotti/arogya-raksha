@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
 import {
   Stethoscope, User, Heart, Pill, AlertCircle, Clock,
   Phone, Calendar, ChevronDown, ChevronUp, Search,

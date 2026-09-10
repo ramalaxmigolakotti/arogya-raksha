@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ClerkProvider } from "@clerk/nextjs";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { LanguageProvider } from "@/context/LanguageContext";
 import { Toaster } from "react-hot-toast";
@@ -46,36 +45,34 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <body
-          className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-          suppressHydrationWarning
-        >
-          <ThemeProvider>
-            <LanguageProvider>
-              <UserRoleProvider>
-                <RealtimeProvider>
-                  <SmartQueueProvider>
-                    <HealthcareJourneyProvider>
-                      {children}
-                      <Toaster
-                        position="top-right"
-                        toastOptions={{
-                          duration: 4000,
-                          style: { background: '#1e293b', color: '#f1f5f9', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '14px' },
-                          success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
-                          error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
-                        }}
-                      />
-                    </HealthcareJourneyProvider>
-                  </SmartQueueProvider>
-                </RealtimeProvider>
-              </UserRoleProvider>
-            </LanguageProvider>
-          </ThemeProvider>
-        </body>
-      </html>
-    </ClerkProvider>
+    <html lang="en" suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
+      >
+        <ThemeProvider>
+          <LanguageProvider>
+            <UserRoleProvider>
+              <RealtimeProvider>
+                <SmartQueueProvider>
+                  <HealthcareJourneyProvider>
+                    {children}
+                    <Toaster
+                      position="top-right"
+                      toastOptions={{
+                        duration: 4000,
+                        style: { background: '#1e293b', color: '#f1f5f9', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)', fontSize: '14px' },
+                        success: { iconTheme: { primary: '#10b981', secondary: '#fff' } },
+                        error: { iconTheme: { primary: '#ef4444', secondary: '#fff' } },
+                      }}
+                    />
+                  </HealthcareJourneyProvider>
+                </SmartQueueProvider>
+              </RealtimeProvider>
+            </UserRoleProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+      </body>
+    </html>
   );
 }

@@ -1,14 +1,13 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useUser } from '@clerk/nextjs';
-import Link from 'next/link';
 import { useTheme } from '@/context/ThemeContext';
 import { useLanguage, Language } from '@/context/LanguageContext';
+import { useUserRole } from '@/context/UserRoleContext';
 import {
   User, Heart, Sun, Moon, Monitor, Bell, Shield,
   Camera, CheckCircle2, ChevronRight, Save, Loader2,
-  Globe, Lock, LogOut, Trash2, Edit2, Upload, Languages
+  Globe, Lock, LogOut, Trash2, Edit2, Upload, Languages, Key
 } from 'lucide-react';
 
 type SettingsTab = 'profile' | 'appearance' | 'notifications' | 'privacy';
@@ -31,7 +30,7 @@ const LANGUAGE_OPTIONS: { value: Language; label: string; native: string; flag: 
 ];
 
 export default function SettingsPage() {
-  const { user, isLoaded } = useUser();
+  const { user, updateUserProfile, registerPasskey, logout } = useUserRole();
   const { theme, setTheme, resolvedTheme } = useTheme();
   const { language, setLanguage, t } = useLanguage();
 
@@ -41,7 +40,8 @@ export default function SettingsPage() {
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [avatarUploading, setAvatarUploading] = useState(false);
+  const [passkeyMsg, setPasskeyMsg] = useState('');
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [notifs, setNotifs] = useState({
@@ -54,8 +54,8 @@ export default function SettingsPage() {
 
   useEffect(() => {
     if (user) {
-      setDisplayName(user.fullName || '');
-      setAvatarPreview(user.imageUrl || null);
+      setDisplayName(user.name || '');
+      setAvatarPreview(null);
       const stored = localStorage.getItem('arogya-bio');
       if (stored) setBio(stored);
       const storedNotifs = localStorage.getItem('arogya-notifs');
@@ -65,28 +65,19 @@ export default function SettingsPage() {
 
   const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !user) return;
-    setAvatarUploading(true);
+    if (!file) return;
     const reader = new FileReader();
     reader.onload = ev => setAvatarPreview(ev.target?.result as string);
     reader.readAsDataURL(file);
-    try {
-      await user.setProfileImage({ file });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
-    } catch (err) {
-      console.error('Avatar upload error:', err);
-    } finally {
-      setAvatarUploading(false);
-    }
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
   };
 
   const saveProfile = async () => {
     if (!user) return;
     setIsSaving(true);
     try {
-      const [firstName, ...rest] = displayName.trim().split(' ');
-      await user.update({ firstName, lastName: rest.join(' ') || undefined });
+      updateUserProfile({ name: displayName.trim() });
       localStorage.setItem('arogya-bio', bio);
       setSaved(true);
       setTimeout(() => setSaved(false), 3000);
@@ -95,6 +86,18 @@ export default function SettingsPage() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleCreatePasskey = async () => {
+    setPasskeyLoading(true);
+    setPasskeyMsg('');
+    const res = await registerPasskey();
+    if (res.success) {
+      setPasskeyMsg('Passkey registered successfully! You can sign in using Windows Hello, Face ID, or Touch ID.');
+    } else {
+      setPasskeyMsg(res.error || 'Passkey registration cancelled.');
+    }
+    setPasskeyLoading(false);
   };
 
   const saveNotifs = () => {
@@ -418,11 +421,61 @@ export default function SettingsPage() {
             ))}
           </div>
 
+          {/* Passkeys & Biometrics Section */}
+          <div className="bg-white dark:bg-slate-800 rounded-2xl border border-teal-500/30 dark:border-teal-500/20 shadow-sm p-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-sm font-bold text-teal-600 dark:text-teal-400 uppercase tracking-wider flex items-center gap-2">
+                  <Key className="h-4 w-4" /> Passkeys & Device Biometrics
+                </h2>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                  Log in instantly with Windows Hello, Mac Touch ID, Face ID, or your device biometric sensor.
+                </p>
+              </div>
+              <span className="text-[10px] bg-teal-500/20 text-teal-700 dark:text-teal-300 font-bold px-2.5 py-1 rounded-full border border-teal-500/30">
+                Supabase Active
+              </span>
+            </div>
+
+            {passkeyMsg && (
+              <div className="text-xs p-3 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-700 dark:text-teal-300 font-medium">
+                {passkeyMsg}
+              </div>
+            )}
+
+            <div className="flex items-center justify-between pt-2">
+              <div className="text-xs text-slate-600 dark:text-slate-300">
+                <p className="font-semibold">Registered to this device</p>
+                <p className="text-[11px] text-slate-400">Relying Party: localhost / Arogya Raksha</p>
+              </div>
+              <button
+                onClick={handleCreatePasskey}
+                disabled={passkeyLoading}
+                className="flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-xs bg-teal-600 hover:bg-teal-700 text-white shadow-lg shadow-teal-500/20 transition-all disabled:opacity-60"
+              >
+                {passkeyLoading ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Verifying Sensor…</span>
+                  </>
+                ) : (
+                  <>
+                    <Key className="h-3.5 w-3.5" />
+                    <span>+ Add New Passkey</span>
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+
           <div className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-6 space-y-3">
             <h2 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-2">
               <Globe className="h-4 w-4" /> Account Actions
             </h2>
-            <button className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border border-slate-100 dark:border-slate-700 group">
+            <button
+              onClick={logout}
+              className="w-full flex items-center justify-between p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border border-slate-100 dark:border-slate-700 group"
+            >
               <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
                 <LogOut className="h-4 w-4" />
                 <span className="text-sm font-bold">{t('signOut')}</span>

@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useUser } from '@clerk/nextjs';
 import { createClient } from '@supabase/supabase-js';
 import {
   User, Heart, Pill, AlertTriangle, Phone, Hospital,

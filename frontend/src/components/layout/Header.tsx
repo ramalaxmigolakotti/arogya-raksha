@@ -5,13 +5,11 @@ import { Search, Bell, MapPin, Video, Loader2, RefreshCw, LogIn, LogOut, Globe, 
 import { useLocation } from '@/context/LocationContext';
 import { useLanguage, LANGUAGES, Language } from '@/context/LanguageContext';
 import { useUserRole, UserRole } from '@/context/UserRoleContext';
-import { useUser, UserButton, SignInButton } from '@clerk/nextjs';
 
 export default function Header() {
   const { location, loading, error, refreshLocation } = useLocation();
   const { t, language, setLanguage, currentLangMeta } = useLanguage();
   const { role, setRole, logout } = useUserRole();
-  const { isSignedIn } = useUser();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [langSearch, setLangSearch] = useState('');
   const [isRoleOpen, setIsRoleOpen] = useState(false);

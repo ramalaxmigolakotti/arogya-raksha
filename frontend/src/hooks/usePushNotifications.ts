@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useCallback } from 'react';
-import { useUser } from '@clerk/nextjs';
+import { useUserRole } from '@/context/UserRoleContext';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 const FIREBASE_CONFIGURED = !!(process.env.NEXT_PUBLIC_FIREBASE_API_KEY);
@@ -11,7 +11,7 @@ const FIREBASE_CONFIGURED = !!(process.env.NEXT_PUBLIC_FIREBASE_API_KEY);
  * Safe to use without Firebase keys (silently skips if not configured)
  */
 export function usePushNotifications() {
-  const { user } = useUser();
+  const { user } = useUserRole();
 
   const register = useCallback(async () => {
     if (!user || !FIREBASE_CONFIGURED) return;

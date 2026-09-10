@@ -85,7 +85,7 @@ const roles = [
 ];
 
 export default function LoginScreen() {
-  const { login, signUpWithSupabase, signInWithSupabase, signInWithGoogle, resetAllTestData } = useUserRole();
+  const { login, signUpWithSupabase, signInWithSupabase, signInWithGoogle, signInWithPasskey, registerPasskey, resetAllTestData } = useUserRole();
 
   // Mode: 'signin' | 'signup' | 'quick_pass'
   const [authMode, setAuthMode] = useState<'signin' | 'signup' | 'quick_pass'>('signin');
@@ -100,6 +100,7 @@ export default function LoginScreen() {
   // Feedback
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [passkeyLoading, setPasskeyLoading] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -116,6 +117,34 @@ export default function LoginScreen() {
       setError(res.error || 'Failed to initialize Google Sign In');
       setGoogleLoading(false);
     }
+  };
+
+  // 0b. Handle Passkey / Biometric Sign In
+  const handlePasskeySignIn = async () => {
+    setError('');
+    setSuccessMsg('');
+    setPasskeyLoading(true);
+    const res = await signInWithPasskey();
+    if (!res.success) {
+      setError(res.error || 'Biometric authentication was cancelled or not found.');
+    } else {
+      setSuccessMsg('Biometric passkey verified! Loading your dashboard...');
+    }
+    setPasskeyLoading(false);
+  };
+
+  // 0c. Handle Register Passkey on this device
+  const handleRegisterPasskey = async () => {
+    setError('');
+    setSuccessMsg('');
+    setPasskeyLoading(true);
+    const res = await registerPasskey();
+    if (!res.success) {
+      setError(res.error || 'Could not register passkey on this device.');
+    } else {
+      setSuccessMsg('Device Passkey created! You can now log in with Windows Hello, Face ID or Touch ID.');
+    }
+    setPasskeyLoading(false);
   };
 
   // 1. Handle Sign In with Supabase
@@ -304,6 +333,30 @@ export default function LoginScreen() {
               )}
             </button>
 
+            {/* Supabase WebAuthn Passkey Button */}
+            <button
+              type="button"
+              onClick={handlePasskeySignIn}
+              disabled={passkeyLoading || loading}
+              className="w-full py-3 px-4 bg-gradient-to-r from-emerald-500/15 via-teal-500/20 to-cyan-500/15 hover:from-emerald-500/25 hover:via-teal-500/30 hover:to-cyan-500/25 text-white font-bold text-sm rounded-xl border border-teal-500/40 shadow-lg shadow-teal-500/10 flex items-center justify-center gap-2.5 transition-all hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-60"
+            >
+              {passkeyLoading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-teal-300" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  <span>Verifying Biometric Passkey…</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-base">🔑</span>
+                  <span>Sign in with Passkey (Biometrics)</span>
+                  <span className="text-[10px] bg-teal-400/20 text-teal-300 px-2 py-0.5 rounded-full border border-teal-400/30 font-semibold uppercase tracking-wider">Touch / Face ID</span>
+                </>
+              )}
+            </button>
+
             <div className="flex items-center gap-3 my-3">
               <div className="flex-1 h-px bg-white/15"></div>
               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">or sign in with email</span>
@@ -421,6 +474,29 @@ export default function LoginScreen() {
                     <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"/>
                   </svg>
                   <span>Quick Sign Up with Google</span>
+                </>
+              )}
+            </button>
+
+            {/* Register Device Passkey Option */}
+            <button
+              type="button"
+              onClick={handleRegisterPasskey}
+              disabled={passkeyLoading || loading}
+              className="w-full py-3 px-4 bg-teal-500/15 hover:bg-teal-500/25 text-teal-300 font-bold text-sm rounded-xl border border-teal-500/30 flex items-center justify-center gap-2.5 transition-all hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-60"
+            >
+              {passkeyLoading ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 text-teal-300" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                  </svg>
+                  <span>Registering Device Passkey…</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-base">🛡️</span>
+                  <span>Register Device Passkey (Windows Hello / Touch ID)</span>
                 </>
               )}
             </button>

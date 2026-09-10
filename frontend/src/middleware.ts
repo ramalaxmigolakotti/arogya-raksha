@@ -1,12 +1,9 @@
-import { clerkMiddleware } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
 
-// All routes are PUBLIC — no login required to access the app
-// Users can optionally sign in for personalized features
-export default clerkMiddleware(async (auth, req) => {
-  // Never block any route — just pass through
+export function middleware(request: NextRequest) {
   return NextResponse.next();
-});
+}
 
 export const config = {
   matcher: [
