@@ -38,14 +38,14 @@ export default function Sidebar() {
 
   const menuItems = [
     { icon: LayoutDashboard, label: t('dashboard'), href: '/dashboard' },
-    { icon: Heart, label: 'My Medical Profile', href: '/dashboard/profile', profile: true },
+    { icon: Heart, label: t('myMedicalProfile'), href: '/dashboard/profile', profile: true },
     { icon: Bot, label: t('askAIDoctor'), href: '/dashboard/ai' },
     { icon: Stethoscope, label: t('symptomChecker'), href: '/dashboard/symptoms' },
     { icon: Pill, label: t('medicineFinder'), href: '/dashboard/medicines' },
     { icon: ScanLine, label: t('medicineScanner'), href: '/dashboard/scanner' },
-    { icon: User, label: 'Doctors', href: '/dashboard/doctors' },
-    { icon: BriefcaseMedical, label: 'Doctor Dashboard', href: '/dashboard/doctor-dashboard' },
-    { icon: Microscope, label: 'Diagnostic Centre', href: '/dashboard/diagnostic-centre' },
+    { icon: User, label: t('doctors'), href: '/dashboard/doctors' },
+    { icon: BriefcaseMedical, label: t('doctorDashboard'), href: '/dashboard/doctor-dashboard' },
+    { icon: Microscope, label: t('diagnosticCentre'), href: '/dashboard/diagnostic-centre' },
     { icon: Building2, label: t('hospitals'), href: '/dashboard/hospitals' },
     { icon: Brain, label: t('healthPredictors'), href: '/dashboard/predictors' },
     { icon: FileText, label: t('medicalReports'), href: '/dashboard/reports' },
