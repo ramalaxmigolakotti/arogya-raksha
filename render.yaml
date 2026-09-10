@@ -1,17 +1,18 @@
-# Render deploy config for Arogya Raksha Backend (Python FastAPI)
+# Render deploy config for Arogya Raksha Backend (Node.js Express)
 services:
   - type: web
     name: arogya-raksha-backend
-    env: python
+    runtime: node
+    region: singapore
     rootDir: backend
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn main:app_asgi --host 0.0.0.0 --port $PORT
+    buildCommand: npm install
+    startCommand: node server.js
     healthCheckPath: /api/health
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.9
+      - key: NODE_VERSION
+        value: 20.11.0
       - key: PORT
-        value: 10000
+        value: 5000
       - key: SUPABASE_URL
         sync: false
       - key: SUPABASE_KEY
@@ -19,6 +20,16 @@ services:
       - key: JWT_SECRET
         sync: false
       - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_API_KEY_DOCTOR
+        sync: false
+      - key: GROQ_API_KEY_SCANNER
+        sync: false
+      - key: GROQ_API_KEY_SYMPTOMS
+        sync: false
+      - key: GROQ_API_KEY_REPORTS
+        sync: false
+      - key: GROQ_API_KEY_QUIZ
         sync: false
       - key: CLOUDINARY_CLOUD_NAME
         sync: false

@@ -1,15 +1,74 @@
 import { NextResponse } from 'next/server';
+import { getSarvamKeyManager } from '@/lib/sarvamKeyManager';
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY_DOCTOR || process.env.GROQ_API_KEY_SYMPTOMS || '';
-const GROQ_API_KEY_QUIZ = process.env.GROQ_API_KEY_QUIZ || GROQ_API_KEY;
+const ALL_GROQ_KEYS = [
+  process.env.GROQ_API_KEY_DOCTOR,
+  process.env.GROQ_API_KEY_SYMPTOMS,
+  process.env.GROQ_API_KEY_SCANNER,
+  process.env.GROQ_API_KEY_QUIZ,
+  process.env.GROQ_API_KEY_REPORTS,
+].filter(Boolean);
+
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
+const SARVAM_TTS_URL = 'https://api.sarvam.ai/text-to-speech';
+
+/**
+ * Robust Groq API caller with multi-key rotation and multi-model fallback on 429 rate limits
+ */
+async function callGroqWithFallback(payload, preferredModel) {
+  const modelsToTry = [preferredModel];
+  if (preferredModel === 'qwen/qwen3.8-27b') {
+    modelsToTry.push('openai/gpt-oss-20b', 'openai/gpt-oss-120b');
+  } else if (preferredModel === 'openai/gpt-oss-120b') {
+    modelsToTry.push('openai/gpt-oss-20b', 'qwen/qwen3.8-27b');
+  } else {
+    modelsToTry.push('qwen/qwen3.8-27b', 'openai/gpt-oss-120b');
+  }
+
+  for (const model of modelsToTry) {
+    for (const apiKey of ALL_GROQ_KEYS) {
+      try {
+        const adjustedPayload = {
+          ...payload,
+          model,
+          max_tokens: Math.min(payload.max_tokens || 500, 500),
+        };
+
+        const res = await fetch(GROQ_API_URL, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(adjustedPayload),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          return { data, modelUsed: model };
+        }
+
+        if (res.status === 429) {
+          console.warn(`[MediBot] Groq 429 on model ${model}. Retrying next key/model...`);
+          continue;
+        }
+
+        const errText = await res.text();
+        console.warn(`[MediBot] Groq error ${res.status} on model ${model}:`, errText.slice(0, 150));
+      } catch (e) {
+        console.warn(`[MediBot] Groq fetch network error:`, e.message);
+      }
+    }
+  }
+  return null;
+}
 
 /**
  * Intelligent Complexity Router for MediBot Agent:
- * - 'vision': qwen/qwen3.8-27b (multimodal image & packaging analysis)
- * - 'simple': openai/gpt-oss-20b (sub-second navigation, greetings, simple requests)
- * - 'complex': openai/gpt-oss-120b (deep 120B medical reasoning, differential diagnosis, drug interactions)
- * - 'moderate': qwen/qwen3.8-27b (standard clinical Q&A, multilingual Indian languages)
+ * - 'vision': qwen/qwen3.8-27b (multimodal image & packaging OCR)
+ * - 'simple': openai/gpt-oss-20b (sub-second navigation, greetings, instant tool triggers)
+ * - 'complex': openai/gpt-oss-120b (deep 120B clinical reasoning, multi-symptom differential, contraindications)
+ * - 'moderate': qwen/qwen3.8-27b (standard clinical Q&A, native multilingual Indian languages)
  */
 function selectModelByComplexity(messages, imageBase64, language) {
   if (imageBase64) {
@@ -25,7 +84,7 @@ function selectModelByComplexity(messages, imageBase64, language) {
 
   // 1. Simple / Low Complexity: Greetings & Quick Navigation
   const isGreeting = /^(hi|hello|hey|namaste|vanakkam|good\s+(morning|afternoon|evening)|hola|sup)\b/i.test(clean);
-  const isNav = /^(go\s+to|open|navigate|show|take\s+me\s+to|bring\s+up)\s+(symptoms|quiz|medicines|hospitals|scanner|doctors|appointments|profile|emergency|reports)/i.test(clean);
+  const isNav = /^(go\s+to|open|navigate|show|take\s+me\s+to|bring\s+up)\s+(symptoms|quiz|medicines|hospitals|scanner|doctors|appointments|profile|emergency|reports|admin)/i.test(clean);
   const isShort = clean.length < 40 && !clean.includes('pain') && !clean.includes('fever') && !clean.includes('blood') && !clean.includes('ache');
 
   if (isNav || (isGreeting && clean.length < 25) || (isShort && !clean.includes('symptom'))) {
@@ -70,15 +129,155 @@ const TOOLS = [
     type: 'function',
     function: {
       name: 'navigate_to_page',
-      description: 'Navigate the user to a specific page in the app. Use this when user asks to go somewhere, open a feature, or wants to use a specific feature.',
+      description: 'Navigate the user to any specific page or admin panel in the application. Use when user asks to go somewhere, open a feature, or inspect an operational dashboard.',
       parameters: {
         type: 'object',
         properties: {
-          page: { type: 'string', description: 'Page name like: symptoms, hospitals, medicines, scanner, doctors, appointments, predictors, analytics, profile, quiz, emergency, healthcare-navigator, reports' },
+          page: {
+            type: 'string',
+            description: 'Target page: symptoms, hospitals, medicines, scanner, doctors, appointments, predictors, analytics, profile, quiz, emergency, reports, tracking, diagnostic-centre, admin_beds, hospital_admin'
+          },
           reason: { type: 'string', description: 'Why we are navigating there' },
-          filter: { type: 'string', description: 'Optional: filter to apply on the target page' }
+          filter: { type: ['string', 'null'], description: 'Optional filter or tab to apply on the target page' }
         },
         required: ['page', 'reason']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_patient_medical_profile',
+      description: 'Retrieve the patient’s authenticated medical profile, vitals, chronic conditions, and allergies for automatic context.',
+      parameters: {
+        type: 'object',
+        properties: {
+          fields: { type: ['array', 'null'], items: { type: 'string' }, description: 'Optional specific fields like vitals, conditions, allergies' }
+        }
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'prefill_symptom_checker',
+      description: 'Pre-populate the Symptom Checker tool with the user’s described symptoms along with their stored profile vitals (BP, diabetic status, age, known allergies).',
+      parameters: {
+        type: 'object',
+        properties: {
+          symptoms: { type: 'array', items: { type: 'string' }, description: 'Identified symptoms list' },
+          severity: { type: ['string', 'null'], description: 'Severity: mild, moderate, or severe' },
+          duration: { type: ['string', 'null'], description: 'Duration of symptoms e.g. 2 days' }
+        },
+        required: ['symptoms']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'prefill_risk_predictor',
+      description: 'Pre-populate a health risk assessment predictor (diabetes, heart, hypertension, mental_health) using the patient’s stored vitals and biometric profile.',
+      parameters: {
+        type: 'object',
+        properties: {
+          predictor_type: {
+            type: 'string',
+            enum: ['diabetes', 'heart', 'mental_health', 'hypertension', 'obesity'],
+            description: 'Type of risk predictor to pre-populate'
+          }
+        },
+        required: ['predictor_type']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'request_action_permission',
+      description: 'Trigger a Human-in-the-Loop permission confirmation card before executing sensitive actions like appointment booking, medicine purchasing, or hospital bed management.',
+      parameters: {
+        type: 'object',
+        properties: {
+          action_type: {
+            type: 'string',
+            enum: ['book_appointment', 'order_medicine', 'allocate_hospital_bed', 'update_medical_record'],
+            description: 'The sensitive action requiring user confirmation'
+          },
+          title: { type: 'string', description: 'Brief user-friendly title e.g. Confirm Doctor Appointment' },
+          summary: { type: 'string', description: 'Detailed summary of the action and parameters' },
+          estimated_cost: { type: ['string', 'null'], description: 'Estimated cost or ₹0 for free care scheme' },
+          payload: { type: 'object', description: 'Complete action execution payload' }
+        },
+        required: ['action_type', 'title', 'summary', 'payload']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'execute_appointment_booking',
+      description: 'Execute doctor appointment booking directly into the SmartQueue system when confirmed by the patient.',
+      parameters: {
+        type: 'object',
+        properties: {
+          doctor_name: { type: 'string', description: 'Doctor or department name' },
+          specialty: { type: ['string', 'null'], description: 'Medical specialty' },
+          date: { type: ['string', 'null'], description: 'Appointment date' },
+          time_slot: { type: ['string', 'null'], description: 'Time slot' },
+          reason: { type: ['string', 'null'], description: 'Reason for visit' }
+        },
+        required: ['doctor_name']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'execute_medicine_order',
+      description: 'Place an order for prescribed or OTC medicines directly with pharmacy delivery tracking.',
+      parameters: {
+        type: 'object',
+        properties: {
+          items: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                quantity: { type: 'number' },
+                price: { type: 'number' }
+              },
+              required: ['name']
+            },
+            description: 'List of medicines to order'
+          },
+          delivery_address: { type: ['string', 'null'], description: 'Delivery address or village name' },
+          payment_method: { type: ['string', 'null'], description: 'cod or online' }
+        },
+        required: ['items']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'hospital_admin_operations',
+      description: 'Perform operational commands for the Hospital Admin console (bed allocation, emergency triage admission, ward management).',
+      parameters: {
+        type: 'object',
+        properties: {
+          operation: {
+            type: 'string',
+            enum: ['assign_bed', 'dispatch_ambulance', 'admit_emergency_patient', 'update_ward_status'],
+            description: 'Admin operation to perform'
+          },
+          ward: { type: 'string', description: 'Ward name e.g. ICU, General, Emergency, Maternity' },
+          bed_number: { type: ['string', 'null'], description: 'Bed identifier' },
+          patient_name: { type: ['string', 'null'], description: 'Patient name' },
+          notes: { type: ['string', 'null'], description: 'Operational notes' }
+        },
+        required: ['operation', 'ward']
       }
     }
   },
@@ -103,7 +302,7 @@ const TOOLS = [
     type: 'function',
     function: {
       name: 'find_hospitals',
-      description: 'Find nearby hospitals based on the user location. Use when user asks for hospitals, emergency care, or nearby medical facilities.',
+      description: 'Find nearby hospitals based on user location or emergency status.',
       parameters: {
         type: 'object',
         properties: {
@@ -116,127 +315,191 @@ const TOOLS = [
   {
     type: 'function',
     function: {
-      name: 'suggest_medicines',
-      description: 'Suggest medicines for given symptoms with dosage, side effects info. Always add disclaimer.',
-      parameters: {
-        type: 'object',
-        properties: {
-          symptoms: { type: 'array', items: { type: 'string' }, description: 'List of symptoms' },
-          severity: { type: ['string', 'null'], description: 'Severity level' }
-        },
-        required: ['symptoms']
-      }
-    }
-  },
-  {
-    type: 'function',
-    function: {
       name: 'start_health_quiz',
       description: 'Start an interactive health quiz for the user',
       parameters: {
         type: 'object',
         properties: {
-          topic: { type: ['string', 'null'], description: 'Quiz topic: general_health, diabetes, heart, nutrition, mental_health' },
+          topic: { type: ['string', 'null'], description: 'Quiz topic' },
           difficulty: { type: ['string', 'null'] },
           num_questions: { type: ['number', 'null'], description: 'Number of questions (3-10)' }
-        }
-      }
-    }
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'run_risk_predictor',
-      description: 'Run a disease risk predictor for the user. Use when user asks about their risk for diabetes, heart disease, mental health, etc.',
-      parameters: {
-        type: 'object',
-        properties: {
-          predictor_type: { type: 'string', enum: ['diabetes', 'heart', 'mental_health', 'hypertension', 'obesity'], description: 'Type of risk predictor to run' }
-        },
-        required: ['predictor_type']
-      }
-    }
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'book_appointment',
-      description: 'Open the appointment booking form for the user to book a doctor appointment',
-      parameters: {
-        type: 'object',
-        properties: {
-          specialty: { type: ['string', 'null'], description: 'Medical specialty needed' },
-          urgency: { type: ['string', 'null'] }
-        }
-      }
-    }
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'manage_profile',
-      description: 'Help user view or update their medical profile, vitals, or health records',
-      parameters: {
-        type: 'object',
-        properties: {
-          action: { type: ['string', 'null'] }
-        }
-      }
-    }
-  },
-  {
-    type: 'function',
-    function: {
-      name: 'show_health_analytics',
-      description: 'Show health analytics, trends, and statistics for the user',
-      parameters: {
-        type: 'object',
-        properties: {
-          metric: { type: ['string', 'null'], description: 'Optional: specific metric like bmi, steps, calories, heart_rate' }
         }
       }
     }
   }
 ];
 
-// ─── PAGE URL MAPPING ─────────────────────────────────────────────────────────
-const PAGE_URLS = {
-  symptoms: '/dashboard/symptoms',
-  hospitals: '/dashboard/hospitals',
-  medicines: '/dashboard/medicines',
-  scanner: '/dashboard/scanner',
-  doctors: '/dashboard/doctors',
-  appointments: '/dashboard/appointments',
-  predictors: '/dashboard/predictors',
-  analytics: '/dashboard/analytics',
-  profile: '/dashboard/profile',
-  quiz: '/dashboard/quiz',
-  emergency: '/dashboard/emergency',
-  'healthcare-navigator': '/dashboard/healthcare-navigator',
-  reports: '/dashboard/reports',
-};
+// ─── TOOL EXECUTION ENGINE ────────────────────────────────────────────────────
+function executeTool(toolName, args, userProfile = {}) {
+  const patient = {
+    name: userProfile.name || 'Rahul Sharma',
+    age: userProfile.age || 32,
+    gender: userProfile.gender || 'Male',
+    village: userProfile.village || 'Kothapeta',
+    bpSystolic: userProfile.bpSystolic || 120,
+    bpDiastolic: userProfile.bpDiastolic || 80,
+    isDiabetic: userProfile.isDiabetic || false,
+    chronicConditions: userProfile.chronicConditions || 'None',
+    allergies: userProfile.allergies || 'None reported',
+    bloodGroup: userProfile.bloodGroup || 'O+',
+  };
 
-// ─── TOOL EXECUTOR ─────────────────────────────────────────────────────────────
-function executeTool(toolName, args) {
   switch (toolName) {
     case 'navigate_to_page': {
-      const url = PAGE_URLS[args.page] || `/dashboard/${args.page}`;
+      const pageMap = {
+        symptoms: '/dashboard/symptoms',
+        hospitals: '/dashboard/hospitals',
+        medicines: '/dashboard/medicines',
+        scanner: '/dashboard/scanner',
+        doctors: '/dashboard/doctors',
+        appointments: '/dashboard/appointments',
+        predictors: '/dashboard/predictors',
+        analytics: '/dashboard/analytics',
+        profile: '/dashboard/profile',
+        quiz: '/dashboard/quiz',
+        emergency: '/dashboard/emergency',
+        reports: '/dashboard/reports',
+        tracking: '/dashboard/tracking',
+        'diagnostic-centre': '/dashboard/diagnostic-centre',
+        admin_beds: '/dashboard',
+        hospital_admin: '/dashboard',
+      };
+      const url = pageMap[args.page] || '/dashboard';
       return {
-        ui_action: args.filter ? 'navigate_with_filter' : 'navigate',
+        ui_action: 'navigate',
         url,
         page: args.page,
-        filter: args.filter,
-        message: `Navigating to ${args.page}: ${args.reason}`
+        filter: args.filter || null,
+        message: `Navigating to ${args.page.replace('_', ' ')}: ${args.reason}`
+      };
+    }
+
+    case 'get_patient_medical_profile': {
+      return {
+        ui_action: 'display_profile_summary',
+        data: patient,
+        message: `Retrieved medical profile for ${patient.name} (${patient.age}y, ${patient.gender}, BP: ${patient.bpSystolic}/${patient.bpDiastolic})`
+      };
+    }
+
+    case 'prefill_symptom_checker': {
+      return {
+        ui_action: 'prefill_symptoms',
+        url: '/dashboard/symptoms',
+        data: {
+          symptoms: args.symptoms,
+          age: patient.age,
+          gender: patient.gender,
+          bpSystolic: patient.bpSystolic,
+          bpDiastolic: patient.bpDiastolic,
+          isDiabetic: patient.isDiabetic,
+          chronicConditions: patient.chronicConditions,
+          allergies: patient.allergies,
+          duration: args.duration || 'recent',
+          severity: args.severity || 'moderate',
+        },
+        message: `Pre-populated Symptom Checker with your vitals (BP: ${patient.bpSystolic}/${patient.bpDiastolic}, Age: ${patient.age})`
+      };
+    }
+
+    case 'prefill_risk_predictor': {
+      return {
+        ui_action: 'prefill_predictor',
+        url: '/dashboard/predictors',
+        data: {
+          predictor_type: args.predictor_type,
+          age: patient.age,
+          gender: patient.gender,
+          bpSystolic: patient.bpSystolic,
+          bpDiastolic: patient.bpDiastolic,
+          isDiabetic: patient.isDiabetic,
+          bmi: 24.2,
+          glucose: patient.isDiabetic ? 145 : 95,
+        },
+        message: `Pre-populated ${args.predictor_type} risk predictor from your saved vitals`
+      };
+    }
+
+    case 'request_action_permission': {
+      const actionId = `act_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      return {
+        ui_action: 'require_confirmation',
+        confirmation_data: {
+          action_id: actionId,
+          action_type: args.action_type,
+          title: args.title,
+          summary: args.summary,
+          estimated_cost: args.estimated_cost || '₹0 (Arogya Raksha Scheme)',
+          payload: args.payload,
+        },
+        message: `⚠️ Confirmation required: ${args.title}. Please review and approve below.`
+      };
+    }
+
+    case 'execute_appointment_booking': {
+      const tokenNumber = Math.floor(Math.random() * 25) + 1;
+      const bookingId = `APT-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      return {
+        ui_action: 'appointment_booked',
+        data: {
+          bookingId,
+          tokenNumber,
+          doctorName: args.doctor_name,
+          specialty: args.specialty || 'General Medicine',
+          date: args.date || 'Tomorrow',
+          timeSlot: args.time_slot || '10:30 AM',
+          patientName: patient.name,
+          status: 'Confirmed',
+        },
+        message: `✅ Appointment successfully booked with ${args.doctor_name}! Your Token Number is #${tokenNumber} (Booking ID: ${bookingId}).`
+      };
+    }
+
+    case 'execute_medicine_order': {
+      const orderId = `ORD-2026-${Math.floor(1000 + Math.random() * 9000)}`;
+      const totalAmount = args.items?.reduce((sum, item) => sum + (item.price || 45) * (item.quantity || 1), 0) || 120;
+      return {
+        ui_action: 'order_placed',
+        data: {
+          orderId,
+          items: args.items,
+          totalAmount,
+          deliveryAddress: args.delivery_address || `${patient.village}, Andhra Pradesh`,
+          paymentMethod: args.payment_method || 'Cash on Delivery / Scheme',
+          estimatedDelivery: 'Within 2 hours (ASHA Network Express)',
+        },
+        message: `📦 Medicine order ${orderId} placed successfully! Total: ₹${totalAmount}. Delivery to ${patient.village}.`
+      };
+    }
+
+    case 'hospital_admin_operations': {
+      const opId = `ADM-${Date.now().toString().slice(-4)}`;
+      return {
+        ui_action: 'admin_operation',
+        data: {
+          operationId: opId,
+          operation: args.operation,
+          ward: args.ward,
+          bedNumber: args.bed_number || `B-${Math.floor(Math.random() * 20) + 1}`,
+          patientName: args.patient_name || 'Emergency Patient',
+          status: 'Success',
+        },
+        message: `🏥 Admin Command Executed: ${args.operation.replace(/_/g, ' ').toUpperCase()} in ${args.ward} ward.`
       };
     }
 
     case 'check_symptoms': {
+      const symptomsStr = args.symptoms?.join(', ') || 'symptoms';
       return {
-        ui_action: 'navigate_with_filter',
-        url: '/dashboard/symptoms',
-        page: 'symptoms',
-        data: { symptoms: args.symptoms, severity: args.severity, duration: args.duration, age: args.age },
-        message: `Analyzing ${args.symptoms?.join(', ')} in Symptom Checker`
+        ui_action: 'show_symptoms_result',
+        data: {
+          symptoms: args.symptoms,
+          severity: args.severity || 'moderate',
+          duration: args.duration || '2 days',
+          assessment: `Preliminary assessment for ${symptomsStr} considering patient age ${patient.age}.`,
+          recommendedAction: 'Stay hydrated, rest, and monitor temperature.',
+        },
+        message: `Analyzed symptoms: ${symptomsStr}`
       };
     }
 
@@ -246,15 +509,7 @@ function executeTool(toolName, args) {
         url: '/dashboard/hospitals',
         page: 'hospitals',
         data: { specialty: args.specialty, emergency: args.emergency },
-        message: args.emergency ? '🚨 Opening Emergency Hospital Finder' : 'Finding nearby hospitals for you'
-      };
-    }
-
-    case 'suggest_medicines': {
-      return {
-        ui_action: 'show_medicine_suggestions',
-        data: { symptoms: args.symptoms, severity: args.severity || 'mild' },
-        message: `Medicine suggestions for: ${args.symptoms?.join(', ')}`
+        message: args.emergency ? '🚨 Opening Emergency Hospital Finder' : 'Finding nearby hospitals'
       };
     }
 
@@ -266,204 +521,165 @@ function executeTool(toolName, args) {
           difficulty: args.difficulty || 'medium',
           num_questions: args.num_questions || 5
         },
-        message: 'Starting health quiz!'
-      };
-    }
-
-    case 'run_risk_predictor': {
-      const scores = {
-        diabetes: Math.floor(Math.random() * 40) + 15,
-        heart: Math.floor(Math.random() * 35) + 10,
-        mental_health: Math.floor(Math.random() * 30) + 10,
-        hypertension: Math.floor(Math.random() * 35) + 15,
-        obesity: Math.floor(Math.random() * 25) + 10
-      };
-      const score = scores[args.predictor_type] || 25;
-      const riskLevel = score < 20 ? 'Low' : score < 40 ? 'Moderate' : score < 60 ? 'High' : 'Very High';
-      const factorsByType = {
-        diabetes: [
-          { name: 'Blood Sugar', value: 'Normal', impact: 'neutral' },
-          { name: 'BMI', value: '24.5', impact: 'neutral' },
-          { name: 'Family History', value: 'None reported', impact: 'decreases' },
-          { name: 'Physical Activity', value: 'Moderate', impact: 'decreases' },
-          { name: 'Diet', value: 'Needs improvement', impact: 'increases' }
-        ],
-        heart: [
-          { name: 'Blood Pressure', value: '120/80', impact: 'neutral' },
-          { name: 'Cholesterol', value: 'Normal', impact: 'decreases' },
-          { name: 'Smoking', value: 'None', impact: 'decreases' },
-          { name: 'Exercise', value: 'Low', impact: 'increases' },
-          { name: 'Stress Level', value: 'Moderate', impact: 'increases' }
-        ],
-        mental_health: [
-          { name: 'Sleep Quality', value: 'Poor', impact: 'increases' },
-          { name: 'Stress Level', value: 'Moderate', impact: 'increases' },
-          { name: 'Social Support', value: 'Good', impact: 'decreases' },
-          { name: 'Exercise', value: 'Moderate', impact: 'decreases' }
-        ]
-      };
-      return {
-        ui_action: 'show_prediction',
-        data: {
-          predictor: `${args.predictor_type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())} Risk`,
-          predictorType: args.predictor_type,
-          riskScore: score,
-          riskLevel,
-          factors: factorsByType[args.predictor_type] || factorsByType.diabetes,
-          advice: [
-            'Maintain a balanced diet rich in vegetables and whole grains',
-            'Exercise for at least 30 minutes daily',
-            'Get regular health checkups',
-            'Avoid smoking and limit alcohol consumption',
-            'Manage stress through yoga or meditation'
-          ]
-        }
-      };
-    }
-
-    case 'book_appointment': {
-      return {
-        ui_action: 'open_booking_form',
-        data: { specialty: args.specialty || 'General Physician', urgency: args.urgency || 'routine' },
-        message: `Opening appointment booking for ${args.specialty || 'General Physician'}`
-      };
-    }
-
-    case 'manage_profile': {
-      return {
-        action: 'MANAGE_PROFILE',
-        url: '/dashboard/profile',
-        message: 'Opening your Medical Profile'
-      };
-    }
-
-    case 'show_health_analytics': {
-      return {
-        action: 'SHOW_ANALYTICS',
-        url: '/dashboard/analytics',
-        message: 'Opening Health Analytics Dashboard'
+        message: 'Starting health quiz'
       };
     }
 
     default:
-      return { message: `Tool ${toolName} executed` };
+      return { message: `Tool ${toolName} executed successfully.` };
   }
 }
 
-// ─── SYSTEM PROMPT ─────────────────────────────────────────────────────────────
-function buildSystemPrompt(userName, language) {
+// ─── SYSTEM PROMPT BUILDER ────────────────────────────────────────────────────
+function buildSystemPrompt(userName, language, userProfile = {}) {
   const LANG_NAMES = {
     en: 'English', hi: 'Hindi (हिंदी)', te: 'Telugu (తెలుగు)', ta: 'Tamil (தமிழ்)',
     kn: 'Kannada (ಕನ್ನಡ)', mr: 'Marathi (मराठी)', bn: 'Bengali (বাংলা)', bho: 'Bhojpuri (भोजपुरी)'
   };
   const langName = LANG_NAMES[language] || 'English';
   const langInstruction = language && language !== 'en'
-    ? `\n\nCRITICAL: Always respond in ${langName}. Every response must be in ${langName} script.`
+    ? `\n\nCRITICAL: You MUST respond in ${langName}. Write all dialogue, explanations, and advice in ${langName} script.`
     : '';
 
-  return `You are MediBot, the intelligent Agentic AI healthcare assistant for "Arogya Raksha" — India's leading rural healthcare platform.${langInstruction}
+  const pName = userProfile.name || userName || 'Rahul Sharma';
+  const pAge = userProfile.age || 32;
+  const pGender = userProfile.gender || 'Male';
+  const pBP = userProfile.bpSystolic && userProfile.bpDiastolic ? `${userProfile.bpSystolic}/${userProfile.bpDiastolic}` : '120/80';
+  const pDiabetic = userProfile.isDiabetic ? 'Yes (Type 2)' : 'No';
+  const pConditions = userProfile.chronicConditions || 'None reported';
+  const pAllergies = userProfile.allergies || 'None reported';
+  const pVillage = userProfile.village || 'Kothapeta';
 
-You are speaking with: ${userName}
+  return `You are MediBot, the advanced Multimodal Agentic AI Healthcare Assistant for "Arogya Raksha" — India's comprehensive healthcare platform.${langInstruction}
 
-## YOUR CAPABILITIES (Use tools actively!)
-You have 9 powerful AI tools. Use them proactively when the user's request matches:
-- 🧬 Run disease risk predictors (diabetes, heart, mental health)
-- 🏥 Find nearby hospitals and emergency care
-- 💊 Suggest medicines for symptoms
-- 🩺 Analyze symptoms and conditions
-- 📅 Book doctor appointments
-- 🧠 Run interactive health quizzes
-- 📊 Show health analytics
-- 📋 Manage medical profile
-- 🗺️ Navigate to any feature
+## AUTHENTICATED PATIENT PROFILE CONTEXT:
+- Name: ${pName} | Age: ${pAge} | Gender: ${pGender}
+- Location / Village: ${pVillage}, Andhra Pradesh
+- Baseline Blood Pressure: ${pBP} mmHg
+- Diabetic Status: ${pDiabetic}
+- Known Chronic Conditions: ${pConditions}
+- Known Allergies: ${pAllergies}
 
-## BEHAVIOR RULES
-1. **Always use tools** when the user's intent matches a tool capability — don't just talk about it, DO it
-2. Be warm, empathetic, and professional
-3. Use simple language (consider rural Indian users)
-4. For serious symptoms, urgently recommend consulting a doctor
-5. Always add a disclaimer for medical advice
-6. Consider Indian healthcare context (AYUSH medicines, PHCs, ASHAs, etc.)
-7. Keep responses concise but helpful (3-5 sentences max before using a tool)
-8. NEVER just say "I'll help you" — always ACT by calling a tool
-9. If user greets (hi/hello/namaste), respond warmly AND call manage_profile or show options
+## YOUR AGENTIC CAPABILITIES:
+You are empowered to take real autonomous actions across the platform via tools:
+1. 🗺️ **App Navigation**: Call \`navigate_to_page\` to smoothly switch pages (symptoms, quiz, medicines, scanner, doctors, appointments, hospital admin).
+2. 📋 **Medical Profile Pre-fill**:
+   - For symptoms: Call \`prefill_symptom_checker\` so user's vitals (BP, diabetic state, age) are automatically pre-populated without asking them!
+   - For disease predictors: Call \`prefill_risk_predictor\` with their stored biomarkers.
+3. 🛡️ **Human-in-the-Loop Permission Gates**:
+   - BEFORE booking an appointment or ordering medicine, ALWAYS call \`request_action_permission\` to ask the user to confirm!
+   - After the user confirms (e.g. "yes", "confirm", "proceed"), execute \`execute_appointment_booking\` or \`execute_medicine_order\`.
+4. 🏥 **Hospital Admin Commands**: If an admin user asks for bed allocation or dispatch, call \`hospital_admin_operations\`.
+5. 💊 **Medication & Diagnostics**: Provide Indian OTC alternatives (Dolo 650, ORS, Combiflam, Gelusil) taking their allergies into account.
 
-## IMPORTANT
-- If the user says "find hospital" → call find_hospitals tool
-- If user says "check symptoms" or mentions symptoms → call check_symptoms tool  
-- If user says "book appointment" → call book_appointment tool
-- If user says "health quiz" or "quiz" → call start_health_quiz tool
-- If user says "diabetes risk" or "heart risk" → call run_risk_predictor tool
-- If user says "analytics" or "health data" → call show_health_analytics tool
-- If user says "medicine" or "medicines" → call navigate_to_page with page="medicines"
-- Greet user briefly then use a tool to be helpful`;
+## BEHAVIORAL PROTOCOL:
+- Be warm, proactive, and compassionate.
+- DO NOT ask the user for information you already know from their profile (age, gender, chronic condition). Use it!
+- When the user asks to book an appointment, ask for the doctor/time and then trigger the permission confirmation gate.
+- When the user asks to order medicine, present the cart and trigger the permission confirmation gate.
+- Always add a brief, respectful medical disclaimer.`;
 }
 
-// ─── QUIZ HANDLER ─────────────────────────────────────────────────────────────
-async function handleQuizRequest(quizConfig, language) {
-  const topic = quizConfig?.topic || 'general_health';
-  const numQ = Math.min(quizConfig?.numQuestions || 5, 10);
+// ─── AUDIO SYNTHESIS HELPER (Sarvam TTS) ──────────────────────────────────────
+async function synthesizeVoiceResponse(text, language) {
+  try {
+    const keyManager = getSarvamKeyManager();
+    const SARVAM_TTS_LANG_CODES = {
+      hi: 'hi-IN', te: 'te-IN', ta: 'ta-IN', kn: 'kn-IN',
+      mr: 'mr-IN', bn: 'bn-IN', gu: 'gu-IN', pa: 'pa-IN',
+      or: 'od-IN', ml: 'ml-IN', en: 'en-IN', bho: 'hi-IN',
+    };
+    const langCode = SARVAM_TTS_LANG_CODES[language] || 'en-IN';
 
-  const topicPrompts = {
-    general_health: 'general health, hygiene, nutrition, and wellness',
-    diabetes: 'diabetes, blood sugar management, diet for diabetics',
-    heart: 'heart health, cardiovascular disease prevention',
-    nutrition: 'nutrition, balanced diet, vitamins, and minerals',
-    mental_health: 'mental health, stress management, mindfulness'
-  };
+    const cleanText = text
+      .replace(/[\*\_#`~]/g, '')
+      .replace(/\[.*?\]\(.*?\)/g, '')
+      .replace(/[\u{1F300}-\u{1F9FF}]/gu, '')
+      .slice(0, 450)
+      .trim();
 
-  const prompt = `Generate ${numQ} multiple choice health quiz questions about ${topicPrompts[topic] || topicPrompts.general_health}.
+    if (!cleanText) return null;
 
-Return ONLY a valid JSON array like this:
-[
-  {
-    "question": "What is the normal fasting blood sugar level?",
-    "options": ["A. 70-100 mg/dL", "B. 120-140 mg/dL", "C. 150-200 mg/dL", "D. 200+ mg/dL"],
-    "correct": "A",
-    "explanation": "Normal fasting blood sugar is 70-100 mg/dL."
+    for (let i = 0; i < keyManager.keyCount; i++) {
+      const apiKey = keyManager.getNextKey();
+      try {
+        const res = await fetch(SARVAM_TTS_URL, {
+          method: 'POST',
+          headers: {
+            'api-subscription-key': apiKey,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            inputs: [cleanText],
+            target_language_code: langCode,
+            speaker: 'priya',
+            pitch: 0,
+            pace: 1.05,
+            loudness: 1.5,
+            speech_sample_rate: 22050,
+            enable_preprocessing: true,
+            model: 'bulbul:v3',
+          }),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          return data.audios?.[0] || null;
+        }
+      } catch {
+        // continue to next key
+      }
+    }
+  } catch (err) {
+    console.warn('[MediBot TTS Synthesis Error]', err);
   }
-]
-
-Make questions relevant to Indian healthcare context. Vary difficulty. Return ONLY the JSON array, no other text.`;
-
-  const res = await fetch(GROQ_API_URL, {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${GROQ_API_KEY_QUIZ}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      model: 'qwen/qwen3.8-27b',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.5,
-      max_tokens: 2000,
-    })
-  });
-
-  if (!res.ok) {
-    throw new Error(`Groq quiz error: ${res.status}`);
-  }
-
-  const data = await res.json();
-  const content = data.choices?.[0]?.message?.content || '[]';
-
-  // Extract JSON from response
-  const jsonMatch = content.match(/\[[\s\S]*\]/);
-  const questions = jsonMatch ? JSON.parse(jsonMatch[0]) : [];
-
-  return NextResponse.json({ questions, success: true });
+  return null;
 }
 
 // ─── MAIN POST HANDLER ────────────────────────────────────────────────────────
 export async function POST(req) {
   try {
     const body = await req.json();
-    const { type, messages, language, userName, imageBase64, quizConfig } = body;
+    const {
+      type,
+      messages,
+      language = 'en',
+      userName = 'Patient',
+      userProfile = {},
+      imageBase64,
+      voiceResponse = false,
+      confirmedAction = null,
+    } = body;
 
-    if (!GROQ_API_KEY) {
+    if (ALL_GROQ_KEYS.length === 0) {
       return NextResponse.json({ error: 'AI service not configured. Please check GROQ_API_KEY.' }, { status: 500 });
     }
 
-    // Handle quiz requests separately
-    if (type === 'quiz') {
-      return await handleQuizRequest(quizConfig, language);
+    // Direct execution of confirmed actions (Human-in-the-Loop completion)
+    if (confirmedAction && confirmedAction.action_type) {
+      console.log(`[MediBot] Executing User-Confirmed Action:`, confirmedAction);
+      let executionResult = null;
+
+      if (confirmedAction.action_type === 'book_appointment') {
+        executionResult = executeTool('execute_appointment_booking', confirmedAction.payload, userProfile);
+      } else if (confirmedAction.action_type === 'order_medicine') {
+        executionResult = executeTool('execute_medicine_order', confirmedAction.payload, userProfile);
+      } else if (confirmedAction.action_type === 'allocate_hospital_bed') {
+        executionResult = executeTool('hospital_admin_operations', confirmedAction.payload, userProfile);
+      }
+
+      const replyContent = executionResult?.message || 'Your request has been successfully confirmed and processed.';
+      let audioBase64 = null;
+      if (voiceResponse !== false) {
+        audioBase64 = await synthesizeVoiceResponse(replyContent, language);
+      }
+
+      return NextResponse.json({
+        success: true,
+        content: replyContent,
+        toolResults: [{ toolName: confirmedAction.action_type, result: executionResult }],
+        audioBase64,
+      });
     }
 
     // Validate messages
@@ -471,60 +687,50 @@ export async function POST(req) {
       return NextResponse.json({ error: 'Messages are required.' }, { status: 400 });
     }
 
-    // Build messages with system prompt
+    // Build messages with dynamic system prompt containing user's profile
     const systemMessage = {
       role: 'system',
-      content: buildSystemPrompt(userName || 'Patient', language || 'en')
+      content: buildSystemPrompt(userName, language, userProfile)
     };
 
-    // Build conversation history (last 10 messages)
+    // Build conversation history
     const history = messages.slice(-10).map(m => ({
       role: m.role === 'bot' ? 'assistant' : m.role,
       content: m.content || ''
     }));
 
-    // If image was uploaded, add vision context
+    // Add vision content if image was passed
     if (imageBase64) {
       const lastMsg = history[history.length - 1];
       if (lastMsg && lastMsg.role === 'user') {
         lastMsg.content = [
-          { type: 'text', text: lastMsg.content || 'Please analyze this medicine/medical image' },
+          { type: 'text', text: lastMsg.content || 'Please analyze this medical packaging or report image' },
           { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${imageBase64}` } }
         ];
       }
     }
 
-    // Select model dynamically based on query complexity
+    // Dynamic model selection based on complexity
     const { model: selectedModel, complexity, reason } = selectModelByComplexity(messages, imageBase64, language);
-    console.log(`[MediBot] Selected model: ${selectedModel} | Complexity: ${complexity} | Reason: ${reason}`);
+    console.log(`[MediBot] Model: ${selectedModel} | Complexity: ${complexity} | Reason: ${reason}`);
 
-    // ── Step 1: Call Groq with tools ──────────────────────────────────────────
-    const groqRes = await fetch(GROQ_API_URL, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${GROQ_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        model: selectedModel,
-        messages: [systemMessage, ...history],
-        tools: TOOLS,
-        tool_choice: 'auto',
-        temperature: complexity === 'complex' ? 0.3 : 0.6,
-        max_tokens: 1500,
-      })
-    });
+    // Step 1: Call Groq with tool declarations & multi-key fallback
+    const groqCallResult = await callGroqWithFallback({
+      messages: [systemMessage, ...history],
+      tools: TOOLS,
+      tool_choice: 'auto',
+      temperature: complexity === 'complex' ? 0.3 : 0.6,
+      max_tokens: 500,
+    }, selectedModel);
 
-    if (!groqRes.ok) {
-      const errText = await groqRes.text();
-      console.error('Groq API error:', groqRes.status, errText);
+    if (!groqCallResult || !groqCallResult.data) {
       return NextResponse.json({
         success: false,
-        error: `AI service error (${groqRes.status}). Please try again.`
+        error: `AI service temporarily busy across failover keys. Please try again.`
       }, { status: 502 });
     }
 
-    const groqData = await groqRes.json();
+    const { data: groqData, modelUsed: activeModel } = groqCallResult;
     const choice = groqData.choices?.[0];
     const assistantMsg = choice?.message;
 
@@ -532,12 +738,11 @@ export async function POST(req) {
       return NextResponse.json({ success: false, error: 'No response from AI.' }, { status: 502 });
     }
 
-    // ── Step 2: Execute tool calls if any ─────────────────────────────────────
+    // Step 2: Execute tool calls if returned
     const toolResults = [];
     let finalContent = assistantMsg.content || '';
 
     if (assistantMsg.tool_calls?.length > 0) {
-      // Execute each tool
       for (const toolCall of assistantMsg.tool_calls) {
         const toolName = toolCall.function?.name;
         let toolArgs = {};
@@ -545,46 +750,43 @@ export async function POST(req) {
           toolArgs = JSON.parse(toolCall.function?.arguments || '{}');
         } catch {}
 
-        console.log(`[MediBot] Calling tool: ${toolName}`, toolArgs);
-        const result = executeTool(toolName, toolArgs);
+        console.log(`[MediBot] Executing tool: ${toolName}`, toolArgs);
+        const result = executeTool(toolName, toolArgs, userProfile);
         toolResults.push({ toolName, args: toolArgs, result });
       }
 
-      // ── Step 3: Get final response after tool execution ────────────────────
+      // Step 3: Follow-up synthesis with tool execution context
       const toolResultMessages = assistantMsg.tool_calls.map((tc, i) => ({
         role: 'tool',
         tool_call_id: tc.id,
         content: JSON.stringify(toolResults[i]?.result || {})
       }));
 
-      const followUpRes = await fetch(GROQ_API_URL, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${GROQ_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: selectedModel,
-          messages: [
-            systemMessage,
-            ...history,
-            assistantMsg,
-            ...toolResultMessages
-          ],
-          temperature: 0.6,
-          max_tokens: 1000,
-        })
-      });
+      const followUpResult = await callGroqWithFallback({
+        messages: [
+          systemMessage,
+          ...history,
+          assistantMsg,
+          ...toolResultMessages
+        ],
+        temperature: 0.6,
+        max_tokens: 500,
+      }, activeModel);
 
-      if (followUpRes.ok) {
-        const followUpData = await followUpRes.json();
-        finalContent = followUpData.choices?.[0]?.message?.content || finalContent;
+      if (followUpResult?.data) {
+        finalContent = followUpResult.data.choices?.[0]?.message?.content || finalContent;
       }
     }
 
-    // Fallback content if empty
+    // Fallback dialogue
     if (!finalContent || finalContent.trim() === '') {
-      finalContent = "I'm here to help! You can ask me about symptoms, find nearby hospitals, get medicine information, or check your health risk. What do you need? 😊";
+      finalContent = "I'm here to help! I can check your symptoms, pre-fill your health risk assessments, find doctors, or guide you through your medical profile. How can I assist you today? 😊";
+    }
+
+    // Always synthesize audio speech in user's preferred language unless muted
+    let audioBase64 = null;
+    if (voiceResponse !== false) {
+      audioBase64 = await synthesizeVoiceResponse(finalContent, language);
     }
 
     return NextResponse.json({
@@ -594,13 +796,15 @@ export async function POST(req) {
       modelUsed: selectedModel,
       complexity,
       reason,
+      audioBase64,
+      hasAudio: !!audioBase64,
     });
 
   } catch (error) {
-    console.error('[MediBot Agent Error]', error);
+    console.error('[MediBot Agent Fatal Error]', error);
     return NextResponse.json({
       success: false,
-      error: error.message || 'Something went wrong. Please try again.'
+      error: error.message || 'Something went wrong.'
     }, { status: 500 });
   }
 }

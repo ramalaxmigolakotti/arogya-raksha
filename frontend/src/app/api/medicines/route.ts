@@ -1,56 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const q = searchParams.get('q') || '';
+  const limit = searchParams.get('limit') || '10';
+  const page = searchParams.get('page') || '1';
 
-export async function GET(request: NextRequest) {
+  if (!q.trim()) {
+    return NextResponse.json({ success: true, count: 0, total: 0, medicines: [] });
+  }
+
   try {
-    const { searchParams } = new URL(request.url);
-    const stats  = searchParams.get('stats');
-    const query  = searchParams.get('q') || '';
-    const letter = searchParams.get('letter') || '';
-    const page   = parseInt(searchParams.get('page') || '1');
-    const limit  = parseInt(searchParams.get('limit') || '24');
+    // 1. First try Express backend running on port 5000
+    const backendRes = await fetch(
+      `http://localhost:5000/api/medicines/search?q=${encodeURIComponent(q)}&limit=${limit}&page=${page}`,
+      { cache: 'no-store' }
+    );
+    if (backendRes.ok) {
+      const data = await backendRes.json();
+      return NextResponse.json(data);
+    }
+  } catch (err: any) {
+    console.warn('[API/medicines] Backend fetch failed, falling back to local search:', err.message);
+  }
 
-    // ── Stats: total medicine count ─────────────────────────────
-    if (stats === 'true') {
-      return NextResponse.json({ totalMedicines: 253973 });
+  // 2. Fallback: Search local JSON files in frontend/src/data/medicines
+  try {
+    const firstLetter = q.trim().charAt(0).toUpperCase();
+    let localMeds: any[] = [];
+    try {
+      const mod = await import(`@/data/medicines/meds_${firstLetter}.json`);
+      localMeds = mod.default || mod;
+    } catch {
+      // letter file not found or special character
     }
 
-    let backendUrl = '';
+    const cleanQ = q.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const matches = localMeds.filter((m: any) => {
+      const cleanName = (m.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      const cleanGeneric = (m.generic_name || m.composition || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+      return cleanName.includes(cleanQ) || cleanGeneric.includes(cleanQ);
+    }).slice(0, parseInt(limit, 10));
 
-    if (query) {
-      // Search mode — full text search
-      backendUrl = `${BACKEND}/api/medicines/search?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`;
-    } else {
-      // Browse mode — letter filter (defaults to 'A' if nothing selected)
-      const browseLetter = letter || 'A';
-      backendUrl = `${BACKEND}/api/medicines/browse?letter=${encodeURIComponent(browseLetter)}&page=${page}&limit=${limit}`;
-    }
-
-    const res  = await fetch(backendUrl, { cache: 'no-store' });
-    const data = await res.json();
-
-    if (!res.ok) throw new Error(data.message || 'Backend error');
-
-    const allMeds = data.medicines || [];
-    const total   = data.total || allMeds.length;
-
-    // Map backend CSV fields → frontend MedicineResult format
-    const medicines = allMeds.map((m: any) => ({
-      id:              m.id,
-      name:            m.name,
-      price:           m.price || m.market_price || 0,
-      manufacturer:    m.manufacturer || m.manufacturer_name || 'Unknown',
-      type:            m.type || m.category || 'allopathy',
-      packSize:        m.pack_size_label || m.pack_size || '',
-      composition1:    m.short_composition1 || '',
-      composition2:    m.short_composition2 || '',
-      is_discontinued: m.is_discontinued || false,
-    }));
-
-    return NextResponse.json({ medicines, total, page, limit });
-  } catch (error: any) {
-    console.error('Medicines API Error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({
+      success: true,
+      count: matches.length,
+      total: matches.length,
+      medicines: matches,
+    });
+  } catch (err: any) {
+    return NextResponse.json({ success: false, error: err.message, medicines: [] }, { status: 500 });
   }
 }

@@ -11,10 +11,14 @@ import PharmacyDashboardView from '@/components/dashboards/PharmacyDashboardView
 export default function DashboardPage() {
   const { role } = useUserRole();
 
-  if (role === 'asha') return <AshaDashboardView />;
-  if (role === 'doctor') return <DoctorDashboardView />;
-  if (role === 'ambulance') return <AmbulanceDashboardView />;
-  if (role === 'hospital_admin') return <HospitalAdminDashboardView />;
-  if (role === 'pharmacy') return <PharmacyDashboardView />;
-  return <PatientDashboardView />;
+  return (
+    <div key={role} className="w-full animate-in fade-in duration-200">
+      {role === 'asha' && <AshaDashboardView />}
+      {role === 'doctor' && <DoctorDashboardView />}
+      {role === 'ambulance' && <AmbulanceDashboardView />}
+      {role === 'hospital_admin' && <HospitalAdminDashboardView />}
+      {role === 'pharmacy' && <PharmacyDashboardView />}
+      {role === 'patient' && <PatientDashboardView />}
+    </div>
+  );
 }

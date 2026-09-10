@@ -4,12 +4,14 @@ import { useState, useEffect } from 'react';
 import {
   Heart, Brain, Activity, Stethoscope, ShieldCheck, AlertTriangle,
   ChevronRight, Loader2, ArrowLeft, CheckCircle2, TrendingUp,
-  Droplets, Wind, Bone, Pill, Target, Zap, ThermometerSun
+  Droplets, Wind, Bone, Pill, Target, Zap, ThermometerSun,
+  Sparkles, RefreshCw
 } from 'lucide-react';
 import HealthcareCTA from '@/components/HealthcareCTA';
 import { useLanguage } from '@/context/LanguageContext';
 import { useUserRole } from '@/context/UserRoleContext';
 import { persistMedicalRecord } from '@/lib/medicalHistoryService';
+import { getActiveMedicalProfile, mapProfileToPredictorInputs } from '@/lib/medicalProfileHelper';
 import FeaturePastHistoryModal from '@/components/FeaturePastHistoryModal';
 
 
@@ -132,9 +134,44 @@ export default function PredictorsPage() {
   useEffect(() => {
     fetch('/api/predict')
       .then(r => r.json())
-      .then(data => { setPredictorData(data.predictors || []); setLoadingPredictors(false); })
+      .then(data => {
+        const pList = data.predictors || [];
+        setPredictorData(pList);
+        setLoadingPredictors(false);
+
+        // Auto-fill from MediBot Agent session storage or Active Medical Profile
+        try {
+          const profile = getActiveMedicalProfile(user?.id);
+          const prefillStr = sessionStorage.getItem('pending_predictor_prefill');
+          if (prefillStr) {
+            const prefill = JSON.parse(prefillStr);
+            const targetId = prefill.predictor_type || 'diabetes-heart';
+            const matched = pList.find((p: any) => p.id === targetId || p.id.includes(targetId)) || pList[0];
+            if (matched) {
+              setSelected(matched.id);
+              setFields(matched.fields);
+              setPredictorInfo(matched);
+              const baseInputs = mapProfileToPredictorInputs(profile, matched.id, matched.fields || []);
+              const initialInputs: Record<string, string> = { ...baseInputs };
+              matched.fields?.forEach((f: any) => {
+                if (prefill[f.id] !== undefined) initialInputs[f.id] = String(prefill[f.id]);
+                else if (f.id === 'age' && prefill.age) initialInputs[f.id] = String(prefill.age);
+                else if (f.id === 'gender' && prefill.gender) initialInputs[f.id] = prefill.gender;
+                else if (f.id === 'systolic' && prefill.bpSystolic) initialInputs[f.id] = String(prefill.bpSystolic);
+                else if (f.id === 'diastolic' && prefill.bpDiastolic) initialInputs[f.id] = String(prefill.bpDiastolic);
+                else if (f.id === 'glucose' && prefill.glucose) initialInputs[f.id] = String(prefill.glucose);
+                else if (f.id === 'bmi' && prefill.bmi) initialInputs[f.id] = String(prefill.bmi);
+              });
+              setInputs(initialInputs);
+            }
+            sessionStorage.removeItem('pending_predictor_prefill');
+          }
+        } catch (e) {
+          console.warn('[Predictors] Prefill read error', e);
+        }
+      })
       .catch(() => setLoadingPredictors(false));
-  }, []);
+  }, [user?.id]);
 
   const selectPredictor = (id: string) => {
     const p = predictorData.find((p: any) => p.id === id);
@@ -142,8 +179,20 @@ export default function PredictorsPage() {
       setSelected(id);
       setFields(p.fields);
       setPredictorInfo(p);
-      setInputs({});
+      const profile = getActiveMedicalProfile(user?.id);
+      const autoFilled = mapProfileToPredictorInputs(profile, id, p.fields || []);
+      setInputs(autoFilled);
       setResult(null);
+    }
+  };
+
+  const reloadFromMedicalProfile = () => {
+    if (!selected) return;
+    const p = predictorData.find((p: any) => p.id === selected);
+    if (p) {
+      const profile = getActiveMedicalProfile(user?.id);
+      const autoFilled = mapProfileToPredictorInputs(profile, selected, p.fields || []);
+      setInputs(autoFilled);
     }
   };
 
@@ -316,7 +365,23 @@ export default function PredictorsPage() {
         </div>
 
         <div className="bg-white rounded-[2rem] p-8 border border-slate-100 shadow-xl">
-          <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em] mb-6">Enter Your Health Data</h3>
+          <div className="flex items-center justify-between flex-wrap gap-2 mb-6">
+            <h3 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">Enter Your Health Data</h3>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1.5 shadow-sm">
+                <Sparkles className="h-3.5 w-3.5 text-emerald-500" />
+                Auto-filled from Medical Profile
+              </span>
+              <button
+                type="button"
+                onClick={reloadFromMedicalProfile}
+                title="Reload latest vitals from Medical Profile"
+                className="p-1.5 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <RefreshCw className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {fields.map((field: any) => (
               <div key={field.key}>

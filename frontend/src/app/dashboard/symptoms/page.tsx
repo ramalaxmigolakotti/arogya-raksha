@@ -1,17 +1,18 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Stethoscope, User, Heart, Activity, Baby, Loader2, AlertTriangle,
   Pill, Clock, ShieldAlert, ChevronRight, Info, Search,
   Thermometer, X, CheckCircle2, Syringe, Droplets, FlaskConical,
   Salad, Dumbbell, Lightbulb, Calendar, MapPin, ShoppingCart,
   ArrowRight, Zap, Star, Building2, UserCheck, Save, Phone,
-  Navigation, ChevronDown, CheckCircle, Circle
+  Navigation, ChevronDown, CheckCircle, Circle, Sparkles, RefreshCw
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useUserRole } from '@/context/UserRoleContext';
 import { persistMedicalRecord } from '@/lib/medicalHistoryService';
+import { getActiveMedicalProfile } from '@/lib/medicalProfileHelper';
 import FeaturePastHistoryModal from '@/components/FeaturePastHistoryModal';
 
 
@@ -324,6 +325,50 @@ export default function SymptomChecker() {
   const [error, setError] = useState('');
   const [result, setResult] = useState<DiagnosisResult | null>(null);
 
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [loadedProfileName, setLoadedProfileName] = useState('');
+
+  const loadFromMedicalProfile = () => {
+    try {
+      const profile = getActiveMedicalProfile(user?.id);
+      if (profile) {
+        if (profile.age) setAge(String(profile.age));
+        if (profile.gender) setGender(profile.gender.toLowerCase());
+        if (profile.bpSystolic) setBpSystolic(String(profile.bpSystolic));
+        if (profile.bpDiastolic) setBpDiastolic(String(profile.bpDiastolic));
+        if (profile.isDiabetic !== undefined) setIsDiabetic(profile.isDiabetic);
+        if (profile.isPregnant !== undefined) setIsPregnant(profile.isPregnant);
+        setProfileLoaded(true);
+        setLoadedProfileName(profile.fullName);
+      }
+    } catch (e) {
+      console.warn('[SymptomChecker] Profile auto-fill error', e);
+    }
+  };
+
+  // Auto-fill from Medical Profile & MediBot Agent session storage
+  useEffect(() => {
+    loadFromMedicalProfile();
+
+    try {
+      const prefillStr = sessionStorage.getItem('pending_symptom_prefill');
+      if (prefillStr) {
+        const prefill = JSON.parse(prefillStr);
+        if (prefill.age) setAge(String(prefill.age));
+        if (prefill.gender) setGender(prefill.gender.toLowerCase());
+        if (prefill.bpSystolic) setBpSystolic(String(prefill.bpSystolic));
+        if (prefill.bpDiastolic) setBpDiastolic(String(prefill.bpDiastolic));
+        if (prefill.isDiabetic !== undefined) setIsDiabetic(!!prefill.isDiabetic);
+        if (prefill.symptoms && Array.isArray(prefill.symptoms)) {
+          setSelectedSymptoms((prev) => Array.from(new Set([...prev, ...prefill.symptoms])));
+        }
+        sessionStorage.removeItem('pending_symptom_prefill');
+      }
+    } catch (e) {
+      console.warn('[SymptomChecker] Prefill read error', e);
+    }
+  }, [user?.id]);
+
   // Smart Care Journey state
   const [journeyStep, setJourneyStep] = useState(1);
   const [nearbyHospitals, setNearbyHospitals] = useState<NearbyHospital[]>([]);
@@ -557,9 +602,27 @@ export default function SymptomChecker() {
 
           {/* Patient Profile */}
           <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-lg shadow-slate-200/30">
-            <h2 className="text-sm font-bold text-slate-700 flex items-center gap-2 mb-4">
-              <User className="h-4 w-4 text-violet-600" /> Patient Profile
-            </h2>
+            <div className="flex items-center justify-between flex-wrap gap-2 mb-4">
+              <h2 className="text-sm font-bold text-slate-700 flex items-center gap-2">
+                <User className="h-4 w-4 text-violet-600" /> Patient Profile
+              </h2>
+              {profileLoaded && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded-full flex items-center gap-1">
+                    <Sparkles className="h-3 w-3 text-emerald-500" />
+                    Auto-filled from Profile ({loadedProfileName || 'Verified'})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={loadFromMedicalProfile}
+                    title="Reload latest vitals from Medical Profile"
+                    className="p-1 hover:bg-slate-100 rounded-lg text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                  </button>
+                </div>
+              )}
+            </div>
             <div className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>

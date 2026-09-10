@@ -14,16 +14,39 @@ export default function Header() {
   const { isSignedIn } = useUser();
   const [isLangOpen, setIsLangOpen] = useState(false);
   const [langSearch, setLangSearch] = useState('');
+  const [isRoleOpen, setIsRoleOpen] = useState(false);
+  const roleRef = useRef<HTMLDivElement>(null);
   const langRef = useRef<HTMLDivElement>(null);
 
   const cityDisplay = loading
     ? 'Detecting...'
     : location?.city || (error ? t('selectLocation') : 'Unknown');
 
+  const ALL_ROLES: {
+    id: UserRole;
+    label: string;
+    shortLabel: string;
+    badge: string;
+    icon: string;
+    color: string;
+  }[] = [
+    { id: 'patient', label: 'Patient Portal', shortLabel: 'Patient', badge: 'Citizen', icon: '🧑‍⚕️', color: 'bg-blue-600 text-white' },
+    { id: 'doctor', label: 'Doctor EHR', shortLabel: 'Doctor', badge: 'Clinical', icon: '👨‍⚕️', color: 'bg-violet-600 text-white' },
+    { id: 'asha', label: 'ASHA Field Worker', shortLabel: 'ASHA', badge: 'Village', icon: '👩‍🌾', color: 'bg-teal-600 text-white' },
+    { id: 'hospital_admin', label: 'Hospital Admin Desk', shortLabel: 'Admin', badge: 'Operations', icon: '🏥', color: 'bg-indigo-600 text-white' },
+    { id: 'pharmacy', label: 'Jan Aushadhi Pharmacy', shortLabel: 'Pharmacy', badge: 'Rx Dispense', icon: '💊', color: 'bg-emerald-600 text-white' },
+    { id: 'ambulance', label: '108 Ambulance Dispatch', shortLabel: 'Ambulance', badge: 'Emergency', icon: '🚑', color: 'bg-rose-600 text-white' },
+  ];
+
+  const currentRoleObj = ALL_ROLES.find(r => r.id === role) || ALL_ROLES[0];
+
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (langRef.current && !langRef.current.contains(e.target as Node)) {
         setIsLangOpen(false);
+      }
+      if (roleRef.current && !roleRef.current.contains(e.target as Node)) {
+        setIsRoleOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -67,41 +90,113 @@ export default function Header() {
           )}
         </button>
 
-        {/* Role Switcher Pill (Patient | ASHA | Doctor) */}
-        <div className="hidden md:flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold">
-          <button
-            onClick={() => setRole('patient')}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
-              role === 'patient'
-                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-            }`}
-          >
-            <User className="h-3.5 w-3.5" />
-            <span>Patient</span>
-          </button>
-          <button
-            onClick={() => setRole('asha')}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
-              role === 'asha'
-                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-            }`}
-          >
-            <Users className="h-3.5 w-3.5" />
-            <span>ASHA Worker</span>
-          </button>
-          <button
-            onClick={() => setRole('doctor')}
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
-              role === 'doctor'
-                ? 'bg-blue-600 text-white shadow-sm font-extrabold'
-                : 'text-slate-600 dark:text-slate-400 hover:text-slate-900'
-            }`}
-          >
-            <Stethoscope className="h-3.5 w-3.5" />
-            <span>Doctor EHR</span>
-          </button>
+        {/* Comprehensive 6-Role Switcher */}
+        <div className="relative" ref={roleRef}>
+          <div className="flex items-center gap-1.5">
+            {/* Quick Pills for Desktop (Patient, Doctor, ASHA) */}
+            <div className="hidden xl:flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200/80 dark:border-slate-700/80 text-xs font-bold">
+              <button
+                onClick={() => setRole('patient')}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
+                  role === 'patient'
+                    ? 'bg-blue-600 text-white shadow-sm font-extrabold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Switch to Patient Portal"
+              >
+                <span>🧑‍⚕️</span>
+                <span>Patient</span>
+              </button>
+              <button
+                onClick={() => setRole('doctor')}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
+                  role === 'doctor'
+                    ? 'bg-violet-600 text-white shadow-sm font-extrabold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Switch to Doctor EHR Portal"
+              >
+                <span>👨‍⚕️</span>
+                <span>Doctor</span>
+              </button>
+              <button
+                onClick={() => setRole('asha')}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg transition-all ${
+                  role === 'asha'
+                    ? 'bg-teal-600 text-white shadow-sm font-extrabold'
+                    : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+                }`}
+                title="Switch to ASHA Field Worker Portal"
+              >
+                <span>👩‍🌾</span>
+                <span>ASHA</span>
+              </button>
+            </div>
+
+            {/* Dropdown trigger showing Active Role (Visible on all screen sizes) */}
+            <button
+              onClick={() => setIsRoleOpen(!isRoleOpen)}
+              className="flex items-center gap-2 px-3 py-2 bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 rounded-xl text-xs md:text-sm font-bold text-slate-800 dark:text-slate-100 transition-all shadow-sm group"
+              title="Switch between all 6 roles"
+            >
+              <span className="text-base">{currentRoleObj.icon}</span>
+              <div className="flex flex-col text-left">
+                <span className="text-[9px] uppercase tracking-wider text-slate-400 font-extrabold leading-none">Role</span>
+                <span className="font-extrabold text-xs text-slate-900 dark:text-white">{currentRoleObj.shortLabel}</span>
+              </div>
+              <ChevronDown className={`h-3.5 w-3.5 text-slate-400 group-hover:text-slate-700 dark:group-hover:text-white transition-transform ${isRoleOpen ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+
+          {/* 6-Role Dropdown Menu */}
+          {isRoleOpen && (
+            <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 p-2 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+              <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <div>
+                  <p className="text-xs font-black text-slate-900 dark:text-white">Switch Role & View</p>
+                  <p className="text-[10px] text-slate-400 font-medium">Instantly updates the page to selected role</p>
+                </div>
+                <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold">
+                  6 Roles
+                </span>
+              </div>
+
+              <div className="max-h-80 overflow-y-auto space-y-1 p-1 custom-scrollbar mt-1">
+                {ALL_ROLES.map((r) => {
+                  const isSelected = role === r.id;
+                  return (
+                    <button
+                      key={r.id}
+                      onClick={() => {
+                        setRole(r.id);
+                        setIsRoleOpen(false);
+                      }}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl transition-all text-left ${
+                        isSelected
+                          ? `${r.color} shadow-md`
+                          : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+                      }`}
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <span className="text-xl flex-shrink-0">{r.icon}</span>
+                        <div className="truncate">
+                          <p className={`text-xs font-black truncate ${isSelected ? 'text-white' : 'text-slate-900 dark:text-white'}`}>
+                            {r.label}
+                          </p>
+                          <span className={`text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded-md ${
+                            isSelected ? 'bg-white/20 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300'
+                          }`}>
+                            {r.badge}
+                          </span>
+                        </div>
+                      </div>
+                      {isSelected && <Check className="h-4 w-4 text-white flex-shrink-0 ml-2" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Language Selector Dropdown */}

@@ -99,12 +99,30 @@ export async function callGroq(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model:       'openai/gpt-oss-20b',
+        model:       options.model || 'qwen/qwen3.8-27b',
         messages:    options.messages,
         temperature: options.temperature ?? 0.4,
         max_tokens:  options.max_tokens  ?? 1500,
         ...(options.response_format && { response_format: options.response_format }),
         ...(options.tools && { tools: options.tools, tool_choice: options.tool_choice || 'auto' }),
+      }),
+    });
+  }
+
+  // 3. If Groq rejects strict json_object validation (code: json_validate_failed), retry without response_format
+  if (res.status === 400 && options.response_format) {
+    console.warn(`[callGroq] JSON validation failed on slot ${slot}, retrying without response_format`);
+    res = await fetch(GROQ_BASE, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model:       options.model,
+        messages:    options.messages,
+        temperature: options.temperature ?? 0.2,
+        max_tokens:  options.max_tokens  ?? 1500,
       }),
     });
   }
@@ -119,10 +137,31 @@ export async function callGroq(
   return { content, raw: data };
 }
 
-/** Parse JSON from Groq response — strips markdown fences if present */
+/** Parse JSON from Groq response — strips markdown fences, preambles, and extracts JSON cleanly */
 export function parseGroqJSON<T = any>(content: string): T {
-  const clean = content.replace(/```json|```/g, '').trim();
-  return JSON.parse(clean) as T;
+  if (!content) return {} as T;
+  try {
+    const clean = content.replace(/```json|```/gi, '').trim();
+    return JSON.parse(clean) as T;
+  } catch {
+    // Extract first { ... } block
+    const firstBrace = content.indexOf('{');
+    const lastBrace = content.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace > firstBrace) {
+      try {
+        return JSON.parse(content.slice(firstBrace, lastBrace + 1)) as T;
+      } catch {}
+    }
+    // Extract first [ ... ] block
+    const firstBracket = content.indexOf('[');
+    const lastBracket = content.lastIndexOf(']');
+    if (firstBracket !== -1 && lastBracket > firstBracket) {
+      try {
+        return JSON.parse(content.slice(firstBracket, lastBracket + 1)) as T;
+      } catch {}
+    }
+    throw new Error('Failed to parse JSON from model output');
+  }
 }
 
 /** Stream response from Groq — returns a ReadableStream of SSE chunks */
@@ -171,38 +210,48 @@ export async function callGroqStream(
 
 // ─── Model constants ────────────────────────────────────────────────────────
 export const GROQ_MODELS = {
-  // Vision OCR & Medical Image Analysis
+  // Vision OCR & Medical Image Analysis (Qwen 3.8 27B Vision, OTPM cap: 1000, safe max_tokens: 650)
   VISION:            'qwen/qwen3.8-27b',
   // Fast low-latency for simple routing & greetings
   FAST:              'openai/gpt-oss-20b',
   // High-accuracy balanced model with Indian multilingual mastery
   BALANCED:          'qwen/qwen3.8-27b',
-  // Deep clinical reasoning, complex differential diagnosis & lab reports
+  // Deep clinical reasoning, complex differential diagnosis & lab reports (2000+ token capacity)
   REASONING_COMPLEX: 'openai/gpt-oss-120b',
   // Medical quiz generation
   QUIZ:              'qwen/qwen3.8-27b',
 
   // Backward compatibility aliases
-  LLAMA_33_70B:      'qwen/qwen3.8-27b',
-  LLAMA_4_SCOUT:     'qwen/qwen3.8-27b',
+  LLAMA_33_70B:      'openai/gpt-oss-120b',
+  LLAMA_4_SCOUT:     'openai/gpt-oss-20b',
 } as const;
 
 /**
  * callGroqVision — passes a real base64 image to Qwen 3.8 27B Vision for OCR/identification.
+ * Includes automatic multi-key failover across all 5 key slots and safe token capping.
  *
  * @param imageDataUrl  - full data URL: "data:image/jpeg;base64,/9j/..."
  * @param textPrompt    - instruction to the model
  * @param systemPrompt  - optional system message
- * @param slot          - key slot (scanner or reports)
+ * @param slot          - primary key slot (scanner or reports)
+ * @param maxTokens     - max output tokens (default 650 to stay strictly under Groq 1000 OTPM limit)
  */
 export async function callGroqVision(
   imageDataUrl: string,
   textPrompt: string,
   systemPrompt?: string,
-  slot: GroqKeySlot = 'scanner'
+  slot: GroqKeySlot = 'scanner',
+  maxTokens: number = 650
 ): Promise<{ content: string; raw: any }> {
-  const apiKey = KEY_MAP[slot] || KEY_MAP['scanner'];
-  if (!apiKey) throw new Error(`No Groq API key configured for ${slot} slot`);
+  // Order of keys to try: primary slot first, then fallback across other slots
+  const allSlots: GroqKeySlot[] = [slot, 'reports', 'scanner', 'doctor', 'symptoms', 'quiz'];
+  const uniqueKeys = Array.from(
+    new Set(allSlots.map((s) => KEY_MAP[s]).filter(Boolean))
+  );
+
+  if (uniqueKeys.length === 0) {
+    throw new Error('No Groq API key configured for vision processing');
+  }
 
   const messages: any[] = [];
 
@@ -225,26 +274,48 @@ export async function callGroqVision(
     ],
   });
 
-  const res = await fetch(GROQ_BASE, {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model:       GROQ_MODELS.VISION,
-      messages,
-      temperature: 0.1,   // very low — accurate OCR
-      max_tokens:  1200,
-    }),
-  });
+  // Keep tokens safely under 700 to prevent OTPM (Output Tokens Per Minute) 1000 cap
+  const safeTokens = Math.min(Math.max(200, maxTokens), 650);
+  let lastError: any = null;
 
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(`Groq Vision API error ${res.status}: ${err}`);
+  for (let i = 0; i < uniqueKeys.length; i++) {
+    const apiKey = uniqueKeys[i];
+    try {
+      const res = await fetch(GROQ_BASE, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model:       GROQ_MODELS.VISION,
+          messages,
+          temperature: 0.1,   // very low — accurate OCR
+          max_tokens:  safeTokens,
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const content = data.choices?.[0]?.message?.content || '';
+        return { content, raw: data };
+      }
+
+      const errText = await res.text();
+      console.warn(`[callGroqVision] Key slot #${i} returned status ${res.status}: ${errText.slice(0, 150)}`);
+
+      // If OTPM rate limit hit on this key, continue to next key slot
+      if (res.status === 429) {
+        lastError = new Error(`Groq Vision rate limit (429): ${errText}`);
+        continue;
+      }
+
+      lastError = new Error(`Groq Vision API error ${res.status}: ${errText}`);
+    } catch (fetchErr: any) {
+      console.warn(`[callGroqVision] Fetch failed on key #${i}:`, fetchErr.message);
+      lastError = fetchErr;
+    }
   }
 
-  const data = await res.json();
-  const content = data.choices?.[0]?.message?.content || '';
-  return { content, raw: data };
+  throw lastError || new Error('Groq Vision API failed across all available keys.');
 }

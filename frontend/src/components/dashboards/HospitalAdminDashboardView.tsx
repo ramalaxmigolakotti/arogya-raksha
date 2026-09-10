@@ -115,10 +115,16 @@ function PatientCard({ p, elapsed, delayed, onSelect }: {
   p: CQPatient; elapsed: number; delayed: boolean; onSelect: (id: string) => void;
 }) {
   const stageColor = STAGES.find((s) => s.key === p.stage)?.color ?? CQ.accent;
+  const borderColor = delayed ? CQ.urgent : CQ.line;
   return (
     <button onClick={() => onSelect(p.id)} className="w-full text-left rounded-lg p-3 mb-2 transition-colors"
-      style={{ background: CQ.panel, border: `1px solid ${delayed ? CQ.urgent : CQ.line}`,
-               borderLeft: `3px solid ${p.priority === 'urgent' ? CQ.urgent : stageColor}` }}>
+      style={{
+        background: CQ.panel,
+        borderTop: `1px solid ${borderColor}`,
+        borderRight: `1px solid ${borderColor}`,
+        borderBottom: `1px solid ${borderColor}`,
+        borderLeft: `3px solid ${p.priority === 'urgent' ? CQ.urgent : stageColor}`,
+      }}>
       <div className="flex items-center justify-between">
         <span style={{ fontWeight: 600, fontSize: 14, color: CQ.ink }}>{p.name}</span>
         <span style={{ fontSize: 11, color: CQ.inkSoft }}>{p.id}</span>
@@ -189,7 +195,13 @@ function CQOverview({ patients, beds, bedsAvail, delayedCount, avgWaitByStage, e
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {cards.map((c) => (
           <div key={c.label} className="rounded-lg p-4"
-            style={{ background: CQ.panel, border: `1px solid ${CQ.line}`, borderTop: `3px solid ${theme.accent}` }}>
+            style={{
+              background: CQ.panel,
+              borderTop: `3px solid ${theme.accent}`,
+              borderRight: `1px solid ${CQ.line}`,
+              borderBottom: `1px solid ${CQ.line}`,
+              borderLeft: `1px solid ${CQ.line}`,
+            }}>
             <div style={{ fontSize: 12, color: CQ.inkSoft }}>{c.label}</div>
             <div style={{ fontSize: 28, fontFamily: 'Georgia, serif', color: theme.accent }}>{c.value}</div>
             <div style={{ fontSize: 11.5, color: CQ.inkSoft }}>{c.sub}</div>
@@ -240,7 +252,13 @@ function BedsView({ beds, patients, onAssign, onStatus, theme }: {
               const occ = patients.find((p) => p.id === b.patientId);
               return (
                 <div key={b.id} className="rounded-lg p-3"
-                  style={{ background: CQ.panel, border: `1px solid ${CQ.line}`, borderTop: `3px solid ${statusColor[b.status]}` }}>
+                  style={{
+                    background: CQ.panel,
+                    borderTop: `3px solid ${statusColor[b.status]}`,
+                    borderRight: `1px solid ${CQ.line}`,
+                    borderBottom: `1px solid ${CQ.line}`,
+                    borderLeft: `1px solid ${CQ.line}`,
+                  }}>
                   <div className="flex items-center justify-between">
                     <span style={{ fontWeight: 700, fontSize: 14, color: CQ.ink }}>Bed {b.id}</span>
                     <span style={{ fontSize: 11, color: statusColor[b.status], fontWeight: 600, textTransform: 'capitalize' }}>{b.status}</span>
@@ -276,7 +294,13 @@ function DeptsView({ patients, elapsed, onSelect, theme }: {
         const group = patients.filter((p) => p.dept === d);
         return (
           <div key={d} className="rounded-lg p-4"
-            style={{ background: CQ.panel, border: `1px solid ${CQ.line}`, borderLeft: `3px solid ${theme.accent}` }}>
+            style={{
+              background: CQ.panel,
+              borderTop: `1px solid ${CQ.line}`,
+              borderRight: `1px solid ${CQ.line}`,
+              borderBottom: `1px solid ${CQ.line}`,
+              borderLeft: `3px solid ${theme.accent}`,
+            }}>
             <div className="flex items-center justify-between mb-2">
               <div style={{ fontWeight: 700, fontSize: 14, color: theme.accent }}>{d}</div>
               <div style={{ fontSize: 12, color: CQ.inkSoft }}>{group.length} patients</div>

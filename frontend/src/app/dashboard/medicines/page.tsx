@@ -527,30 +527,21 @@ export default function Medicines() {
     { id: 3, name: 'Vitamin D3', dosage: '60000 IU', time: 'Sunday, 10:00 AM', taken: false, stock: '2 pills left (Low Stock)' },
   ];
 
-  // ——— Fetch nearby pharmacies via Overpass API ———
+  // ——— Fetch nearby pharmacies via high-speed API ———
   const fetchPharmacies = useCallback(async (lat: number, lng: number) => {
     setPharmaciesLoading(true);
     try {
-      const query = `[out:json][timeout:15];(node["amenity"="pharmacy"](around:5000,${lat},${lng});way["amenity"="pharmacy"](around:5000,${lat},${lng}););out center body;`;
-      const res = await fetch('https://overpass-api.de/api/interpreter', {
-        method: 'POST',
-        body: `data=${encodeURIComponent(query)}`,
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      });
+      const res = await fetch(`/api/hospitals?lat=${lat}&lng=${lng}&radius=15&type=pharmacy&limit=10`);
       const data = await res.json();
-      if (data?.elements?.length > 0) {
-        const results: NearbyPharmacy[] = data.elements
-          .filter((el: any) => el.tags?.name)
-          .map((el: any) => ({
-            id: String(el.id),
-            name: el.tags.name,
-            address: [el.tags['addr:street'], el.tags['addr:city'], el.tags['addr:postcode']].filter(Boolean).join(', ') || 'Address not available',
-            distance: haversineDistance(lat, lng, el.lat ?? el.center?.lat, el.lon ?? el.center?.lon),
-            phone: el.tags.phone || el.tags['contact:phone'],
-          }))
-          .sort((a: NearbyPharmacy, b: NearbyPharmacy) => a.distance - b.distance)
-          .slice(0, 8);
-        setNearbyPharmacies(results);
+      if (data?.hospitals && data.hospitals.length > 0) {
+        const results: NearbyPharmacy[] = data.hospitals.map((h: any) => ({
+          id: `ph-${h.id || h.name.replace(/[^a-zA-Z0-9]/g, '')}`,
+          name: (h.name || 'Medical & Pharmacy').replace(/\\n/g, ' '),
+          address: [h.address, h.district, h.state].filter((p: any) => p && p !== '0').join(', ') || 'Address available via call',
+          distance: typeof h.distance === 'number' ? h.distance : 1.2,
+          phone: h.phone && h.phone !== '0' ? h.phone.replace(/\\n/g, ' ') : undefined,
+        }));
+        setNearbyPharmacies(results.slice(0, 8));
       } else {
         setNearbyPharmacies(getDemoPharmacies());
       }
@@ -562,9 +553,9 @@ export default function Medicines() {
 
   function getDemoPharmacies(): NearbyPharmacy[] {
     return [
-      { id: 'demo-p1', name: 'Apollo Pharmacy', address: 'Sarita Vihar, Main Road', distance: 0.8, phone: '+91 11 2682 1234' },
-      { id: 'demo-p2', name: 'MedPlus Pharmacy', address: 'Sector 15, Near Metro', distance: 1.5, phone: '+91 11 2744 5678' },
-      { id: 'demo-p3', name: 'Wellness Forever', address: 'DDA Market, Block A', distance: 2.3 },
+      { id: 'demo-p1', name: 'Apollo Pharmacy 24/7', address: 'Nearby Main Road Clinic', distance: 0.8, phone: '+91 40 2339 0933' },
+      { id: 'demo-p2', name: 'MedPlus Health Services', address: 'Station Road Market', distance: 1.5, phone: '+91 40 2790 4259' },
+      { id: 'demo-p3', name: 'Sanjivani Chemist & Care', address: 'Medical Enclave Block A', distance: 2.3, phone: '+91 40 2701 9223' },
     ];
   }
 

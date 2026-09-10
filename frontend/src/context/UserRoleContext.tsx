@@ -179,7 +179,8 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
       const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
         if (event === 'SIGNED_IN' && session?.user) {
           const meta = session.user.user_metadata || {};
-          const uRole: UserRole = (meta.role || 'patient') as UserRole;
+          const savedActiveRole = localStorage.getItem('app-user-role') as UserRole;
+          const uRole: UserRole = (savedActiveRole || meta.role || 'patient') as UserRole;
           const uName = meta.full_name || meta.name || session.user.email?.split('@')[0] || 'User';
           
           const profile: AuthUser = {
@@ -213,7 +214,10 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
     setHydrated(true);
   }, []);
 
-  const setRole = (newRole: UserRole) => {
+  const router = typeof window !== 'undefined' ? require('next/navigation').useRouter?.() : null;
+  const pathname = typeof window !== 'undefined' ? require('next/navigation').usePathname?.() : '/dashboard';
+
+  const setRole = (newRole: UserRole, navigate: boolean = true) => {
     setRoleState(newRole);
     const existingName = user.name && !Object.values(DEFAULT_PROFILES).some(p => p.name === user.name) ? user.name : DEFAULT_PROFILES[newRole].name;
     const existingEmail = user.email && !Object.values(DEFAULT_PROFILES).some(p => p.email === user.email) ? user.email : DEFAULT_PROFILES[newRole].email;
@@ -231,6 +235,19 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('app-user-role', newRole);
     localStorage.setItem('app-user-profile', JSON.stringify(profile));
     window.dispatchEvent(new CustomEvent('user-role-changed', { detail: newRole }));
+
+    // Immediately route to /dashboard so the present page updates to the selected role's view
+    if (navigate && typeof window !== 'undefined') {
+      if (window.location.pathname !== '/dashboard') {
+        if (router?.push) {
+          router.push('/dashboard');
+        } else {
+          window.location.href = '/dashboard';
+        }
+      } else if (router?.refresh) {
+        router.refresh();
+      }
+    }
   };
 
   const login = (selectedRole: UserRole, customUser?: Partial<AuthUser>) => {

@@ -133,11 +133,19 @@ function normalize(str) {
   return (str || '').toLowerCase().trim();
 }
 
+function compact(str) {
+  return (str || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
+
 function matchesQuery(med, q) {
   const lq = normalize(q);
+  const cq = compact(q);
+  const cn = compact(med.name);
+  const cg = compact(med.generic_name);
   return (
     normalize(med.name).includes(lq) ||
     normalize(med.generic_name).includes(lq) ||
+    (cq.length >= 2 && (cn.includes(cq) || cg.includes(cq))) ||
     normalize(med.manufacturer).includes(lq) ||
     normalize(med.category).includes(lq) ||
     normalize(med.short_composition1).includes(lq) ||

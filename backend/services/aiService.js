@@ -64,13 +64,13 @@ async function callGeminiAgent(agentType, userMessage, context = '') {
     const systemPrompt = AGENT_PROMPTS[agentType] || AGENT_PROMPTS.generalHealth;
 
     const chatCompletion = await groq.chat.completions.create({
-      model: 'llama-3.3-70b-versatile',
+      model: 'openai/gpt-oss-120b',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: `Patient Context: ${context}\n\nUser Message: ${userMessage}` },
       ],
-      temperature: 0.7,
-      max_tokens: 2000,
+      temperature: 0.5,
+      max_tokens: 650,
     });
 
     const responseText = chatCompletion.choices?.[0]?.message?.content || '';
