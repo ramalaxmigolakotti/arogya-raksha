@@ -1,13 +1,14 @@
 'use client';
 
-import { Search, Bell, User, MapPin, Video, Loader2, RefreshCw } from 'lucide-react';
+import { Search, Bell, MapPin, Video, Loader2, RefreshCw, LogIn } from 'lucide-react';
 import { useLocation } from '@/context/LocationContext';
 import { useLanguage } from '@/context/LanguageContext';
-import { UserButton } from '@clerk/nextjs';
+import { useUser, UserButton, SignInButton } from '@clerk/nextjs';
 
 export default function Header() {
   const { location, loading, error, refreshLocation } = useLocation();
   const { t } = useLanguage();
+  const { isSignedIn } = useUser();
 
   const cityDisplay = loading
     ? 'Detecting...'
@@ -56,14 +57,23 @@ export default function Header() {
           <span className="absolute top-2 right-2 h-2 w-2 bg-rose-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
         </button>
 
-        {/* Clerk User Button */}
-        <UserButton
-          appearance={{
-            elements: {
-              avatarBox: 'h-10 w-10 ring-2 ring-emerald-100 hover:ring-emerald-300 transition-all shadow-md',
-            },
-          }}
-        />
+        {/* Auth: Show UserButton if signed in, else show Login button */}
+        {isSignedIn ? (
+          <UserButton
+            appearance={{
+              elements: {
+                avatarBox: 'h-10 w-10 ring-2 ring-emerald-100 hover:ring-emerald-300 transition-all shadow-md',
+              },
+            }}
+          />
+        ) : (
+          <SignInButton mode="modal">
+            <button className="flex items-center gap-2 bg-slate-900 hover:bg-emerald-600 text-white px-4 py-2.5 rounded-xl font-bold text-sm shadow-lg transition-all hover:-translate-y-0.5">
+              <LogIn className="h-4 w-4" />
+              <span className="hidden sm:inline">Login</span>
+            </button>
+          </SignInButton>
+        )}
       </div>
     </header>
   );

@@ -1,26 +1,15 @@
-import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { clerkMiddleware } from '@clerk/nextjs/server';
 import { NextResponse } from 'next/server';
 
-// ONLY these routes need auth — everything else passes through instantly
-const isProtectedRoute = createRouteMatcher([
-  '/dashboard(.*)',
-]);
-
+// All routes are PUBLIC — no login required to access the app
+// Users can optionally sign in for personalized features
 export default clerkMiddleware(async (auth, req) => {
-  // Skip auth check entirely for non-dashboard routes (fast path)
-  if (!isProtectedRoute(req)) {
-    return NextResponse.next();
-  }
-  // Only protect dashboard routes
-  await auth.protect();
+  // Never block any route — just pass through
+  return NextResponse.next();
 });
 
 export const config = {
-  // ONLY run middleware on dashboard routes — skip everything else for speed
   matcher: [
-    '/',
-    '/dashboard/:path*',
-    '/sign-in/:path*',
-    '/sign-up/:path*',
+    '/((?!_next/static|_next/image|favicon.ico|.*\\..*).*)',
   ],
 };
