@@ -109,6 +109,7 @@ interface UserRoleContextType {
     email: string;
     password: string;
   }) => Promise<{ success: boolean; error?: string }>;
+  signInWithGoogle: (preferredRole?: UserRole) => Promise<{ success: boolean; error?: string }>;
   logout: () => Promise<void>;
   updateUserProfile: (updates: Partial<AuthUser>) => void;
   resetAllTestData: () => Promise<void>;
@@ -198,6 +199,19 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('app-user-role', uRole);
           localStorage.setItem('app-user-profile', JSON.stringify(profile));
           localStorage.setItem('app-logged-in', 'true');
+
+          // Sync authenticated user to public.users table in Supabase
+          try {
+            await supabase.from('users').upsert({
+              id: session.user.id,
+              name: uName,
+              email: session.user.email || '',
+              role: uRole,
+              is_active: true,
+            }, { onConflict: 'id' });
+          } catch (syncErr) {
+            console.warn('User DB sync notice:', syncErr);
+          }
         } else if (event === 'SIGNED_OUT') {
           // Keep local state in sync
           setIsLoggedIn(false);
@@ -546,6 +560,40 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const signInWithGoogle = async (
+    preferredRole: UserRole = 'patient'
+  ): Promise<{ success: boolean; error?: string }> => {
+    try {
+      if (!isSupabaseConfigured) {
+        return { success: false, error: 'Supabase client is not configured.' };
+      }
+
+      localStorage.setItem('app-user-role', preferredRole);
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000';
+      const redirectTo = `${origin}/dashboard`;
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+        },
+      });
+
+      if (error) {
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (err: any) {
+      console.error('Google Sign In Error:', err);
+      return { success: false, error: err?.message || 'Failed to initialize Google Sign In.' };
+    }
+  };
+
   const updateUserProfile = (updates: Partial<AuthUser>) => {
     setUser((prev) => {
       const updated = { ...prev, ...updates };
@@ -595,6 +643,7 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
         login,
         signUpWithSupabase,
         signInWithSupabase,
+        signInWithGoogle,
         logout,
         updateUserProfile,
         resetAllTestData,
@@ -616,6 +665,7 @@ export function useUserRole() {
       login: () => {},
       signUpWithSupabase: async () => ({ success: true }),
       signInWithSupabase: async () => ({ success: true }),
+      signInWithGoogle: async () => ({ success: true }),
       logout: async () => {},
       updateUserProfile: () => {},
       resetAllTestData: async () => {},
