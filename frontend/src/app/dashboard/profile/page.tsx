@@ -101,22 +101,59 @@ export default function MedicalProfilePage() {
   const [saved, setSaved] = useState(false);
   const [hasProfile, setHasProfile] = useState(false);
 
-  // Load existing profile — direct from Supabase
+  const STORAGE_KEY = 'arogya_medical_profile';
+  const userKey = user?.id ? `arogya_medical_profile_${user.id}` : STORAGE_KEY;
+
+  // Immediate load from localStorage on mount (0ms delay!)
   useEffect(() => {
-    if (!isLoaded || !user) return;
-    supabase
+    try {
+      const cached = localStorage.getItem(userKey) || localStorage.getItem(STORAGE_KEY);
+      if (cached) {
+        const data = JSON.parse(cached);
+        setProfile(prev => ({ ...prev, ...data }));
+        setHasProfile(true);
+      }
+    } catch (e) {
+      console.warn('[Profile] Local cache read error:', e);
+    }
+    setIsLoading(false);
+  }, [userKey]);
+
+  // Non-blocking background sync from Supabase when user is ready
+  useEffect(() => {
+    if (!isLoaded) return;
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+
+    // Auto-prefill full name from Clerk if missing
+    if (user.fullName || user.firstName) {
+      setProfile(p => ({
+        ...p,
+        full_name: p.full_name || user.fullName || `${user.firstName || ''} ${user.lastName || ''}`.trim()
+      }));
+    }
+
+    // Non-blocking fetch with strict 2.5s timeout so it never hangs
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error('timeout')), 2500)
+    );
+
+    const fetchPromise = supabase
       .from('user_medical_profiles')
       .select('*')
       .eq('user_id', user.id)
-      .single()
-      .then(({ data, error }) => {
-        // PGRST116 = no rows found (first time user)
+      .single();
+
+    Promise.race([fetchPromise, timeoutPromise])
+      .then((res: any) => {
+        const { data, error } = res || {};
         if (error && error.code !== 'PGRST116') {
-          console.warn('[Profile] Load error:', error.message);
           return;
         }
         if (data) {
-          setProfile({
+          const formatted = {
             ...data,
             age: data.age?.toString() || '',
             height_cm: data.height_cm?.toString() || '',
@@ -130,56 +167,71 @@ export default function MedicalProfilePage() {
             current_medications: data.current_medications || [],
             allergies: data.allergies || [],
             preferred_hospitals: data.preferred_hospitals || [],
-          });
+          };
+          setProfile(formatted);
           setHasProfile(true);
+          try {
+            localStorage.setItem(userKey, JSON.stringify(formatted));
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(formatted));
+          } catch {}
         }
       })
-      .finally(() => setIsLoading(false));
-  }, [isLoaded, user]);
+      .catch(() => {
+        // Fallback silently to localStorage — zero freeze!
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  }, [isLoaded, user, userKey]);
 
   const set = (key: keyof Profile, value: unknown) =>
     setProfile(p => ({ ...p, [key]: value }));
 
-  // Save profile — direct upsert to Supabase
+  // Instant optimistic save — persists immediately to localStorage then syncs in background
   const save = async () => {
-    if (!user) return;
     setIsSaving(true);
+    const profileData = {
+      user_id: user?.id || 'guest',
+      ...profile,
+      age: profile.age ? Number(profile.age) : null,
+      height_cm: profile.height_cm ? Number(profile.height_cm) : null,
+      weight_kg: profile.weight_kg ? Number(profile.weight_kg) : null,
+      bp_systolic: profile.bp_systolic ? Number(profile.bp_systolic) : null,
+      bp_diastolic: profile.bp_diastolic ? Number(profile.bp_diastolic) : null,
+      sugar_level_fasting: profile.sugar_level_fasting ? Number(profile.sugar_level_fasting) : null,
+      sugar_level_pp: profile.sugar_level_pp ? Number(profile.sugar_level_pp) : null,
+      pulse_rate: profile.pulse_rate ? Number(profile.pulse_rate) : null,
+      updated_at: new Date().toISOString(),
+    };
+
+    // 1. Instant local save (0ms)
     try {
-      const profileData = {
-        user_id: user.id,
-        ...profile,
-        age: profile.age ? Number(profile.age) : null,
-        height_cm: profile.height_cm ? Number(profile.height_cm) : null,
-        weight_kg: profile.weight_kg ? Number(profile.weight_kg) : null,
-        bp_systolic: profile.bp_systolic ? Number(profile.bp_systolic) : null,
-        bp_diastolic: profile.bp_diastolic ? Number(profile.bp_diastolic) : null,
-        sugar_level_fasting: profile.sugar_level_fasting ? Number(profile.sugar_level_fasting) : null,
-        sugar_level_pp: profile.sugar_level_pp ? Number(profile.sugar_level_pp) : null,
-        pulse_rate: profile.pulse_rate ? Number(profile.pulse_rate) : null,
-        updated_at: new Date().toISOString(),
-      };
-      const { error } = await supabase
-        .from('user_medical_profiles')
-        .upsert(profileData, { onConflict: 'user_id' });
-      if (error) throw error;
-      setSaved(true);
-      setHasProfile(true);
-      setTimeout(() => setSaved(false), 3000);
-    } catch (e: any) {
-      console.error('[Profile] Save error:', e.message);
-      alert('Save failed: ' + e.message);
-    } finally {
-      setIsSaving(false);
+      localStorage.setItem(userKey, JSON.stringify(profileData));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(profileData));
+      window.dispatchEvent(new CustomEvent('medicalProfileUpdated', { detail: profileData }));
+    } catch {}
+
+    setSaved(true);
+    setHasProfile(true);
+    setTimeout(() => setSaved(false), 3000);
+    setIsSaving(false);
+
+    // 2. Background sync to Supabase (if user logged in)
+    if (user?.id) {
+      try {
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('timeout')), 3000)
+        );
+        const syncPromise = supabase
+          .from('user_medical_profiles')
+          .upsert(profileData, { onConflict: 'user_id' });
+
+        await Promise.race([syncPromise, timeoutPromise]);
+      } catch (e: any) {
+        console.warn('[Profile] Supabase background sync notice:', e.message);
+      }
     }
   };
-
-  if (!isLoaded || isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-8 w-8 text-indigo-500 animate-spin" />
-      </div>
-    );
-  }
 
   const inp = (key: keyof Profile, placeholder: string, type = 'text') => (
     <input

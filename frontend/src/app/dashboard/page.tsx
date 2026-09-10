@@ -38,12 +38,36 @@ export default function Dashboard() {
   const [profileLoaded, setProfileLoaded] = useState(false);
 
   useEffect(() => {
-    if (!user?.id) return;
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/medical-profile`, {
-      headers: { 'x-user-id': user.id },
-    }).then(r => r.json()).then(res => {
-      if (res.success && res.profile) setMedProfile(res.profile);
-    }).catch(() => {}).finally(() => setProfileLoaded(true));
+    // 1. Instant load from localStorage
+    try {
+      const userKey = user?.id ? `arogya_medical_profile_${user.id}` : 'arogya_medical_profile';
+      const cached = localStorage.getItem(userKey) || localStorage.getItem('arogya_medical_profile');
+      if (cached) {
+        setMedProfile(JSON.parse(cached));
+        setProfileLoaded(true);
+      }
+    } catch {}
+
+    const handleUpdate = (e: any) => {
+      if (e?.detail) {
+        setMedProfile(e.detail);
+        setProfileLoaded(true);
+      }
+    };
+    window.addEventListener('medicalProfileUpdated', handleUpdate);
+
+    // 2. Background fetch from API
+    if (user?.id) {
+      fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/medical-profile`, {
+        headers: { 'x-user-id': user.id },
+      }).then(r => r.json()).then(res => {
+        if (res.success && res.profile) setMedProfile(res.profile);
+      }).catch(() => {}).finally(() => setProfileLoaded(true));
+    } else {
+      setProfileLoaded(true);
+    }
+
+    return () => window.removeEventListener('medicalProfileUpdated', handleUpdate);
   }, [user?.id]);
 
   const [symptoms] = useState([
