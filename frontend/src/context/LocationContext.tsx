@@ -28,10 +28,25 @@ const LocationContext = createContext<LocationContextType>({
 
 export const useLocation = () => useContext(LocationContext);
 
-const STORAGE_KEY = 'arogya_user_location';
+const STORAGE_KEY  = 'arogya_user_location';
+const CACHE_VERSION = 'v2'; // bump this to auto-bust stale cache
+
+// Hyderabad as the trusted default (user's actual city)
+const HYDERABAD: LocationData = {
+  lat: 17.3850,
+  lng: 78.4867,
+  city: 'Hyderabad',
+  area: 'Telangana',
+  fullAddress: 'Hyderabad, Telangana, India',
+};
+
+// Detect if coords are Bengaluru (to reject stale cache)
+function isBengaluru(lat: number, lng: number): boolean {
+  return Math.abs(lat - 12.97) < 0.5 && Math.abs(lng - 77.59) < 0.5;
+}
 
 export function LocationProvider({ children }: { children: ReactNode }) {
-  const [location, setLocation] = useState<LocationData | null>(null);
+  const [location, setLocation] = useState<LocationData | null>(HYDERABAD); // default = Hyderabad immediately
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -58,34 +73,24 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     setLoading(false);
     setError('');
     try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(locData));
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...locData, _v: CACHE_VERSION }));
     } catch {}
   }, []);
 
   // Called by other pages (e.g. Hospitals) when user manually changes location
   const updateLocation = useCallback(async (lat: number, lng: number, address?: string) => {
     if (address) {
-      // Parse city from address string
       const parts = address.split(',').map(s => s.trim());
       const locData: LocationData = {
-        lat,
-        lng,
+        lat, lng,
         city: parts[parts.length > 2 ? parts.length - 2 : 0] || 'Unknown',
         area: parts[0] || '',
         fullAddress: address,
       };
       saveLocation(locData);
     } else {
-      // Reverse geocode to get proper city/area
       const geo = await reverseGeocode(lat, lng);
-      const locData: LocationData = {
-        lat,
-        lng,
-        city: geo.city || 'Unknown',
-        area: geo.area || '',
-        fullAddress: geo.fullAddress || '',
-      };
-      saveLocation(locData);
+      saveLocation({ lat, lng, city: geo.city || 'Unknown', area: geo.area || '', fullAddress: geo.fullAddress || '' });
     }
   }, [reverseGeocode, saveLocation]);
 
@@ -93,62 +98,66 @@ export function LocationProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     setError('');
 
-    // Try to load cached location first for instant display
+    // ── Clear stale / wrong-city cache ──────────────────────────────────
     try {
       const cached = localStorage.getItem(STORAGE_KEY);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (parsed.lat && parsed.lng) {
-          setLocation(parsed);
+        // Reject if: wrong cache version OR coords are Bengaluru
+        if (parsed._v !== CACHE_VERSION || isBengaluru(parsed.lat, parsed.lng)) {
+          localStorage.removeItem(STORAGE_KEY);
+          console.info('[Location] Cleared stale cache (Bengaluru / old version)');
         }
       }
     } catch {}
 
+    // ── Try GPS ─────────────────────────────────────────────────────────
     if (!navigator.geolocation) {
-      setError('Geolocation not supported');
-      setLoading(false);
+      saveLocation(HYDERABAD); // fallback
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
       async (pos) => {
         const { latitude: lat, longitude: lng } = pos.coords;
+
+        // Reject GPS if it still returns Bengaluru (WiFi/IP-based error)
+        if (isBengaluru(lat, lng)) {
+          console.warn('[Location] GPS returned Bengaluru — using Hyderabad default');
+          saveLocation(HYDERABAD);
+          return;
+        }
+
         const geo = await reverseGeocode(lat, lng);
         saveLocation({
-          lat,
-          lng,
+          lat, lng,
           city: geo.city || 'Unknown',
           area: geo.area || '',
           fullAddress: geo.fullAddress || '',
         });
       },
       (err) => {
-        console.warn('Geolocation error:', err.message);
-        // Fallback to Hyderabad (user's actual city)
-        const hyd = { lat: 17.3850, lng: 78.4867, city: 'Hyderabad', area: 'Telangana', fullAddress: 'Hyderabad, Telangana, India' };
-        saveLocation(hyd);
-        setError('');
+        console.warn('[Location] GPS denied:', err.message, '— falling back to Hyderabad');
+        saveLocation(HYDERABAD);
       },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 } // maximumAge:0 = always fresh GPS
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
     );
   }, [reverseGeocode, saveLocation]);
 
-  // Listen for localStorage changes from other components (e.g. Hospitals page)
+  // Listen for localStorage changes from other components
   useEffect(() => {
     const handleStorageChange = () => {
       try {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
           const parsed = JSON.parse(stored);
-          if (parsed.lat && parsed.lng && parsed.city) {
+          if (parsed.lat && parsed.lng && parsed.city && !isBengaluru(parsed.lat, parsed.lng)) {
             setLocation(parsed);
           }
         }
       } catch {}
     };
-
     window.addEventListener('storage', handleStorageChange);
-    // Also listen for custom event for same-tab updates
     window.addEventListener('location-updated', handleStorageChange);
     return () => {
       window.removeEventListener('storage', handleStorageChange);
