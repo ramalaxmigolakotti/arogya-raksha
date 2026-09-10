@@ -1,11 +1,12 @@
+# Render deploy config for Arogya Raksha Backend
 services:
   - type: web
-    name: arogya-raksha-api
-    runtime: node
-    region: singapore
+    name: arogya-raksha-backend
+    env: node
     rootDir: backend
     buildCommand: npm install
-    startCommand: node server.js
+    startCommand: npm start
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
@@ -25,13 +26,15 @@ services:
         sync: false
       - key: CLOUDINARY_API_SECRET
         sync: false
-      - key: CLERK_SECRET_KEY
-        sync: false
       - key: FRONTEND_URL
-        sync: false
-      - key: REDIS_URL
         sync: false
       - key: RESEND_API_KEY
         sync: false
-      - key: FROM_EMAIL
+      - key: REDIS_URL
+        sync: false
+      - key: CLERK_SECRET_KEY
+        sync: false
+      - key: TWILIO_ACCOUNT_SID
+        sync: false
+      - key: TWILIO_AUTH_TOKEN
         sync: false
