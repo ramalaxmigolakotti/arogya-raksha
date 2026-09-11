@@ -5,7 +5,8 @@ import {
   Navigation, Ambulance, Calendar, Pill, ShieldAlert,
   Clock, CheckCircle2, MapPin, Search, ArrowRight, Phone,
   Radio, Copy, ExternalLink, Ticket, Building2, User,
-  Activity, Package, Truck, Stethoscope, FileText, Check
+  Activity, Package, Truck, Stethoscope, FileText, Check,
+  BedDouble, FlaskConical, LogOut, Loader2
 } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -33,9 +34,24 @@ export default function RealtimeTrackingPage() {
     requestAmbulanceForJourney,
   } = useHealthcareJourney();
 
-  const [activeTab, setActiveTab] = useState<'journey' | 'ambulance' | 'appointments' | 'orders'>('journey');
+  const [activeTab, setActiveTab] = useState<'journey' | 'ambulance' | 'appointments' | 'orders' | 'inpatient'>('journey');
   const [searchId, setSearchId] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [admissions, setAdmissions] = useState<any[]>([]);
+  const [inpLoading, setInpLoading] = useState(false);
+
+  const { user } = useUserRole();
+
+  const fetchAdmissions = async () => {
+    if (!user?.id) return;
+    setInpLoading(true);
+    try {
+      const API = process.env.NEXT_PUBLIC_API_URL || 'https://arogya-raksha-n89v.onrender.com';
+      const res = await fetch(`${API}/api/admissions?patient_id=${user.id}&limit=10`);
+      const data = await res.json();
+      setAdmissions(data.admissions || []);
+    } catch { /* non-blocking */ } finally { setInpLoading(false); }
+  };
 
   const copyText = (text: string) => {
     navigator.clipboard.writeText(text).catch(() => {});
@@ -176,6 +192,19 @@ export default function RealtimeTrackingPage() {
           <Pill className="h-4 w-4" />
           <span>Medicine Orders</span>
           <span className="text-[9px] bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full font-bold">ORD</span>
+        </button>
+
+        <button
+          onClick={() => { setActiveTab('inpatient'); fetchAdmissions(); }}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 rounded-xl transition-all whitespace-nowrap ${
+            activeTab === 'inpatient'
+              ? 'bg-white text-blue-700 shadow-md font-black'
+              : 'text-slate-600 hover:text-slate-900'
+          }`}
+        >
+          <BedDouble className="h-4 w-4" />
+          <span>Hospital Stay</span>
+          <span className="text-[9px] bg-blue-100 text-blue-700 px-1.5 py-0.5 rounded-full font-bold">IPD</span>
         </button>
       </div>
 
@@ -765,6 +794,142 @@ export default function RealtimeTrackingPage() {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── TAB: HOSPITAL STAY (INPATIENT TRACKING) ─────────────────────── */}
+      {activeTab === 'inpatient' && (
+        <div className="space-y-4">
+          <div className="bg-white rounded-3xl p-5 md:p-6 border border-slate-200/80 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                  <BedDouble className="h-5 w-5 text-blue-600" /> Hospital Stay Tracker
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">Track your inpatient admission — from arrival to discharge</p>
+              </div>
+              <button onClick={fetchAdmissions}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-600 transition-all">
+                Refresh
+              </button>
+            </div>
+
+            {inpLoading ? (
+              <div className="flex items-center justify-center py-12 gap-3 text-blue-600">
+                <Loader2 className="h-5 w-5 animate-spin" />
+                <span className="font-bold text-sm">Loading your hospital stays...</span>
+              </div>
+            ) : admissions.length === 0 ? (
+              <div className="text-center py-12 text-slate-400">
+                <BedDouble className="h-10 w-10 mx-auto mb-3 opacity-30" />
+                <p className="font-bold">No hospital admissions found</p>
+                <p className="text-sm mt-1">Your inpatient stays will appear here once admitted</p>
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {admissions.map((adm: any) => {
+                  const STEPS = [
+                    { key: 'registered',          label: 'Registered',         icon: User,          color: 'blue' },
+                    { key: 'doctor_assigned',      label: 'Doctor Assigned',    icon: Stethoscope,   color: 'indigo' },
+                    { key: 'under_examination',    label: 'Under Examination',  icon: Activity,      color: 'purple' },
+                    { key: 'diagnostics_ordered',  label: 'Diagnostics Ordered',icon: FlaskConical,  color: 'amber' },
+                    { key: 'diagnostics_done',     label: 'Results Ready',      icon: CheckCircle2,  color: 'emerald' },
+                    { key: 'treatment_ongoing',    label: 'Treatment Ongoing',  icon: Pill,          color: 'green' },
+                    { key: 'ready_for_discharge',  label: 'Ready for Discharge',icon: LogOut,        color: 'orange' },
+                    { key: 'discharged',           label: 'Discharged',         icon: CheckCircle2,  color: 'emerald' },
+                  ];
+                  const currentIdx = STEPS.findIndex(s => s.key === adm.status);
+                  const ts = adm.timestamps || {};
+
+                  return (
+                    <div key={adm.id} className="border border-slate-200 rounded-2xl overflow-hidden">
+                      {/* Header */}
+                      <div className={`p-4 ${adm.status === 'discharged' ? 'bg-emerald-50' : 'bg-blue-50'}`}>
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h3 className="font-black text-slate-800 text-lg">{adm.hospital_name}</h3>
+                            <p className="text-xs text-slate-500">
+                              {adm.ward && `${adm.ward} Ward`}
+                              {adm.bed_number && ` · Bed ${adm.bed_number}`}
+                              {adm.assigned_doctor_name && ` · ${adm.assigned_doctor_name}`}
+                            </p>
+                            <p className="text-xs text-slate-400 mt-1">
+                              Admitted: {new Date(adm.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <span className={`text-[10px] font-black px-3 py-1.5 rounded-full capitalize ${
+                              adm.severity === 'critical' ? 'bg-red-100 text-red-700' :
+                              adm.severity === 'severe'   ? 'bg-orange-100 text-orange-700' :
+                              adm.severity === 'moderate' ? 'bg-amber-100 text-amber-700' :
+                              'bg-emerald-100 text-emerald-700'
+                            }`}>
+                              {adm.severity}
+                            </span>
+                            {adm.status === 'discharged' && (
+                              <p className="text-[10px] text-emerald-600 font-bold mt-1">✅ Discharged</p>
+                            )}
+                          </div>
+                        </div>
+                        {adm.chief_complaint && (
+                          <p className="text-xs text-slate-600 mt-2 bg-white/70 p-2 rounded-lg">
+                            <span className="font-bold">Complaint:</span> {adm.chief_complaint}
+                          </p>
+                        )}
+                      </div>
+
+                      {/* 8-Step Journey Stepper */}
+                      <div className="p-4">
+                        <p className="text-xs font-black text-slate-500 uppercase tracking-wider mb-3">Journey Progress</p>
+                        <div className="space-y-2">
+                          {STEPS.map((step, i) => {
+                            const Icon = step.icon;
+                            const isDone = i <= currentIdx;
+                            const isCurrent = i === currentIdx;
+                            const timestamp = ts[`${step.key}_at`];
+                            return (
+                              <div key={step.key} className={`flex items-center gap-3 p-2.5 rounded-xl transition-all ${
+                                isCurrent ? 'bg-blue-50 border border-blue-200' :
+                                isDone    ? 'bg-slate-50' : 'opacity-40'
+                              }`}>
+                                <div className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                  isDone ? 'bg-blue-600' : 'bg-slate-200'
+                                }`}>
+                                  {isDone
+                                    ? <Check className="h-3.5 w-3.5 text-white" />
+                                    : <Icon className="h-3.5 w-3.5 text-slate-400" />
+                                  }
+                                </div>
+                                <div className="flex-1">
+                                  <p className={`text-sm font-bold ${isDone ? 'text-slate-800' : 'text-slate-400'}`}>
+                                    {step.label}
+                                    {isCurrent && <span className="ml-2 text-[10px] text-blue-600 font-black bg-blue-100 px-2 py-0.5 rounded-full animate-pulse">Current</span>}
+                                  </p>
+                                  {timestamp && (
+                                    <p className="text-[10px] text-slate-400">
+                                      {new Date(timestamp).toLocaleString('en-IN', { dateStyle: 'short', timeStyle: 'short' })}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Discharge Summary */}
+                      {adm.discharge_summary && (
+                        <div className="mx-4 mb-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl">
+                          <p className="text-xs font-black text-emerald-700 uppercase tracking-wider mb-1">Discharge Summary</p>
+                          <p className="text-sm text-emerald-800">{adm.discharge_summary}</p>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       )}

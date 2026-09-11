@@ -102,6 +102,8 @@ const whatsappRoutes = require('./routes/whatsapp');
 const predictRoutes = require('./routes/predict');
 const queueRoutes = require('./routes/queue');
 const ticketRoutes = require('./routes/tickets');
+const admissionsRoutes = require('./routes/admissions');
+const bedsRoutes = require('./routes/beds');
 
 // Preload all 9 predictor datasets into memory
 require('./services/predictorDatasets').loadAll();
@@ -126,6 +128,8 @@ app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/predict', predictRoutes);
 app.use('/api/queue', queueRoutes);
 app.use('/api/tickets', ticketRoutes);
+app.use('/api/admissions', admissionsRoutes);
+app.use('/api/beds', bedsRoutes);
 
 // Root endpoint
 app.get('/', (req, res) => {

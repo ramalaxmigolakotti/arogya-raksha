@@ -6,7 +6,8 @@ import {
   Phone, Calendar, ChevronDown, ChevronUp, Search,
   Activity, Droplets, ShieldAlert, Building2, Loader2,
   Edit3, Save, ImagePlus, MapPin, GraduationCap, IndianRupee,
-  Globe, FileText, CheckCircle2, X
+  Globe, FileText, CheckCircle2, X, BedDouble, FlaskConical,
+  LogOut, RefreshCw, Send
 } from 'lucide-react';
 import { useLanguage } from '@/context/LanguageContext';
 import { useUserRole } from '@/context/UserRoleContext';
@@ -298,6 +299,47 @@ export default function DoctorDashboardPage() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [patientCards, setPatientCards] = useState<Record<string, PatientCard | null>>({});
   const [loadingCard, setLoadingCard] = useState<string | null>(null);
+  const [mainTab, setMainTab] = useState<'opd' | 'inpatients'>('opd');
+  const [inpatients, setInpatients] = useState<any[]>([]);
+  const [inpLoading, setInpLoading] = useState(false);
+  const [expandedInp, setExpandedInp] = useState<string | null>(null);
+  const [dischargeForm, setDischargeForm] = useState<Record<string, string>>({});
+  const [discharging, setDischarging] = useState<string | null>(null);
+
+  const fetchInpatients = async () => {
+    if (!user?.id) return;
+    setInpLoading(true);
+    try {
+      const res = await fetch(`${API}/api/admissions?doctor_id=${user.id}&limit=50`);
+      const data = await res.json();
+      setInpatients((data.admissions || []).filter((a: any) => a.status !== 'discharged'));
+    } catch { /* non-blocking */ } finally { setInpLoading(false); }
+  };
+
+  const handleStatusUpdate = async (admissionId: string, status: string) => {
+    await fetch(`${API}/api/admissions/${admissionId}/status`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+    fetchInpatients();
+  };
+
+  const handleDischarge = async (admissionId: string) => {
+    const summary = dischargeForm[admissionId];
+    if (!summary?.trim()) return;
+    setDischarging(admissionId);
+    try {
+      await fetch(`${API}/api/admissions/${admissionId}/discharge`, {
+        method: 'PATCH', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          discharge_summary: summary,
+          discharged_by_doctor_id: user?.id,
+          discharged_by_doctor_name: user?.name,
+        }),
+      });
+      fetchInpatients();
+    } finally { setDischarging(null); }
+  };
   const [filter, setFilter] = useState<'all' | 'today' | 'confirmed' | 'pending'>('today');
 
   useEffect(() => {
@@ -393,6 +435,155 @@ export default function DoctorDashboardPage() {
 
       {/* Doctor Profile Section */}
       {user && <DoctorProfileForm userId={user.id} />}
+
+      {/* Main Tab Switcher */}
+      <div className="flex gap-2">
+        <button onClick={() => setMainTab('opd')}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all ${
+            mainTab === 'opd' ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500'
+          }`}>
+          <Calendar className="h-4 w-4" /> OPD Queue
+        </button>
+        <button onClick={() => { setMainTab('inpatients'); fetchInpatients(); }}
+          className={`flex items-center gap-2 px-5 py-2.5 rounded-2xl text-sm font-bold transition-all ${
+            mainTab === 'inpatients' ? 'bg-blue-600 text-white shadow-lg' : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500'
+          }`}>
+          <BedDouble className="h-4 w-4" /> My Inpatients
+          {inpatients.length > 0 && (
+            <span className="bg-red-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center">
+              {inpatients.length}
+            </span>
+          )}
+        </button>
+        {mainTab === 'inpatients' && (
+          <button onClick={fetchInpatients}
+            className="ml-auto flex items-center gap-1.5 px-4 py-2.5 rounded-2xl text-sm font-bold bg-white dark:bg-slate-800 border border-slate-200 text-slate-500">
+            <RefreshCw className={`h-4 w-4 ${inpLoading ? 'animate-spin' : ''}`} />
+          </button>
+        )}
+      </div>
+
+      {/* ── My Inpatients Panel ── */}
+      {mainTab === 'inpatients' && (
+        <div>
+          {inpLoading ? (
+            <div className="flex items-center justify-center py-16 gap-3 text-blue-600">
+              <Loader2 className="h-5 w-5 animate-spin" />
+              <span className="font-bold text-sm">Loading inpatients...</span>
+            </div>
+          ) : inpatients.length === 0 ? (
+            <div className="text-center py-16 text-slate-400 bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
+              <BedDouble className="h-10 w-10 mx-auto mb-3 opacity-30" />
+              <p className="font-bold">No active inpatients assigned to you</p>
+              <p className="text-sm mt-1">Hospital admin will assign patients from Hospital Management</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {inpatients.map((adm: any) => {
+                const isExpanded = expandedInp === adm.id;
+                const STEPS = ['registered','doctor_assigned','under_examination','diagnostics_ordered','diagnostics_done','treatment_ongoing','ready_for_discharge'];
+                const stepIdx = STEPS.indexOf(adm.status);
+                const severityColor = adm.severity === 'critical' ? 'text-red-600 bg-red-50' : adm.severity === 'severe' ? 'text-orange-600 bg-orange-50' : adm.severity === 'moderate' ? 'text-amber-600 bg-amber-50' : 'text-emerald-600 bg-emerald-50';
+                return (
+                  <div key={adm.id} className="bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm overflow-hidden">
+                    {/* Summary Row */}
+                    <div className="p-4 cursor-pointer flex items-start justify-between" onClick={() => setExpandedInp(isExpanded ? null : adm.id)}>
+                      <div className="flex items-start gap-3">
+                        <div className="p-2.5 bg-blue-100 dark:bg-blue-900 rounded-xl">
+                          <BedDouble className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <div>
+                          <h3 className="font-black text-slate-800 dark:text-white">{adm.patient_name}</h3>
+                          <p className="text-xs text-slate-500">
+                            {adm.bed_number ? `Bed ${adm.bed_number} · ${adm.ward}` : 'No bed assigned'}
+                            {adm.patient_age && ` · Age ${adm.patient_age}`}
+                          </p>
+                          {/* Mini progress */}
+                          <div className="flex gap-1 mt-2">
+                            {STEPS.map((s, i) => (
+                              <div key={s} className={`h-1 w-5 rounded-full ${i <= stepIdx ? 'bg-blue-500' : 'bg-slate-100'}`} />
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[10px] font-black px-2 py-1 rounded-full capitalize ${severityColor}`}>{adm.severity}</span>
+                        {isExpanded ? <ChevronUp className="h-4 w-4 text-slate-400" /> : <ChevronDown className="h-4 w-4 text-slate-400" />}
+                      </div>
+                    </div>
+
+                    {/* Expanded Actions */}
+                    {isExpanded && (
+                      <div className="px-4 pb-4 border-t border-slate-50 dark:border-slate-700 pt-3 space-y-3">
+                        {adm.chief_complaint && (
+                          <p className="text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700 p-3 rounded-xl">
+                            <span className="font-bold">Complaint:</span> {adm.chief_complaint}
+                          </p>
+                        )}
+
+                        {/* Status Action Buttons */}
+                        <div className="grid grid-cols-2 gap-2">
+                          {adm.status === 'doctor_assigned' && (
+                            <button onClick={() => handleStatusUpdate(adm.id, 'under_examination')}
+                              className="col-span-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5">
+                              <Stethoscope className="h-3.5 w-3.5" /> Start Examination
+                            </button>
+                          )}
+                          {adm.status === 'under_examination' && (
+                            <>
+                              <button onClick={() => handleStatusUpdate(adm.id, 'diagnostics_ordered')}
+                                className="bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5">
+                                <FlaskConical className="h-3.5 w-3.5" /> Order Tests
+                              </button>
+                              <button onClick={() => handleStatusUpdate(adm.id, 'treatment_ongoing')}
+                                className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5">
+                                <Pill className="h-3.5 w-3.5" /> Skip to Treatment
+                              </button>
+                            </>
+                          )}
+                          {adm.status === 'diagnostics_done' && (
+                            <button onClick={() => handleStatusUpdate(adm.id, 'treatment_ongoing')}
+                              className="col-span-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5">
+                              <Pill className="h-3.5 w-3.5" /> Start Treatment + Prescribe
+                            </button>
+                          )}
+                          {adm.status === 'treatment_ongoing' && (
+                            <button onClick={() => handleStatusUpdate(adm.id, 'ready_for_discharge')}
+                              className="col-span-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-1.5">
+                              <LogOut className="h-3.5 w-3.5" /> Mark Ready for Discharge
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Discharge Form — only when ready */}
+                        {adm.status === 'ready_for_discharge' && (
+                          <div className="bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-2xl p-4 space-y-3">
+                            <p className="text-xs font-black text-emerald-700 dark:text-emerald-300 uppercase tracking-wider">Discharge Summary</p>
+                            <textarea rows={3} placeholder="Patient recovered from... Follow up in X days..."
+                              className="w-full text-sm border border-emerald-200 rounded-xl p-3 focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none dark:bg-slate-800 dark:text-white"
+                              value={dischargeForm[adm.id] || ''}
+                              onChange={e => setDischargeForm(f => ({ ...f, [adm.id]: e.target.value }))} />
+                            <button
+                              onClick={() => handleDischarge(adm.id)}
+                              disabled={!dischargeForm[adm.id]?.trim() || discharging === adm.id}
+                              className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-sm flex items-center justify-center gap-2 disabled:opacity-50">
+                              {discharging === adm.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="h-4 w-4" />}
+                              {discharging === adm.id ? 'Processing Discharge...' : 'Confirm Discharge'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── OPD Section ── */}
+      {mainTab === 'opd' && <>
 
       {/* KPI row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -593,6 +784,7 @@ export default function DoctorDashboardPage() {
           })}
         </div>
       )}
+      </> /* end OPD tab */}
     </div>
   );
 }

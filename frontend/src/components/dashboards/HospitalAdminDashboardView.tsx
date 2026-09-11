@@ -714,7 +714,11 @@ export default function HospitalAdminDashboardView() {
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2 w-full md:w-auto">
+        <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
+          <Link href="/dashboard/hospital-management"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5">
+            <BedDouble className="h-3.5 w-3.5" /> Inpatient Management
+          </Link>
           <button onClick={() => setRole('doctor')}   className="flex-1 md:flex-none px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md">Doctor EHR View</button>
           <button onClick={() => setRole('pharmacy')} className="flex-1 md:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-md">Pharmacy View</button>
           <button onClick={() => setRole('asha')}     className="flex-1 md:flex-none px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition-all border border-slate-700">ASHA View</button>
