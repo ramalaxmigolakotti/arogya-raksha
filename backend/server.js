@@ -127,6 +127,16 @@ app.use('/api/predict', predictRoutes);
 app.use('/api/queue', queueRoutes);
 app.use('/api/tickets', ticketRoutes);
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({
+    status: 'ok',
+    service: 'Arogya Raksha Backend API',
+    version: '1.0.0',
+    documentation: '/api/health',
+  });
+});
+
 // Health check
 const { redisHealth } = require('./services/redisService');
 app.get('/api/health', async (req, res) => {
