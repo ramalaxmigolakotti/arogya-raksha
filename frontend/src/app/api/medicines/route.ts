@@ -1,4 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
+import fs from 'fs';
+import path from 'path';
+
+// Path to the medicines data directory (works on both local & Vercel)
+const DATA_DIR = path.join(process.cwd(), 'src', 'data', 'medicines');
 
 function formatMedicine(m: any, index?: number) {
   return {
@@ -13,58 +18,64 @@ function formatMedicine(m: any, index?: number) {
   };
 }
 
+function readJsonFile(filePath: string): any[] {
+  try {
+    const raw = fs.readFileSync(filePath, 'utf-8');
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+function readLetterFile(letter: string): any[] {
+  const cleanLetter = (letter || 'A').trim().charAt(0).toUpperCase();
+  const filePath = path.join(DATA_DIR, `meds_${cleanLetter}.json`);
+  return readJsonFile(filePath);
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const stats = searchParams.get('stats');
   const letter = searchParams.get('letter');
   const q = searchParams.get('q') || '';
-  const limit = parseInt(searchParams.get('limit') || '24', 10);
+  const limit = Math.min(100, Math.max(1, parseInt(searchParams.get('limit') || '24', 10)));
   const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
 
-  // 1. Stats Request
+  // ── 1. Stats request ─────────────────────────────────────────────────────
   if (stats === 'true') {
     try {
-      const statsMod = await import('@/data/medicines/medicine-stats.json');
-      return NextResponse.json(statsMod.default || statsMod);
+      const statsPath = path.join(DATA_DIR, 'medicine-stats.json');
+      const statsData = JSON.parse(fs.readFileSync(statsPath, 'utf-8'));
+      return NextResponse.json(statsData);
     } catch {
       return NextResponse.json({ totalMedicines: 246068, types: { allopathy: 246068 } });
     }
   }
 
-  // 2. Letter Browsing Request (e.g., letter=A)
+  // ── 2. Letter browsing (e.g. letter=A) ───────────────────────────────────
   if (letter && !q.trim()) {
-    try {
-      const cleanLetter = letter.trim().charAt(0).toUpperCase();
-      let rawMeds: any[] = [];
-      try {
-        const mod = await import(`@/data/medicines/meds_${cleanLetter}.json`);
-        rawMeds = mod.default || mod;
-      } catch (err) {
-        console.warn(`[API/medicines] Letter file meds_${cleanLetter}.json not loaded:`, err);
-      }
+    const rawMeds = readLetterFile(letter);
+    const total = rawMeds.length;
+    const startIndex = (page - 1) * limit;
+    const paged = rawMeds
+      .slice(startIndex, startIndex + limit)
+      .map((m, idx) => formatMedicine(m, startIndex + idx));
 
-      const total = rawMeds.length;
-      const startIndex = (page - 1) * limit;
-      const paged = rawMeds.slice(startIndex, startIndex + limit).map((m, idx) => formatMedicine(m, startIndex + idx));
-
-      return NextResponse.json({
-        success: true,
-        total,
-        count: paged.length,
-        page,
-        limit,
-        medicines: paged,
-      });
-    } catch (err: any) {
-      return NextResponse.json({ success: false, error: err.message, medicines: [], total: 0 }, { status: 500 });
-    }
+    return NextResponse.json({
+      success: true,
+      total,
+      count: paged.length,
+      page,
+      limit,
+      medicines: paged,
+    });
   }
 
-  // 3. Search Query Request (e.g., q=paracetamol)
+  // ── 3. Search query ───────────────────────────────────────────────────────
   if (q.trim()) {
     const cleanQ = q.trim();
 
-    // 3a. Try Render / backend search first
+    // 3a. Try the Render backend first (has full-text search)
     const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://arogya-raksha-n89v.onrender.com';
     try {
       const controller = new AbortController();
@@ -87,67 +98,55 @@ export async function GET(req: NextRequest) {
           });
         }
       }
-    } catch (err: any) {
-      // Backend unavailable or timed out; seamlessly fall through to local dataset
+    } catch {
+      // Backend unavailable or timed out — fall through to local dataset
     }
 
-    // 3b. Fallback: Search in local letter JSON file
-    try {
-      const firstChar = cleanQ.charAt(0).toUpperCase();
-      let localMeds: any[] = [];
-      try {
-        const mod = await import(`@/data/medicines/meds_${firstChar}.json`);
-        localMeds = mod.default || mod;
-      } catch {
-        // First char might be a symbol or digit; fallback to 'A'
-        try {
-          const mod = await import('@/data/medicines/meds_A.json');
-          localMeds = mod.default || mod;
-        } catch {}
-      }
+    // 3b. Local dataset fallback — search letter file for first character
+    const firstChar = cleanQ.charAt(0).toUpperCase();
+    let localMeds = readLetterFile(firstChar);
 
-      const qLower = cleanQ.toLowerCase();
-      const matched = localMeds.filter((m: any) => {
-        const name = (m.name || m.n || '').toLowerCase();
-        const c1 = (m.composition1 || m.c1 || '').toLowerCase();
-        const c2 = (m.composition2 || m.c2 || '').toLowerCase();
-        const mfg = (m.manufacturer || m.m || '').toLowerCase();
-        return name.includes(qLower) || c1.includes(qLower) || c2.includes(qLower) || mfg.includes(qLower);
-      });
-
-      const total = matched.length;
-      const startIndex = (page - 1) * limit;
-      const paged = matched.slice(startIndex, startIndex + limit).map((m, idx) => formatMedicine(m, startIndex + idx));
-
-      return NextResponse.json({
-        success: true,
-        total,
-        count: paged.length,
-        page,
-        limit,
-        medicines: paged,
-      });
-    } catch (err: any) {
-      return NextResponse.json({ success: false, error: err.message, medicines: [], total: 0 }, { status: 500 });
+    // If nothing found via first char, also try searching other letters for cross-letter queries
+    if (localMeds.length === 0) {
+      localMeds = readLetterFile('A');
     }
-  }
 
-  // 4. Fallback if no query or letter (default to letter 'A')
-  try {
-    const mod = await import('@/data/medicines/meds_A.json');
-    const rawMeds = mod.default || mod;
-    const total = rawMeds.length;
-    const paged = rawMeds.slice(0, limit).map((m: any, idx: number) => formatMedicine(m, idx));
+    const qLower = cleanQ.toLowerCase();
+    const matched = localMeds.filter((m: any) => {
+      const name = (m.name || m.n || '').toLowerCase();
+      const c1   = (m.composition1 || m.c1 || '').toLowerCase();
+      const c2   = (m.composition2 || m.c2 || '').toLowerCase();
+      const mfg  = (m.manufacturer || m.m || '').toLowerCase();
+      return name.includes(qLower) || c1.includes(qLower) || c2.includes(qLower) || mfg.includes(qLower);
+    });
+
+    const total = matched.length;
+    const startIndex = (page - 1) * limit;
+    const paged = matched
+      .slice(startIndex, startIndex + limit)
+      .map((m, idx) => formatMedicine(m, startIndex + idx));
 
     return NextResponse.json({
       success: true,
       total,
       count: paged.length,
-      page: 1,
+      page,
       limit,
       medicines: paged,
     });
-  } catch (err: any) {
-    return NextResponse.json({ success: false, total: 0, count: 0, medicines: [] });
   }
+
+  // ── 4. No params — default to letter A ───────────────────────────────────
+  const rawMeds = readLetterFile('A');
+  const total = rawMeds.length;
+  const paged = rawMeds.slice(0, limit).map((m: any, idx: number) => formatMedicine(m, idx));
+
+  return NextResponse.json({
+    success: true,
+    total,
+    count: paged.length,
+    page: 1,
+    limit,
+    medicines: paged,
+  });
 }
