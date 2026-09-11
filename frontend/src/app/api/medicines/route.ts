@@ -1,54 +1,153 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+function formatMedicine(m: any, index?: number) {
+  return {
+    id: m.id ?? index ?? Math.floor(Math.random() * 1000000),
+    name: m.name || m.n || 'Medicine',
+    price: m.price ? String(m.price) : (m.p ? String(m.p) : '99.00'),
+    manufacturer: m.manufacturer || m.m || 'Standard Pharma',
+    type: m.type || m.t || 'allopathy',
+    packSize: m.packSize || m.pk || '1 Strip',
+    composition1: m.composition1 || m.c1 || '',
+    composition2: m.composition2 || m.c2 || '',
+  };
+}
+
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
+  const stats = searchParams.get('stats');
+  const letter = searchParams.get('letter');
   const q = searchParams.get('q') || '';
-  const limit = searchParams.get('limit') || '10';
-  const page = searchParams.get('page') || '1';
+  const limit = parseInt(searchParams.get('limit') || '24', 10);
+  const page = Math.max(1, parseInt(searchParams.get('page') || '1', 10));
 
-  if (!q.trim()) {
-    return NextResponse.json({ success: true, count: 0, total: 0, medicines: [] });
-  }
-
-  try {
-    // 1. First try Express backend running on port 5000
-    const backendRes = await fetch(
-      `http://localhost:5000/api/medicines/search?q=${encodeURIComponent(q)}&limit=${limit}&page=${page}`,
-      { cache: 'no-store' }
-    );
-    if (backendRes.ok) {
-      const data = await backendRes.json();
-      return NextResponse.json(data);
-    }
-  } catch (err: any) {
-    console.warn('[API/medicines] Backend fetch failed, falling back to local search:', err.message);
-  }
-
-  // 2. Fallback: Search local JSON files in frontend/src/data/medicines
-  try {
-    const firstLetter = q.trim().charAt(0).toUpperCase();
-    let localMeds: any[] = [];
+  // 1. Stats Request
+  if (stats === 'true') {
     try {
-      const mod = await import(`@/data/medicines/meds_${firstLetter}.json`);
-      localMeds = mod.default || mod;
+      const statsMod = await import('@/data/medicines/medicine-stats.json');
+      return NextResponse.json(statsMod.default || statsMod);
     } catch {
-      // letter file not found or special character
+      return NextResponse.json({ totalMedicines: 246068, types: { allopathy: 246068 } });
+    }
+  }
+
+  // 2. Letter Browsing Request (e.g., letter=A)
+  if (letter && !q.trim()) {
+    try {
+      const cleanLetter = letter.trim().charAt(0).toUpperCase();
+      let rawMeds: any[] = [];
+      try {
+        const mod = await import(`@/data/medicines/meds_${cleanLetter}.json`);
+        rawMeds = mod.default || mod;
+      } catch (err) {
+        console.warn(`[API/medicines] Letter file meds_${cleanLetter}.json not loaded:`, err);
+      }
+
+      const total = rawMeds.length;
+      const startIndex = (page - 1) * limit;
+      const paged = rawMeds.slice(startIndex, startIndex + limit).map((m, idx) => formatMedicine(m, startIndex + idx));
+
+      return NextResponse.json({
+        success: true,
+        total,
+        count: paged.length,
+        page,
+        limit,
+        medicines: paged,
+      });
+    } catch (err: any) {
+      return NextResponse.json({ success: false, error: err.message, medicines: [], total: 0 }, { status: 500 });
+    }
+  }
+
+  // 3. Search Query Request (e.g., q=paracetamol)
+  if (q.trim()) {
+    const cleanQ = q.trim();
+
+    // 3a. Try Render / backend search first
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'https://arogya-raksha-n89v.onrender.com';
+    try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 3500);
+
+      const backendRes = await fetch(
+        `${backendUrl}/api/medicines/search?q=${encodeURIComponent(cleanQ)}&limit=${limit}&page=${page}`,
+        { cache: 'no-store', signal: controller.signal }
+      );
+      clearTimeout(timeoutId);
+
+      if (backendRes.ok) {
+        const data = await backendRes.json();
+        if (data.medicines && data.medicines.length > 0) {
+          return NextResponse.json({
+            success: true,
+            total: data.total || data.medicines.length,
+            count: data.medicines.length,
+            medicines: data.medicines.map((m: any, idx: number) => formatMedicine(m, idx)),
+          });
+        }
+      }
+    } catch (err: any) {
+      // Backend unavailable or timed out; seamlessly fall through to local dataset
     }
 
-    const cleanQ = q.toLowerCase().replace(/[^a-z0-9]/g, '');
-    const matches = localMeds.filter((m: any) => {
-      const cleanName = (m.name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      const cleanGeneric = (m.generic_name || m.composition || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-      return cleanName.includes(cleanQ) || cleanGeneric.includes(cleanQ);
-    }).slice(0, parseInt(limit, 10));
+    // 3b. Fallback: Search in local letter JSON file
+    try {
+      const firstChar = cleanQ.charAt(0).toUpperCase();
+      let localMeds: any[] = [];
+      try {
+        const mod = await import(`@/data/medicines/meds_${firstChar}.json`);
+        localMeds = mod.default || mod;
+      } catch {
+        // First char might be a symbol or digit; fallback to 'A'
+        try {
+          const mod = await import('@/data/medicines/meds_A.json');
+          localMeds = mod.default || mod;
+        } catch {}
+      }
+
+      const qLower = cleanQ.toLowerCase();
+      const matched = localMeds.filter((m: any) => {
+        const name = (m.name || m.n || '').toLowerCase();
+        const c1 = (m.composition1 || m.c1 || '').toLowerCase();
+        const c2 = (m.composition2 || m.c2 || '').toLowerCase();
+        const mfg = (m.manufacturer || m.m || '').toLowerCase();
+        return name.includes(qLower) || c1.includes(qLower) || c2.includes(qLower) || mfg.includes(qLower);
+      });
+
+      const total = matched.length;
+      const startIndex = (page - 1) * limit;
+      const paged = matched.slice(startIndex, startIndex + limit).map((m, idx) => formatMedicine(m, startIndex + idx));
+
+      return NextResponse.json({
+        success: true,
+        total,
+        count: paged.length,
+        page,
+        limit,
+        medicines: paged,
+      });
+    } catch (err: any) {
+      return NextResponse.json({ success: false, error: err.message, medicines: [], total: 0 }, { status: 500 });
+    }
+  }
+
+  // 4. Fallback if no query or letter (default to letter 'A')
+  try {
+    const mod = await import('@/data/medicines/meds_A.json');
+    const rawMeds = mod.default || mod;
+    const total = rawMeds.length;
+    const paged = rawMeds.slice(0, limit).map((m: any, idx: number) => formatMedicine(m, idx));
 
     return NextResponse.json({
       success: true,
-      count: matches.length,
-      total: matches.length,
-      medicines: matches,
+      total,
+      count: paged.length,
+      page: 1,
+      limit,
+      medicines: paged,
     });
   } catch (err: any) {
-    return NextResponse.json({ success: false, error: err.message, medicines: [] }, { status: 500 });
+    return NextResponse.json({ success: false, total: 0, count: 0, medicines: [] });
   }
 }

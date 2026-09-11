@@ -372,6 +372,7 @@ function OrderRefillModal({
     setPaymentSuccess(true);
     if (selectedPharmacy) {
       persistMedicalRecord(user?.id || 'usr_pat_8812', {
+        userEmail: user?.email,
         type: 'medicine_order',
         title: `Medicine Order: ${medicine}`,
         userQuery: `Ordered ${medicine} from ${selectedPharmacy.name} via ${mode === 'delivery' ? 'Home Delivery' : 'Store Pickup'}`,
@@ -384,6 +385,7 @@ function OrderRefillModal({
           deliveryMode: mode,
           totalAmount,
           paymentId,
+          userEmail: user?.email,
         },
       }).catch(console.warn);
     }

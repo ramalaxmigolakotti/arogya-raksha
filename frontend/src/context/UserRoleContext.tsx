@@ -179,6 +179,9 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
           localStorage.setItem('app-user-role', detectedRole);
           localStorage.setItem('app-user-profile', JSON.stringify(finalProfile));
           localStorage.setItem('app-logged-in', 'true');
+
+          // Immediately sync patient history from Supabase cloud into local storage for this user and email
+          syncUserRecordsFromCloud(session.user.id, session.user.email).catch(() => {});
         }
       }).catch(err => console.warn('Supabase session load error:', err));
 
@@ -217,6 +220,9 @@ export function UserRoleProvider({ children }: { children: React.ReactNode }) {
           } catch (syncErr) {
             console.warn('User DB sync notice:', syncErr);
           }
+
+          // Immediately sync patient medical records from cloud for this account
+          syncUserRecordsFromCloud(session.user.id, session.user.email).catch(() => {});
         } else if (event === 'SIGNED_OUT') {
           // Keep local state in sync
           setIsLoggedIn(false);

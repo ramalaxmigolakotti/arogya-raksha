@@ -21,6 +21,7 @@ import {
   clearLocalHistory,
   clearCategoryRecords,
   persistMedicalRecord,
+  syncUserRecordsFromCloud,
 } from '@/lib/medicalHistoryService';
 
 // Direct Supabase client (bypasses backend — works even when backend is offline)
@@ -136,15 +137,28 @@ export default function MedicalProfilePage() {
 
   const loadHistory = useCallback(() => {
     const recs = getLocalHistory(activeUserId);
-    setHistoryRecords(recs);
-  }, [activeUserId]);
+    const byEmail = userProfile?.email ? getLocalHistory(userProfile.email) : [];
+    const idMap = new Map<string, MedicalRecord>();
+    recs.forEach(r => idMap.set(r.id, r));
+    byEmail.forEach(r => { if (!idMap.has(r.id)) idMap.set(r.id, r); });
+
+    const merged = Array.from(idMap.values()).sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    setHistoryRecords(merged);
+  }, [activeUserId, userProfile?.email]);
 
   useEffect(() => {
     loadHistory();
+    // Sync from cloud on mount for active user and email
+    syncUserRecordsFromCloud(activeUserId, userProfile?.email).then(() => {
+      loadHistory();
+    }).catch(() => {});
+
     const handleUpdate = () => loadHistory();
     window.addEventListener('medical-history-updated', handleUpdate);
     return () => window.removeEventListener('medical-history-updated', handleUpdate);
-  }, [loadHistory]);
+  }, [loadHistory, activeUserId, userProfile?.email]);
 
   const getTabCount = (tab: typeof FEATURE_TABS[0]) => {
     if (tab.id === 'all') return historyRecords.length;

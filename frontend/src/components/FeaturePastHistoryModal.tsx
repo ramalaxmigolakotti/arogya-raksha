@@ -9,6 +9,7 @@ import {
   getLocalHistory,
   deleteMedicalRecord,
   clearCategoryRecords,
+  syncUserRecordsFromCloud,
 } from '@/lib/medicalHistoryService';
 import toast from 'react-hot-toast';
 
@@ -37,10 +38,18 @@ export default function FeaturePastHistoryModal({
 
   const loadRecords = useCallback(() => {
     const all = getLocalHistory(activeUserId);
+    const byEmail = user?.email ? getLocalHistory(user.email) : [];
+    const idMap = new Map<string, MedicalRecord>();
+    all.forEach(r => idMap.set(r.id, r));
+    byEmail.forEach(r => { if (!idMap.has(r.id)) idMap.set(r.id, r); });
+    
+    const combined = Array.from(idMap.values()).sort(
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
     const targetTypes = types || [];
-    const filtered = targetTypes.length > 0 ? all.filter((r) => targetTypes.includes(r.type)) : all;
+    const filtered = targetTypes.length > 0 ? combined.filter((r) => targetTypes.includes(r.type)) : combined;
     setRecords(filtered);
-  }, [activeUserId, types]);
+  }, [activeUserId, user?.email, types]);
 
   useEffect(() => {
     loadRecords();
@@ -48,6 +57,15 @@ export default function FeaturePastHistoryModal({
     window.addEventListener('medical-history-updated', handleUpdate);
     return () => window.removeEventListener('medical-history-updated', handleUpdate);
   }, [loadRecords]);
+
+  // Sync from cloud whenever modal is opened
+  useEffect(() => {
+    if (isOpen) {
+      syncUserRecordsFromCloud(activeUserId, user?.email).then(() => {
+        loadRecords();
+      }).catch(() => {});
+    }
+  }, [isOpen, activeUserId, user?.email, loadRecords]);
 
   const handleDelete = async (recId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();

@@ -115,39 +115,106 @@ export function clearLocalHistory(userId: string, types?: MedicalRecordType[] | 
   }
 }
 
+function generateUUID(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
+
+function getStoredUserEmail(): string | undefined {
+  if (typeof window === 'undefined') return undefined;
+  try {
+    const raw = localStorage.getItem('app-user-profile');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.email) return parsed.email;
+    }
+  } catch {}
+  return undefined;
+}
+
 /**
  * Saves medical record to BOTH local storage and Supabase PostgreSQL.
- * Tied to the user's permanent authenticated credentials.
+ * Tied to the user's permanent authenticated credentials and email.
  */
 export async function persistMedicalRecord(
   userId: string,
-  record: Omit<MedicalRecord, 'id' | 'timestamp' | 'userId'> & { id?: string; timestamp?: string }
+  record: Omit<MedicalRecord, 'id' | 'timestamp' | 'userId'> & { id?: string; timestamp?: string; userEmail?: string }
 ): Promise<MedicalRecord> {
-  const finalRecord: MedicalRecord = {
-    id: record.id || `rec_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-    userId,
-    timestamp: record.timestamp || new Date().toISOString(),
-    ...record,
+  let effectiveUserId = userId;
+  let effectiveEmail = record.userEmail || getStoredUserEmail();
+
+  // If userId is default or falsy, try to resolve from active Supabase session
+  if (isSupabaseConfigured && (effectiveUserId === 'usr_pat_8812' || !effectiveUserId || !effectiveEmail)) {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        if (effectiveUserId === 'usr_pat_8812' || !effectiveUserId) {
+          effectiveUserId = session.user.id;
+        }
+        if (!effectiveEmail) {
+          effectiveEmail = session.user.email;
+        }
+      }
+    } catch {}
+  }
+
+  // Ensure record has a valid RFC UUID for PostgreSQL primary key
+  const finalId = (record.id && record.id.length >= 32 && record.id.includes('-'))
+    ? record.id
+    : generateUUID();
+
+  const finalMetadata = {
+    ...(record.metadata || {}),
+    user_email: effectiveEmail || '',
+    email: effectiveEmail || '',
+    user_id: effectiveUserId,
   };
 
-  // 1. Immediately save to localStorage (guarantees offline availability & instant UI reaction)
-  saveLocalHistory(userId, finalRecord);
+  const finalRecord: MedicalRecord = {
+    id: finalId,
+    userId: effectiveUserId,
+    userEmail: effectiveEmail,
+    timestamp: record.timestamp || new Date().toISOString(),
+    ...record,
+    metadata: finalMetadata,
+  };
+
+  // 1. Immediately save to localStorage across active keys (guarantees offline availability & instant UI reaction)
+  saveLocalHistory(effectiveUserId, finalRecord);
+  if (effectiveEmail && effectiveEmail !== effectiveUserId) {
+    saveLocalHistory(effectiveEmail, finalRecord);
+  }
+  if (userId && userId !== effectiveUserId) {
+    saveLocalHistory(userId, finalRecord);
+  }
 
   // 2. Persist to Supabase if configured & active
   if (isSupabaseConfigured) {
     try {
-      await supabase.from('patient_health_records').upsert({
-        id: finalRecord.id.includes('-') && finalRecord.id.length >= 32 ? finalRecord.id : undefined,
-        user_id: userId,
+      const row = {
+        id: finalRecord.id,
+        user_id: effectiveUserId,
         type: finalRecord.type,
         record_type: finalRecord.type,
         title: finalRecord.title,
         user_query: finalRecord.userQuery || null,
         ai_response: finalRecord.aiResponse || null,
         summary: finalRecord.summary || null,
-        metadata: finalRecord.metadata || {},
+        metadata: finalMetadata,
         created_at: finalRecord.timestamp,
-      });
+      };
+
+      const { error: upsertErr } = await supabase.from('patient_health_records').upsert(row, { onConflict: 'id' });
+      if (upsertErr) {
+        // Fallback to plain insert if upsert conflict target encountered an issue
+        await supabase.from('patient_health_records').insert(row);
+      }
     } catch (supabaseErr) {
       console.warn('Supabase sync notice (local saved):', supabaseErr);
     }
@@ -161,13 +228,15 @@ export async function persistMedicalRecord(
  */
 export async function deleteMedicalRecord(userId: string, recordId: string): Promise<void> {
   deleteLocalRecord(userId, recordId);
+  const email = getStoredUserEmail();
+  if (email) deleteLocalRecord(email, recordId);
 
   if (isSupabaseConfigured) {
     try {
       await supabase
         .from('patient_health_records')
         .delete()
-        .match({ user_id: userId, id: recordId });
+        .eq('id', recordId);
     } catch (err) {
       console.warn('Supabase deletion notice:', err);
     }
@@ -179,14 +248,18 @@ export async function deleteMedicalRecord(userId: string, recordId: string): Pro
  */
 export async function clearCategoryRecords(userId: string, types: MedicalRecordType[]): Promise<void> {
   clearLocalHistory(userId, types);
+  const email = getStoredUserEmail();
+  if (email) clearLocalHistory(email, types);
 
   if (isSupabaseConfigured) {
     try {
-      await supabase
-        .from('patient_health_records')
-        .delete()
-        .eq('user_id', userId)
-        .in('type', types);
+      let query = supabase.from('patient_health_records').delete().in('type', types);
+      if (email && userId) {
+        query = query.or(`user_id.eq.${userId},metadata->>user_email.eq.${email}`);
+      } else {
+        query = query.eq('user_id', userId);
+      }
+      await query;
     } catch (err) {
       console.warn('Supabase category clear notice:', err);
     }
@@ -202,24 +275,38 @@ export function getUserMedicalHistoryCount(userId: string, typeFilter?: MedicalR
 
 /**
  * Synchronizes medical records from Supabase cloud into local storage for this user.
- * Ensures lifetime history and dashboard always display their actual records.
+ * Supports querying by both User ID and User Email so records are restored across devices & deployments.
  */
-export async function syncUserRecordsFromCloud(userId: string): Promise<MedicalRecord[]> {
-  if (typeof window === 'undefined' || !isSupabaseConfigured || !userId) return getLocalHistory(userId);
+export async function syncUserRecordsFromCloud(userId: string, userEmail?: string): Promise<MedicalRecord[]> {
+  if (typeof window === 'undefined' || !isSupabaseConfigured) return getLocalHistory(userId);
+
+  const effectiveEmail = userEmail || getStoredUserEmail();
+  const effectiveUserId = userId || 'usr_pat_8812';
+
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('patient_health_records')
       .select('*')
-      .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
+    if (effectiveUserId && effectiveEmail) {
+      query = query.or(`user_id.eq.${effectiveUserId},user_id.eq.${effectiveEmail},metadata->>user_email.eq.${effectiveEmail},metadata->>email.eq.${effectiveEmail}`);
+    } else if (effectiveUserId) {
+      query = query.or(`user_id.eq.${effectiveUserId},user_id.eq.usr_pat_8812`);
+    } else if (effectiveEmail) {
+      query = query.or(`metadata->>user_email.eq.${effectiveEmail},metadata->>email.eq.${effectiveEmail},user_id.eq.${effectiveEmail}`);
+    }
+
+    const { data, error } = await query;
+
     if (error || !data) {
-      return getLocalHistory(userId);
+      return getLocalHistory(effectiveUserId);
     }
 
     const cloudRecords: MedicalRecord[] = data.map((row: any) => ({
       id: row.id,
       userId: row.user_id,
+      userEmail: row.metadata?.user_email || row.metadata?.email || effectiveEmail || undefined,
       type: (row.type || row.record_type || 'health_tracker') as MedicalRecordType,
       title: row.title || 'Medical Record',
       summary: row.summary || row.user_query || '',
@@ -229,23 +316,27 @@ export async function syncUserRecordsFromCloud(userId: string): Promise<MedicalR
       timestamp: row.created_at || new Date().toISOString(),
     }));
 
-    const local = getLocalHistory(userId);
+    const localPrimary = getLocalHistory(effectiveUserId);
+    const localEmail = effectiveEmail ? getLocalHistory(effectiveEmail) : [];
     const idMap = new Map<string, MedicalRecord>();
+
     cloudRecords.forEach((r) => idMap.set(r.id, r));
-    local.forEach((r) => {
-      if (!idMap.has(r.id)) idMap.set(r.id, r);
-    });
+    localPrimary.forEach((r) => { if (!idMap.has(r.id)) idMap.set(r.id, r); });
+    localEmail.forEach((r) => { if (!idMap.has(r.id)) idMap.set(r.id, r); });
 
     const merged = Array.from(idMap.values()).sort(
       (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     );
 
-    localStorage.setItem(`${STORAGE_PREFIX}${userId}`, JSON.stringify(merged));
+    localStorage.setItem(`${STORAGE_PREFIX}${effectiveUserId}`, JSON.stringify(merged));
+    if (effectiveEmail) {
+      localStorage.setItem(`${STORAGE_PREFIX}${effectiveEmail}`, JSON.stringify(merged));
+    }
     localStorage.setItem('arogya_medical_history', JSON.stringify(merged));
-    window.dispatchEvent(new CustomEvent('medical-history-updated', { detail: { userId } }));
+    window.dispatchEvent(new CustomEvent('medical-history-updated', { detail: { userId: effectiveUserId, count: merged.length } }));
     return merged;
   } catch (err) {
     console.warn('Failed to sync records from cloud:', err);
-    return getLocalHistory(userId);
+    return getLocalHistory(effectiveUserId);
   }
 }

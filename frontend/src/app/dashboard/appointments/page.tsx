@@ -116,6 +116,7 @@ export default function AppointmentsCareFlowPage() {
 
       // 2. Persist to Lifetime Medical Records Vault
       await persistMedicalRecord(user?.id || 'usr_pat_8812', {
+        userEmail: user?.email,
         type: 'hospital_appointment',
         title: `OPD Token #${tokenNum}: ${bookingForm.doctorName}`,
         userQuery: `Booked OPD appointment for ${bookingForm.patientName} (${bookingForm.symptoms}) at ${bookingForm.hospitalName}`,
@@ -133,6 +134,8 @@ export default function AppointmentsCareFlowPage() {
           paymentStatus: finalPaymentStatus,
           paymentAmount: finalAmount,
           paymentId: finalPaymentId,
+          user_email: user?.email,
+          email: user?.email,
         },
       });
 
