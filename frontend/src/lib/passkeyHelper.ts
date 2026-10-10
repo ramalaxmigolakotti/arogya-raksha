@@ -57,6 +57,17 @@ export function formatPasskeyError(err: any): string {
     return 'No passkey is available on this device. Please sign in using your email/Google account and add a passkey from Security Settings.';
   }
 
+  // 1b. RP ID / Domain mismatch error (WebAuthn security sandbox violation)
+  if (
+    msg.includes('rp id') ||
+    msg.includes('relying party') ||
+    (msg.includes('invalid') && msg.includes('domain')) ||
+    (code.includes('securityerror') && msg.includes('invalid'))
+  ) {
+    const currentHost = typeof window !== 'undefined' ? window.location.hostname : 'your deployment domain';
+    return `Passkey Domain Mismatch: Supabase Auth is configured with Relying Party ID "localhost", but your app is running on "${currentHost}". To fix: in your Supabase Dashboard → Authentication → Passkeys, set Relying Party ID to "${currentHost}" and add "https://${currentHost}" to Allowed Origins.`;
+  }
+
   // 2. Passkey disabled on Supabase project
   if (code.includes('disabled') || msg.includes('disabled') || code === 'passkey_disabled') {
     return 'Passkey authentication is not enabled in your Supabase project. Please enable it in Authentication → Passkeys in your Supabase Dashboard.';

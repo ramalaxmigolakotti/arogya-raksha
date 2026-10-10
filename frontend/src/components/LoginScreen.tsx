@@ -289,9 +289,9 @@ export default function LoginScreen() {
 
         {/* Feedback alerts */}
         {error && (
-          <div className="mb-5 flex items-center gap-2 text-rose-400 text-xs font-bold bg-rose-500/10 border border-rose-500/25 rounded-xl p-3.5 animate-in fade-in">
-            <span>⚠️</span>
-            <span>{error}</span>
+          <div className="mb-5 flex items-start gap-2.5 text-rose-400 text-xs font-bold bg-rose-500/10 border border-rose-500/25 rounded-xl p-3.5 animate-in fade-in leading-relaxed">
+            <span className="shrink-0 mt-0.5 text-sm">⚠️</span>
+            <span className="break-words flex-1">{error}</span>
           </div>
         )}
         {successMsg && (
