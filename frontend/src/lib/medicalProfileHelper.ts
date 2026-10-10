@@ -157,7 +157,7 @@ export function mapProfileToPredictorInputs(
       } else {
         inputs[key] = profile.gender;
       }
-    } else if (lowerKey === 'sysbp' || lowerKey === 'systolic' || lowerKey === 'bpsystolic' || (lowerKey === 'bp' && f.max > 120)) {
+    } else if (lowerKey === 'sysbp' || lowerKey === 'systolic' || lowerKey === 'bpsystolic' || lowerKey === 'blood_pressure' || lowerKey === 'bloodpressure' || (lowerKey === 'bp' && f.max > 120)) {
       inputs[key] = String(profile.bpSystolic);
     } else if (lowerKey === 'diabp' || lowerKey === 'diastolic' || lowerKey === 'bpdiastolic') {
       inputs[key] = String(profile.bpDiastolic);

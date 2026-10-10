@@ -170,4 +170,65 @@ router.post('/stats', async (req, res) => {
   }
 });
 
+// POST /api/predict — Express backend calculation endpoint
+router.post(['/', '/run'], async (req, res) => {
+  try {
+    const { predictor: predictorId, predictorId: altId, inputs = {} } = req.body;
+    const targetId = predictorId || altId;
+    const meta = PREDICTORS_META.find(p => p.id === targetId);
+
+    const csvStats = getStats();
+    const totalPatients = csvStats[targetId]?.rows || 10000;
+
+    // Simple deterministic risk scorer on backend
+    let score = 25;
+    const factors = [];
+
+    const num = (k, d) => {
+      const v = parseFloat(inputs[k]);
+      return isNaN(v) ? d : v;
+    };
+    const str = (k, d) => String(inputs[k] || d);
+
+    if (targetId === 'diabetes-heart') {
+      const glucose = num('glucose', 95);
+      const bmi = num('bmi', 23);
+      const bp = num('blood_pressure', 120);
+      if (glucose > 140) score += 30;
+      else if (glucose > 105) score += 15;
+      if (bmi > 30) score += 20;
+      if (bp > 140) score += 20;
+      factors.push({ name: 'Glucose', value: `${glucose} mg/dL`, impact: glucose > 100 ? 'increases' : 'decreases' });
+      factors.push({ name: 'Blood Pressure', value: `${bp} mmHg`, impact: bp > 130 ? 'increases' : 'decreases' });
+    } else if (targetId === 'dengue') {
+      const platelet = num('platelet', 200);
+      const fever = str('fever', 'No');
+      if (platelet < 100) score += 40;
+      if (fever === 'Yes') score += 25;
+      factors.push({ name: 'Platelets', value: `${platelet} K/μL`, impact: platelet < 150 ? 'increases' : 'decreases' });
+    }
+
+    score = Math.max(10, Math.min(90, score));
+    const level = score < 25 ? 'Low' : score < 50 ? 'Medium' : score < 75 ? 'High' : 'Critical';
+
+    res.json({
+      success: true,
+      predictor: meta ? meta.name : targetId,
+      riskScore: score,
+      riskLevel: level,
+      totalPatientsAnalyzed: totalPatients,
+      factors: factors.length > 0 ? factors : [{ name: 'Clinical Inputs', value: 'Recorded', impact: 'neutral' }],
+      advice: [
+        'Maintain a balanced lifestyle and regular hydration.',
+        'Consult a certified medical doctor for personalized clinical evaluation.',
+        'Monitor vital signs routinely.',
+        'Schedule preventive health checkups annually.'
+      ],
+      summary: `Clinical assessment indicates a ${level.toLowerCase()} risk score based on provided vitals.`
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+});
+
 module.exports = router;

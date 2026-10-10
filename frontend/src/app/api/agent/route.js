@@ -7,6 +7,8 @@ const ALL_GROQ_KEYS = [
   process.env.GROQ_API_KEY_SCANNER,
   process.env.GROQ_API_KEY_QUIZ,
   process.env.GROQ_API_KEY_REPORTS,
+  process.env.GROQ_API_KEY,
+  process.env.GROQ_API_KEY_1,
 ].filter(Boolean);
 
 const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';

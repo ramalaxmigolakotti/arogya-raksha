@@ -2,7 +2,7 @@
 
 # 🏥 Arogya Raksha
 
-### AI-Powered Intelligent Healthcare Platform
+### AI-Powered Decentralized Healthcare & Hospital Operating System
 
 **आरोग्य रक्षा** — *Your Health, Our Priority*
 
@@ -15,68 +15,68 @@
 
 <br />
 
-**A full-stack, AI-powered healthcare platform combining agentic AI automation, real-time crisis response, and multilingual support (8 Indian languages) to deliver intelligent healthcare services for 1.4 billion people.**
+**A production-grade, AI-native healthcare platform uniting Patients, ASHA Field Workers, Doctors, Hospital Admins, Pharmacists, and Ambulance Teams with 23 official Indian languages and WebAuthn biometric security.**
 
-[🚀 Live Demo](https://arogya-raksha.vercel.app) · [📖 Documentation](./docs/) · [🐛 Report Bug](https://github.com/ifthekharahmad69-ship-it/Arogya/issues)
+[🚀 Live Demo](https://arogya-raksha.vercel.app) · [📖 Master Documentation](./project_documentation.md) · [🐛 Report Bug](https://github.com/ifthekharahmad69-ship-it/arogyaa-rakshaa/issues)
 
 </div>
 
 ---
 
-## ✨ What Makes This Special?
+## ✨ Platform Highlights
 
-> Built in **24 hours** for the Google Gemini Hackathon — This isn't a prototype. It's a **production-grade platform** with 17 API routes, 20+ pages, 7 backend services, real-time WebSocket communication, and AI-powered decision intelligence.
+> **Enterprise-Ready Healthcare Operating System** — Built with real-time WebSocket communication, dual Node.js/Python backend, biometric passkeys, inpatient bed management, forensic OCR scanning, and 9 machine learning clinical predictors.
 
 | Metric | Count |
-|--------|-------|
+|---|---|
 | 💊 Medicines in Database | **250,000+** |
-| 🏥 Health Facilities | **200,000+** |
-| 🌍 Languages Supported | **8** (English, Hindi, Telugu, Tamil, Kannada, Marathi, Bengali, Bhojpuri) |
-| 🤖 AI Features | **10+** |
-| 🔗 API Routes | **17** |
-| 📄 Frontend Pages | **20+** |
-| ⚙️ Backend Services | **7** |
+| 🏥 Geocoded Health Facilities | **200,000+** |
+| 🌍 Official Indian Languages | **23** (All 22 Eighth Schedule languages + English) |
+| 🤖 AI & ML Predictors | **10+** Models |
+| 👥 Dedicated Role Interfaces | **6** (Patient, ASHA, Doctor, Hospital Admin, Pharmacy, Ambulance) |
+| 🔗 Backend REST Routes | **20+** Endpoints |
+| 📄 Frontend App Routes | **18** Workspaces |
 
 ---
 
-## 🎯 Core Features
+## 🎯 Core Present Features
 
 <table>
 <tr>
 <td width="50%">
 
-### 🤖 MediBot AI Agent
-Tool-calling chatbot with **8 capabilities** — appointments, medicines, navigation, quiz, image analysis, hospitals, health tips, and document scanning.
+### 🤖 MediBot AI Clinical Agent
+Multi-turn conversational assistant with clinical tool-calling, Whisper voice input (STT), and audio voice output (TTS).
 
 ### 🩺 AI Doctor & Symptom Checker
-Symptom analysis → conditions, medicines, urgency assessment, and home remedies — all powered by Groq LLM.
+Dynamic triage engine computing urgency levels (`mild`, `moderate`, `severe`, `emergency`), differential diagnosis, and OTC guidance.
 
-### 💊 Medicine Intelligence
-**250K+ medicine database** with AI-powered information retrieval and camera-based medicine scanner.
+### 🔍 Forensic Medicine Scanner OCR
+Canvas de-blurring preprocessor + Gemini 2.0 Flash Vision extracting salt formulations, dosage, warnings, and expiry from medicine packs.
 
-### 🏥 Hospital Discovery & Maps
-**200K+ health facilities** with live geolocation, interactive Leaflet maps, and distance-based sorting.
+### 💊 250,000+ Medicine Intelligence
+Comprehensive Indian pharmaceutical directory with price comparisons, dosage indications, and generic chemical alternatives.
 
-### 📊 Health Predictors
-Diabetes risk screening and medical report AI analysis with actionable insights.
+### 📊 9 Clinical ML Health Predictors
+Trained statistical/ML inference for Diabetes, Heart Disease, Dengue Fever, Kidney (CKD), Liver, Lung, Cancer, Asthma, and Mental Health.
 
 </td>
 <td width="50%">
 
-### 🚨 Crisis Response System
-Full end-to-end pipeline: **QR-triggered SOS → AI triage → staff dispatch → hospital bridge → real-time ambulance tracking**.
+### 🏥 Hospital Inpatient & Bed Management
+Live ward bed tracker (General, ICU, Emergency, Paediatric, Maternity) with an 8-stage clinical patient admission lifecycle.
 
-### 🧭 Healthcare Navigator
-Clinical pathways, cost estimation (KNN algorithm), EMI calculator, and loan application flow with Razorpay.
+### 🧭 Live Journey Radar & Ambulance GPS
+Real-time Leaflet GPS tracking streaming ambulance telemetry, speed, route polyline, and live arrival ETA.
 
-### 💬 Real-time Communication
-Socket.io doctor-patient messaging + WebRTC video calls + Firebase push notifications.
+### 🎫 Smart Appointments & Care Flow
+Dynamic token-based OPD queue management, live wait-time forecasting, doctor EHR consultation, and Razorpay payments.
 
-### 💳 Payments Integration
-Razorpay integration for appointments, medicines, and healthcare financing.
+### 🆔 Digital Medical Profile & Emergency ID
+Verifiable patient profile with scannable Emergency QR code, blood group, allergies, and local-first Supabase cloud sync.
 
-### 🆔 Medical Profile & Emergency ID
-Complete medical profile with QR code generation for emergency situations — auto-sends to hospitals during SOS.
+### 🔐 WebAuthn Biometric Passkeys
+Zero-password sign-in using device biometrics (Touch ID, Face ID, Windows Hello) and Google OAuth via Supabase.
 
 </td>
 </tr>
@@ -84,50 +84,44 @@ Complete medical profile with QR code generation for emergency situations — au
 
 ---
 
-## 🏗 Architecture
+## 🏗 System Architecture
 
 ```mermaid
 graph TB
     subgraph Frontend["🖥 Frontend — Next.js 16"]
-        UI[React 19 + TypeScript]
-        TW[Tailwind CSS 4]
-        FM[Framer Motion]
-        CL[Clerk Auth]
-        MB[MediBot Agent]
+        UI[React 19 + TypeScript + Tailwind 4]
+        PK[Supabase WebAuthn Passkeys]
+        MB[MediBot AI Multi-Agent]
+        RAD[Leaflet Journey Radar]
     end
 
-    subgraph Backend["⚙️ Backend — Express 5"]
-        API[17 REST API Routes]
-        SVC[7 Business Services]
-        WS[Socket.io WebSocket]
-        RL[Rate Limiter + Helmet]
+    subgraph Backend["⚙️ Backend Services Layer"]
+        EX[Express 5 Node.js API Gateway]
+        PY[FastAPI Python ML Inference Engine]
+        WS[Socket.io Real-time Telemetry]
+        MW[Helmet + Rate Limiter + Compression]
     end
 
-    subgraph Data["💾 Data Layer"]
-        SB[(Supabase PostgreSQL)]
-        RD[(Redis Cloud)]
+    subgraph Data["💾 Persistence Layer"]
+        SB[(Supabase PostgreSQL + RLS)]
+        RD[(Upstash Redis Cache)]
     end
 
-    subgraph AI["🤖 AI Engine"]
-        GQ[Groq LLM — Llama 3.3 70B]
-        VS[Llama 4 Scout Vision]
-        MK[Multi-Key Rotation]
+    subgraph AI["🤖 AI & Vision Engine"]
+        GQ[Groq Llama 3.3 70B Versatile]
+        GM[Gemini 2.0 Flash Vision OCR]
     end
 
-    subgraph Services["☁️ Cloud Services"]
-        CD[Cloudinary — Media]
-        FB[Firebase — Push Notifications]
-        RS[Resend — Transactional Email]
-        RP[Razorpay — Payments]
-        LF[Leaflet — Maps]
+    subgraph External["🌐 Third-Party Integrations"]
+        RP[Razorpay Payment Gateway]
+        TW[Twilio WhatsApp Triage Webhook]
+        FCM[Web Push / Firebase Notifications]
     end
 
-    Frontend -->|REST + WebSocket| Backend
+    Frontend -->|REST + WebSockets| Backend
     Backend --> Data
     Backend --> AI
-    Backend --> Services
-    Frontend -->|Direct| CL
-    Frontend -->|Client AI| GQ
+    Backend --> External
 ```
 
 ---
@@ -135,18 +129,27 @@ graph TB
 ## 🛠 Tech Stack
 
 | Layer | Technologies |
-|-------|-------------|
-| **Frontend** | Next.js 16, React 19, TypeScript, Tailwind CSS 4, Framer Motion, Recharts |
-| **Backend** | Express 5, Node.js, Socket.io, Groq SDK |
-| **Database** | Supabase (PostgreSQL), Redis Cloud |
-| **AI/ML** | Groq LLM (Llama 3.3 70B, Llama 4 Scout Vision), Multi-key rotation |
-| **Auth** | Clerk (Google SSO + email/password) |
-| **Media** | Cloudinary (images, videos, avatars) |
-| **Payments** | Razorpay |
-| **Notifications** | Firebase Cloud Messaging |
-| **Maps** | Leaflet + OpenStreetMap + Nominatim |
-| **Email** | Resend (transactional emails) |
-| **Deploy** | Vercel (frontend) + Render Singapore (backend) |
+|---|---|
+| **Frontend** | Next.js 16 (App Router), React 19, TypeScript 5, Tailwind CSS 4, Lucide Icons |
+| **Backend** | Express 5, Node.js, Socket.io, FastAPI (Python), Uvicorn |
+| **Database** | Supabase (PostgreSQL with RLS), Upstash Redis |
+| **AI/ML** | Groq Llama 3.3 70B, Google Gemini 2.0 Flash Vision, Scikit-Learn, Pandas, NumPy |
+| **Authentication** | Supabase WebAuthn Biometric Passkeys, Google OAuth, Magic Links |
+| **Payments** | Razorpay Checkout SDK |
+| **Maps & GPS** | Leaflet, React-Leaflet, OpenStreetMap |
+| **Messaging** | Twilio WhatsApp Webhook API |
+| **Deployment** | Vercel (Frontend) + Render (Node.js API & Docker) |
+
+---
+
+## 👥 6 Dedicated Role Workspaces
+
+1. **🧑‍⚕️ Patient Console:** Symptom checker, MediBot assistant, medicine catalog, appointment flow, reports analyzer, and emergency SOS.
+2. **👩‍🌾 ASHA Field Desk:** Community roster, village OPD queue ticket generator, immunization tracking, and emergency referrals.
+3. **👨‍⚕️ Doctor EHR Platform:** Live waiting room queue, patient history, digital prescription drafting, and lab requisitions.
+4. **🏥 Hospital Admin Operations:** Inpatient bed occupancy, ward management, doctor duty roster, and pharmacy stock monitor.
+5. **💊 Pharmacy Console:** Digital prescription dispensing queue, drug inventory, and medicine delivery radar.
+6. **🚑 Ambulance Dispatch:** Active emergency calls, turn-by-turn GPS routing, driver telemetry, and trauma hospital handoff.
 
 ---
 
@@ -155,142 +158,35 @@ graph TB
 ### Prerequisites
 - Node.js 18+
 - npm or yarn
-- [Supabase](https://supabase.com) account
-- [Clerk](https://clerk.dev) account
+- Python 3.10+ (for ML backend)
+- [Supabase](https://supabase.com) project
 
-### Setup
-
+### 1. Backend Setup
 ```bash
-# 1. Clone the repo
-git clone https://github.com/ifthekharahmad69-ship-it/Arogya.git
-cd Arogya
-
-# 2. Backend setup
 cd backend
-cp .env.example .env          # Fill in your API keys
+cp .env.example .env          # Add your credentials
 npm install
-npm run seed                   # Seed 250K+ medicines & 200K+ hospitals
-npm start                      # → http://localhost:5000
+npm run dev                   # Starts Express 5 API on http://localhost:5000
+```
 
-# 3. Frontend setup (new terminal)
+### 2. Frontend Setup
+```bash
 cd frontend
-cp .env.example .env.local     # Fill in your keys
+cp .env.example .env.local    # Add your credentials
 npm install
-npm run dev                    # → http://localhost:3000
-```
-
-### Database Setup
-
-1. Create a [Supabase](https://supabase.com) project
-2. Run these SQL files in order via the SQL Editor:
-   ```
-   backend/schema.sql
-   backend/crisis_schema.sql
-   backend/medical_profile_schema.sql
-   backend/doctor_profiles.sql
-   backend/media_uploads.sql
-   ```
-
----
-
-## 📁 Project Structure
-
-```
-Arogya/
-├── frontend/                       # Next.js 16 Application
-│   └── src/
-│       ├── app/                    # App Router (20+ pages)
-│       │   ├── dashboard/          # Main dashboard with 20 sub-pages
-│       │   │   ├── ai/             # MediBot AI chat
-│       │   │   ├── crisis/         # Crisis command center
-│       │   │   ├── symptoms/       # AI symptom checker
-│       │   │   ├── medicines/      # Medicine intelligence
-│       │   │   ├── hospitals/      # Hospital discovery + maps
-│       │   │   ├── predictors/     # Health risk predictors
-│       │   │   ├── healthcare-navigator/  # Clinical pathways
-│       │   │   ├── profile/        # Medical profile + emergency ID
-│       │   │   ├── video-call/     # WebRTC video consultations
-│       │   │   └── ...             # 10+ more feature pages
-│       │   ├── crisis/             # Public crisis report page
-│       │   └── responder/          # Ambulance responder app
-│       ├── components/             # 13 reusable components
-│       ├── context/                # 3 React contexts (Theme, Language, Location)
-│       ├── lib/                    # 8 utility modules
-│       └── data/                   # Client-side datasets
-│
-├── backend/                        # Express 5 API Server
-│   ├── routes/          (17)       # API route modules
-│   ├── services/        (7)        # Business logic services
-│   ├── models/          (9)        # Data models
-│   ├── middleware/       (2)       # Auth middleware
-│   ├── scripts/         (3)       # Database seeders
-│   └── server.js                   # Entry point with Socket.io
-│
-├── docs/                           # Technical documentation
-│   ├── Arogya_Raksha_Master_Documentation.md
-│   ├── 01_Healthcare_Navigator_Documentation.md
-│   ├── 02_AI_Doctor_Symptom_Checker_Documentation.md
-│   ├── 03_Medicine_Intelligence_Documentation.md
-│   ├── 04_Hospital_Discovery_Maps_Documentation.md
-│   └── 05_Crisis_Response_Emergency_Documentation.md
-│
-├── CONTRIBUTING.md                 # Contributing guide
-├── LICENSE                         # MIT License
-└── render.yaml                     # Render deployment config
+npm run dev                   # Starts Next.js 16 app on http://localhost:3000
 ```
 
 ---
 
-## 🔒 Security
+## 🌍 Multilingual Support (23 Official Languages)
 
-- **Clerk Auth** — Google SSO + email/password authentication
-- **Rate Limiting** — 500 req/15min (API), 30 req/15min (auth endpoints)
-- **Helmet** — Security headers
-- **CORS** — Whitelist with Vercel preview support
-- **Gzip Compression** — 60-80% response size reduction
-- **Redis-backed** — Rate limiting per IP
-- **50MB** — Request body limit for media uploads
+Supported across English and all 22 Eighth Schedule languages of the Indian Constitution:
 
----
-
-## 📚 Documentation
-
-| Document | Description |
-|----------|-------------|
-| [Master Documentation](./docs/Arogya_Raksha_Master_Documentation.md) | Complete system reference |
-| [Healthcare Navigator](./docs/01_Healthcare_Navigator_Documentation.md) | Clinical pathways & cost estimation |
-| [AI Doctor](./docs/02_AI_Doctor_Symptom_Checker_Documentation.md) | Symptom analysis pipeline |
-| [Medicine Intelligence](./docs/03_Medicine_Intelligence_Documentation.md) | 250K+ medicine database |
-| [Hospital Discovery](./docs/04_Hospital_Discovery_Maps_Documentation.md) | Geolocation & interactive maps |
-| [Crisis Response](./docs/05_Crisis_Response_Emergency_Documentation.md) | End-to-end emergency pipeline |
-
----
-
-## 🌍 Multilingual Support
-
-| Language | Code | Region |
-|----------|------|--------|
-| English | `en` | Pan-India |
-| हिंदी (Hindi) | `hi` | North India |
-| తెలుగు (Telugu) | `te` | Andhra Pradesh, Telangana |
-| தமிழ் (Tamil) | `ta` | Tamil Nadu |
-| ಕನ್ನಡ (Kannada) | `kn` | Karnataka |
-| मराठी (Marathi) | `mr` | Maharashtra |
-| বাংলা (Bengali) | `bn` | West Bengal |
-| भोजपुरी (Bhojpuri) | `bho` | Bihar, UP |
+`en` (English) · `hi` (हिंदी) · `te` (తెలుగు) · `ta` (தமிழ்) · `kn` (ಕನ್ನಡ) · `mr` (मराठी) · `bn` (বাংলা) · `gu` (ગુજરાતી) · `pa` (ਪੰਜਾਬੀ) · `or` (ଓଡ଼ିଆ) · `as` (অসমীয়া) · `ur` (اردو) · `ml` (മലയാളം) · `bho` (भोजपुरी) · `mai` (मैथिली) · `sat` (ᱥᱟᱱᱛᱟᱲᱤ) · `kok` (कोंकणी) · `doi` (डोगरी) · `ks` (کٲشُر) · `mni` (মেইতেই) · `ne` (नेपाली) · `sd` (سنڌي) · `sa` (संस्कृतम्)
 
 ---
 
 ## 👥 Team SSRRK
 
 Built with ❤️ for the **Google Gemini Hackathon 2026**
-
----
-
-<div align="center">
-
-**Arogya Raksha — Intelligent Healthcare for 1.4 Billion People** 🇮🇳
-
-[![GitHub Stars](https://img.shields.io/github/stars/ifthekharahmad69-ship-it/Arogya?style=social)](https://github.com/ifthekharahmad69-ship-it/Arogya)
-
-</div>

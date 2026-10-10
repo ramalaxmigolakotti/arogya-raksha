@@ -20,12 +20,14 @@ const GROQ_BASE = 'https://api.groq.com/openai/v1/chat/completions';
 
 export type GroqKeySlot = 'scanner' | 'symptoms' | 'doctor' | 'quiz' | 'reports';
 
+const defaultGroq = process.env.GROQ_API_KEY || process.env.GROQ_API_KEY_1 || '';
+
 const KEY_MAP: Record<GroqKeySlot, string> = {
-  doctor:   process.env.GROQ_API_KEY_DOCTOR   || '',
-  quiz:     process.env.GROQ_API_KEY_QUIZ     || '',
-  scanner:  process.env.GROQ_API_KEY_SCANNER  || '',
-  symptoms: process.env.GROQ_API_KEY_SYMPTOMS || '',
-  reports:  process.env.GROQ_API_KEY_REPORTS  || '',
+  doctor:   process.env.GROQ_API_KEY_DOCTOR   || defaultGroq,
+  quiz:     process.env.GROQ_API_KEY_QUIZ     || defaultGroq,
+  scanner:  process.env.GROQ_API_KEY_SCANNER  || defaultGroq,
+  symptoms: process.env.GROQ_API_KEY_SYMPTOMS || defaultGroq,
+  reports:  process.env.GROQ_API_KEY_REPORTS  || defaultGroq,
 };
 
 export interface GroqMessage {

@@ -434,7 +434,8 @@ export async function executeToolCall(toolName, toolArgs, language = "en") {
       try {
         const predictorInputs = { ...toolArgs };
         delete predictorInputs.predictor;
-        const res = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/predict`, {
+        const baseUrl = typeof window !== 'undefined' ? '' : (process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000');
+        const res = await fetch(`${baseUrl}/api/predict`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ predictor: toolArgs.predictor, inputs: predictorInputs, language }),
