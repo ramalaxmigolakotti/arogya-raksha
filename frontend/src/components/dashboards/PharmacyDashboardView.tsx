@@ -55,19 +55,19 @@ export default function PharmacyDashboardView() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-7xl mx-auto pb-16">
       {/* Top Banner / Role Switch */}
-      <div className="bg-slate-900 text-white rounded-3xl p-5 md:p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-800">
+      <div className="bg-[#FFFDF9] text-stone-900 rounded-3xl p-5 md:p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 border border-[#EFE8DE]">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-600 flex items-center justify-center font-bold text-white shadow-lg">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center font-bold text-white shadow-md shadow-amber-500/20">
             <Pill className="h-6 w-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-widest font-bold text-emerald-400">Hospital Central Pharmacy</span>
-              <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full font-bold">
+              <span className="text-xs uppercase tracking-widest font-bold text-amber-800">Hospital Central Pharmacy</span>
+              <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
                 Jan Aushadhi & OPD Dispensing Hub
               </span>
             </div>
-            <p className="text-sm text-slate-300 font-medium mt-0.5">
+            <p className="text-sm text-stone-600 font-medium mt-0.5">
               Live Digital Prescription Stream • Stock Verification • Medicine Packaging • Rural Village Dispatch
             </p>
           </div>
@@ -77,19 +77,19 @@ export default function PharmacyDashboardView() {
         <div className="flex items-center gap-2 w-full md:w-auto">
           <button
             onClick={() => setRole('hospital_admin')}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-amber-500/20"
           >
             Hospital Admin
           </button>
           <button
             onClick={() => setRole('doctor')}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 rounded-xl text-xs font-bold transition-all border border-[#EFE8DE]"
           >
             Doctor EHR
           </button>
           <button
             onClick={() => setRole('patient')}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition-all border border-slate-700"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 rounded-xl text-xs font-bold transition-all border border-[#EFE8DE]"
           >
             Patient App
           </button>
@@ -330,7 +330,7 @@ export default function PharmacyDashboardView() {
                             </button>
                             <button
                               onClick={() => dispatchMedicines(j.id, 'counter_pickup')}
-                              className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl shadow-sm transition-all"
+                              className="px-4 py-2 bg-[#FAF7F2] hover:bg-stone-100 text-stone-800 border border-[#EFE8DE] font-extrabold text-xs rounded-xl shadow-sm transition-all"
                             >
                               Counter Ready
                             </button>
@@ -361,28 +361,28 @@ export default function PharmacyDashboardView() {
 
             {/* Right Side: Quick Dispenser Instructions & Summary */}
             <div className="space-y-6">
-              <div className="bg-gradient-to-br from-emerald-950 via-slate-900 to-slate-900 text-white rounded-3xl p-6 border border-emerald-500/30 shadow-xl space-y-4">
+              <div className="bg-[#FFFDF9] text-stone-900 rounded-3xl p-6 border border-[#EFE8DE] shadow-sm space-y-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-3 bg-emerald-600 rounded-2xl text-white">
+                  <div className="p-3 bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl text-white shadow-md shadow-emerald-500/20">
                     <ShieldCheck className="h-6 w-6" />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-lg">Digital Pharmacy Protocol</h3>
-                    <p className="text-xs text-emerald-300">NABH & Jan Aushadhi Standards</p>
+                    <h3 className="font-extrabold text-lg text-stone-900">Digital Pharmacy Protocol</h3>
+                    <p className="text-xs text-emerald-700 font-medium">NABH & Jan Aushadhi Standards</p>
                   </div>
                 </div>
 
-                <div className="text-xs text-slate-300 space-y-2.5 pt-2">
+                <div className="text-xs text-stone-600 space-y-2.5 pt-2">
                   <div className="flex items-start gap-2">
-                    <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0">1</span>
+                    <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center shrink-0">1</span>
                     <p>Every digital prescription from OPD doctors is securely tokenized.</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0">2</span>
+                    <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center shrink-0">2</span>
                     <p>Stock is automatically reserved upon clicking <strong>Verify Stock</strong>.</p>
                   </div>
                   <div className="flex items-start gap-2">
-                    <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center shrink-0">3</span>
+                    <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 font-bold flex items-center justify-center shrink-0">3</span>
                     <p>Rural patients via ASHA receive real-time SMS & WhatsApp alerts when packed.</p>
                   </div>
                 </div>

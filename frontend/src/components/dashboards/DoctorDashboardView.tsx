@@ -70,29 +70,29 @@ export default function DoctorDashboardView() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto pb-12">
       {/* Role Switch Banner */}
-      <div className="bg-slate-900 text-white rounded-3xl p-4 md:p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-[#FFFDF9] text-stone-900 rounded-3xl p-4 md:p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 border border-[#EFE8DE]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center font-bold text-white">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center font-bold text-white shadow-md shadow-amber-500/20">
             <Stethoscope className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-widest font-bold text-blue-400">Current View</span>
-              <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded-full font-bold">Doctor Clinical EHR & Smart Queue</span>
+              <span className="text-xs uppercase tracking-widest font-bold text-amber-800">Current View</span>
+              <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full font-bold">Doctor Clinical EHR & Smart Queue</span>
             </div>
-            <p className="text-sm text-slate-300 font-medium mt-0.5">Clinical Decision Support • Real-time Smart OPD Queue • e-Prescription Writer</p>
+            <p className="text-sm text-stone-600 font-medium mt-0.5">Clinical Decision Support • Real-time Smart OPD Queue • e-Prescription Writer</p>
           </div>
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto">
           <button
             onClick={() => setRole('patient')}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-xs font-bold transition-all border border-slate-700"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 rounded-xl text-xs font-bold transition-all border border-[#EFE8DE]"
           >
             Switch to Patient
           </button>
           <button
             onClick={() => setRole('asha')}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-xs font-bold transition-all border border-slate-700"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 rounded-xl text-xs font-bold transition-all border border-[#EFE8DE]"
           >
             Switch to ASHA Worker
           </button>
@@ -148,40 +148,40 @@ export default function DoctorDashboardView() {
       {/* ================= REALTIME CRISIS MONITOR & ASHA TICKET DESK ================= */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Real-time Emergency & Ambulance Dispatch Monitor */}
-        <div className="bg-gradient-to-r from-slate-900 to-rose-950 text-white rounded-3xl p-6 border border-rose-500/30 shadow-xl space-y-4">
-          <div className="flex items-center justify-between border-b border-rose-900/60 pb-3">
+        <div className="bg-white text-stone-900 rounded-3xl p-6 border border-rose-200 shadow-md space-y-4">
+          <div className="flex items-center justify-between border-b border-rose-100 pb-3">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-rose-600/30 border border-rose-400/30 flex items-center justify-center text-rose-300 font-bold">
+              <div className="w-9 h-9 rounded-xl bg-rose-50 border border-rose-200 flex items-center justify-center text-rose-600 font-bold">
                 🚨
               </div>
               <div>
-                <h3 className="font-extrabold text-base text-white">Live Emergency & Ambulance Telemetry</h3>
-                <p className="text-xs text-rose-300 font-mono">Dispatch ID: {activeAmbulanceStream?.dispatchId || 'EMR-2026-0412'}</p>
+                <h3 className="font-extrabold text-base text-stone-900">Live Emergency & Ambulance Telemetry</h3>
+                <p className="text-xs text-rose-600 font-mono">Dispatch ID: {activeAmbulanceStream?.dispatchId || 'EMR-2026-0412'}</p>
               </div>
             </div>
-            <span className="text-[10px] font-black uppercase px-2.5 py-1 bg-rose-600 text-white rounded-full animate-pulse">
+            <span className="text-[10px] font-black uppercase px-2.5 py-1 bg-rose-600 text-white rounded-full animate-pulse shadow-sm">
               LIVE RADAR
             </span>
           </div>
 
           <div className="grid grid-cols-2 gap-3 text-xs">
-            <div className="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800 space-y-1">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Incoming Patient</span>
-              <p className="font-extrabold text-white">{activeAmbulanceStream?.patientName || 'Ramesh Rao'}</p>
-              <p className="text-[10px] text-rose-300 font-semibold">{activeAmbulanceStream?.locationName || 'Ward 14, Peruru'}</p>
+            <div className="bg-[#FAF7F2] p-3.5 rounded-2xl border border-[#EFE8DE] space-y-1">
+              <span className="text-[10px] font-bold text-stone-500 uppercase">Incoming Patient</span>
+              <p className="font-extrabold text-stone-900">{activeAmbulanceStream?.patientName || 'Ramesh Rao'}</p>
+              <p className="text-[10px] text-rose-600 font-semibold">{activeAmbulanceStream?.locationName || 'Ward 14, Peruru'}</p>
             </div>
-            <div className="bg-slate-900/80 p-3.5 rounded-2xl border border-slate-800 space-y-1">
-              <span className="text-[10px] font-bold text-slate-400 uppercase">Vehicle & ETA</span>
-              <p className="font-mono text-sm font-bold text-amber-400">{activeAmbulanceStream?.vehicleNo || 'AP-39-AMB-108'}</p>
-              <p className="text-xs font-black text-emerald-400">ETA: {activeAmbulanceStream?.eta || 4} mins</p>
+            <div className="bg-[#FAF7F2] p-3.5 rounded-2xl border border-[#EFE8DE] space-y-1">
+              <span className="text-[10px] font-bold text-stone-500 uppercase">Vehicle & ETA</span>
+              <p className="font-mono text-sm font-bold text-amber-600">{activeAmbulanceStream?.vehicleNo || 'AP-39-AMB-108'}</p>
+              <p className="text-xs font-black text-emerald-600">ETA: {activeAmbulanceStream?.eta || 4} mins</p>
             </div>
           </div>
 
-          <div className="flex items-center justify-between text-xs pt-1 border-t border-rose-900/40">
-            <span className="text-slate-300 font-bold">Stage: <span className="text-cyan-400 uppercase font-black">{activeAmbulanceStream?.status.replace('_', ' ') || 'EN ROUTE'}</span></span>
+          <div className="flex items-center justify-between text-xs pt-1 border-t border-stone-100">
+            <span className="text-stone-600 font-bold">Stage: <span className="text-blue-600 uppercase font-black">{activeAmbulanceStream?.status.replace('_', ' ') || 'EN ROUTE'}</span></span>
             <button
               onClick={() => alert(`ICU Resuscitation Bay #2 reserved for ${activeAmbulanceStream?.patientName || 'Emergency Patient'}`)}
-              className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-extrabold transition-all"
+              className="px-3.5 py-1.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-extrabold transition-all shadow-sm"
             >
               Prepare Trauma Bay #2
             </button>
@@ -288,7 +288,7 @@ export default function DoctorDashboardView() {
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-base font-black px-3 py-1 rounded-2xl bg-slate-900 text-white shadow-sm">
+                        <span className="text-base font-black px-3 py-1 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 text-white shadow-sm">
                           #{item.token}
                         </span>
                         <span

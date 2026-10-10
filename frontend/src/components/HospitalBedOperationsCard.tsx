@@ -288,9 +288,9 @@ export default function HospitalBedOperationsCard() {
             <span className="font-black text-purple-700 text-sm">{reservedCount} Beds</span>
           </div>
 
-          <div className="px-3 py-1.5 rounded-xl bg-slate-900 text-white text-xs font-bold">
-            <span className="text-slate-400 block text-[10px]">OCCUPANCY</span>
-            <span className="font-black text-white text-sm">{occupancyRate}%</span>
+          <div className="px-3 py-1.5 rounded-xl bg-amber-50 border border-amber-200 text-xs">
+            <span className="text-amber-800 block text-[10px] font-bold">OCCUPANCY</span>
+            <span className="font-black text-amber-900 text-sm">{occupancyRate}%</span>
           </div>
         </div>
       </div>
@@ -325,7 +325,7 @@ export default function HospitalBedOperationsCard() {
               key={s.id}
               onClick={() => setStatusFilter(s.id)}
               className={`px-2 py-1 rounded-lg transition-all ${
-                statusFilter === s.id ? 'bg-slate-900 text-white' : 'text-slate-600 hover:text-slate-900'
+                statusFilter === s.id ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-black shadow-sm' : 'text-slate-600 hover:text-slate-900'
               }`}
             >
               {s.label}
@@ -385,7 +385,7 @@ export default function HospitalBedOperationsCard() {
                   {isOcc && (
                     <>
                       <p className="font-extrabold text-slate-900 text-sm flex items-center gap-1.5">
-                        <span className="text-xs px-1.5 py-0.2 bg-slate-900 text-white rounded font-mono">
+                        <span className="text-xs px-1.5 py-0.2 bg-amber-500 text-white rounded font-mono shadow-xs">
                           #{bed.patientToken}
                         </span>
                         <span>{bed.patientName}</span>
@@ -451,10 +451,10 @@ export default function HospitalBedOperationsCard() {
                   <div className="flex items-center gap-1 w-full">
                     <button
                       onClick={() => markAsCleaning(bed.id)}
-                      className="flex-1 py-1 px-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-bold flex items-center justify-center gap-1 text-[10px] transition-colors"
+                      className="flex-1 py-1 px-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white rounded-lg font-bold flex items-center justify-center gap-1 text-[10px] transition-colors shadow-xs"
                       title="Discharge patient and send bed to sanitization"
                     >
-                      <LogOut className="h-3 w-3 text-amber-400" />
+                      <LogOut className="h-3 w-3 text-white" />
                       <span>Discharge & Clean</span>
                     </button>
                   </div>
@@ -486,7 +486,7 @@ export default function HospitalBedOperationsCard() {
 
       {/* Patient Assignment Modal */}
       {assigningBedId && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl border border-slate-100 space-y-4 animate-in fade-in zoom-in-95">
             <div className="flex items-center justify-between border-b pb-3">
               <div>
@@ -507,7 +507,7 @@ export default function HospitalBedOperationsCard() {
                   <p className="font-bold">No active checked-in patients waiting for admission.</p>
                   <button
                     onClick={() => assignBedToPatient(assigningBedId, 'Manual Patient Intake', Math.floor(Math.random() * 80) + 20)}
-                    className="mt-3 px-3 py-1.5 bg-indigo-600 text-white rounded-lg text-xs font-bold"
+                    className="mt-3 px-3 py-1.5 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-stone-950 rounded-lg text-xs font-black shadow-sm"
                   >
                     Assign Generic Emergency Patient
                   </button>

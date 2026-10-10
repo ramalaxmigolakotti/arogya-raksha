@@ -207,7 +207,7 @@ function VideoCallContent() {
         <h2 className="text-3xl font-black text-slate-800">Call Ended</h2>
         <p className="text-slate-500">Duration: {fmt(callDuration)}</p>
         <div className="flex gap-4">
-          <Link href="/dashboard/doctors" className="bg-slate-900 text-white font-bold px-8 py-3 rounded-2xl hover:bg-slate-800 transition-all">
+          <Link href="/dashboard/doctors" className="bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-bold px-8 py-3 rounded-2xl transition-all shadow-md shadow-amber-500/20">
             Back to Doctors
           </Link>
           {doctorPhone && (

@@ -138,30 +138,30 @@ export default function PatientDashboardView() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto pb-12">
-      {/* Role Switch Banner */}
-      <div className="bg-slate-900 text-white rounded-3xl p-4 md:p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+      {/* Role Switch Banner — Warm Clean Aesthetic */}
+      <div className="bg-[#FAF7F2] text-stone-900 rounded-3xl p-4 md:p-6 border border-[#EFE8DE] shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center font-bold text-white">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center font-bold text-white shadow-sm">
             <User className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-widest font-bold text-blue-400">Current View</span>
-              <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded-full font-bold">Patient Experience & Smart Queue</span>
+              <span className="text-xs uppercase tracking-widest font-black text-amber-800">Current View</span>
+              <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full font-bold">Patient Experience & Smart Queue</span>
             </div>
-            <p className="text-sm text-slate-300 font-medium mt-0.5">Live OPD Queue Tracking • Instant Appointment Token • Restrained Blue System</p>
+            <p className="text-xs text-stone-500 font-medium mt-0.5">Live OPD Queue Tracking • Instant Appointment Token • Care Flow Engine</p>
           </div>
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto">
           <button
             onClick={() => setRole('asha')}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-xs font-bold transition-all border border-slate-700"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-white hover:bg-stone-50 text-stone-700 hover:text-stone-900 rounded-xl text-xs font-bold transition-all border border-[#EBE4D8] shadow-sm"
           >
             Switch to ASHA Worker
           </button>
           <button
             onClick={() => setRole('doctor')}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-amber-500/20"
           >
             Switch to Doctor EHR
           </button>
@@ -169,112 +169,110 @@ export default function PatientDashboardView() {
       </div>
 
       {/* Patient Welcome Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/80 pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#EFE8DE] pb-6">
         <div>
-          <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+          <h1 className="text-3xl md:text-4xl font-black text-stone-900 tracking-tight">
             Good Morning, {user?.name || 'Patient'} 👋
           </h1>
-          <p className="text-slate-500 text-base font-medium mt-1">
+          <p className="text-stone-500 text-base font-medium mt-1">
             Here is your health summary and real-time appointment status for today.
           </p>
         </div>
         <div className="flex items-center gap-3 flex-wrap">
           <Link
             href="/dashboard/tracking"
-            className="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white px-5 py-3 rounded-2xl font-extrabold text-xs shadow-lg shadow-emerald-600/20 transition-all hover:scale-105"
+            className="flex items-center gap-2 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-white px-5 py-3 rounded-2xl font-black text-xs shadow-md shadow-amber-500/20 transition-all hover:scale-105"
           >
             <Navigation className="h-4 w-4 animate-pulse" /> Live Tracking Center
           </Link>
           <button
             onClick={() => setShowBookingModal(true)}
-            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-3 rounded-2xl font-extrabold text-xs shadow-lg shadow-blue-600/20 transition-all hover:scale-105"
+            className="flex items-center gap-2 bg-[#FAF6F0] hover:bg-[#F2ECE0] text-stone-800 border border-[#EBE4D8] px-5 py-3 rounded-2xl font-black text-xs shadow-sm transition-all hover:scale-105"
           >
-            <Ticket className="h-4 w-4" /> Book OPD Queue Token
+            <Ticket className="h-4 w-4 text-amber-600" /> Book OPD Queue Token
           </button>
           <Link
             href="/dashboard/emergency"
-            className="flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-5 py-3 rounded-2xl font-bold text-xs shadow-lg shadow-rose-600/20 transition-all hover:-translate-y-0.5"
+            className="flex items-center gap-2 bg-rose-600 hover:bg-rose-700 text-white px-5 py-3 rounded-2xl font-bold text-xs shadow-md shadow-rose-600/20 transition-all hover:-translate-y-0.5"
           >
             <ShieldAlert className="h-4 w-4" /> Emergency SOS
           </Link>
         </div>
       </div>
 
-      {/* ================= SMART LIVE QUEUE CARD ================= */}
+      {/* ================= SMART LIVE QUEUE CARD — CLEAN LIGHT WARM THEME ================= */}
       {myToken ? (
-        <div className="bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-950 text-white rounded-3xl p-6 md:p-8 shadow-2xl border border-blue-500/30 relative overflow-hidden space-y-6">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />
-
+        <div className="bg-white text-stone-900 rounded-3xl p-6 md:p-8 shadow-xl shadow-stone-200/50 border border-[#EFE8DE] relative overflow-hidden space-y-6">
           {/* Card Top Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/15 pb-5 relative z-10">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EFE8DE] pb-5 relative z-10">
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] uppercase font-black tracking-widest text-blue-400 bg-blue-500/20 px-2.5 py-0.5 rounded-full border border-blue-400/30">
+                <span className="text-[10px] uppercase font-black tracking-widest text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-200">
                   APPOINTMENT CONFIRMED
                 </span>
-                <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" /> Live Socket Connected
+                <span className="text-xs text-emerald-700 font-bold flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" /> Live Socket Connected
                 </span>
               </div>
-              <h2 className="text-2xl font-extrabold text-white mt-1">General Medicine OPD Clinic</h2>
-              <p className="text-xs text-blue-200 font-medium">Apollo Clinic • Room #4 • {myToken.doctorName || 'Dr. Rajesh Varma'}</p>
+              <h2 className="text-2xl font-black text-stone-900 mt-1">General Medicine OPD Clinic</h2>
+              <p className="text-xs text-stone-500 font-medium">Apollo Clinic • Room #4 • {myToken.doctorName || 'Dr. Rajesh Varma'}</p>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/20 flex items-center justify-between gap-4">
+            <div className="bg-[#FAF7F2] px-4 py-2.5 rounded-2xl border border-[#EFE8DE] flex items-center justify-between gap-4 shadow-sm">
               <div>
-                <p className="text-[10px] font-bold text-blue-200 uppercase">Appointment ID</p>
-                <p className="text-sm font-extrabold text-white tracking-wider">{myToken.appointmentId || 'APT-LIVE'}</p>
+                <p className="text-[10px] font-bold text-stone-500 uppercase">Appointment ID</p>
+                <p className="text-sm font-black text-stone-900 tracking-wider">{myToken.appointmentId || 'APT-LIVE'}</p>
               </div>
-              <Ticket className="h-6 w-6 text-blue-400" />
+              <Ticket className="h-6 w-6 text-amber-600" />
             </div>
           </div>
 
           {/* Queue Metrics Matrix */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 relative z-10">
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15">
-              <p className="text-[10px] font-extrabold text-blue-200 uppercase">Your Queue Token</p>
-              <p className="text-3xl font-black text-white mt-1">#{myToken.token}</p>
-              <p className="text-[10px] text-blue-300 font-bold mt-0.5">Status: {myToken.status.toUpperCase()}</p>
+            <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE]">
+              <p className="text-[10px] font-extrabold text-stone-500 uppercase">Your Queue Token</p>
+              <p className="text-3xl font-black text-stone-900 mt-1">#{myToken.token}</p>
+              <p className="text-[10px] text-amber-800 font-bold mt-0.5">Status: {myToken.status.toUpperCase()}</p>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15">
-              <p className="text-[10px] font-extrabold text-blue-200 uppercase">Currently Consulting</p>
-              <p className="text-3xl font-black text-emerald-400 mt-1">{currentConsultingToken ? `#${currentConsultingToken}` : 'Ready'}</p>
-              <p className="text-[10px] text-emerald-300 font-bold mt-0.5">In Clinic Room #4</p>
+            <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE]">
+              <p className="text-[10px] font-extrabold text-stone-500 uppercase">Currently Consulting</p>
+              <p className="text-3xl font-black text-emerald-700 mt-1">{currentConsultingToken ? `#${currentConsultingToken}` : 'Ready'}</p>
+              <p className="text-[10px] text-emerald-600 font-bold mt-0.5">In Clinic Room #4</p>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15">
-              <p className="text-[10px] font-extrabold text-blue-200 uppercase">Patients Ahead</p>
-              <p className="text-3xl font-black text-amber-400 mt-1">{Math.max(0, myToken.token - (currentConsultingToken || 0) - 1)}</p>
-              <p className="text-[10px] text-amber-300 font-bold mt-0.5">{Math.max(0, myToken.token - (currentConsultingToken || 0) - 1) === 0 ? 'YOU ARE NEXT!' : 'Waiting in Lobby'}</p>
+            <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE]">
+              <p className="text-[10px] font-extrabold text-stone-500 uppercase">Patients Ahead</p>
+              <p className="text-3xl font-black text-amber-600 mt-1">{Math.max(0, myToken.token - (currentConsultingToken || 0) - 1)}</p>
+              <p className="text-[10px] text-amber-700 font-bold mt-0.5">{Math.max(0, myToken.token - (currentConsultingToken || 0) - 1) === 0 ? 'YOU ARE NEXT!' : 'Waiting in Lobby'}</p>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15">
-              <p className="text-[10px] font-extrabold text-blue-200 uppercase">Estimated Wait Time</p>
-              <p className="text-2xl font-black text-white mt-1.5">{myToken.estimatedTime || `~${Math.max(5, Math.max(0, myToken.token - (currentConsultingToken || 0) - 1) * 8)} mins`}</p>
-              <p className="text-[10px] text-blue-200 font-medium mt-0.5">~8 min / patient avg</p>
+            <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE]">
+              <p className="text-[10px] font-extrabold text-stone-500 uppercase">Estimated Wait Time</p>
+              <p className="text-2xl font-black text-stone-900 mt-1.5">{myToken.estimatedTime || `~${Math.max(5, Math.max(0, myToken.token - (currentConsultingToken || 0) - 1) * 8)} mins`}</p>
+              <p className="text-[10px] text-stone-500 font-medium mt-0.5">~8 min / patient avg</p>
             </div>
           </div>
 
           {/* Live Stepper Queue Status Progression */}
-          <div className="bg-slate-900/60 p-4 rounded-2xl border border-white/10 space-y-3 relative z-10">
-            <p className="text-xs font-bold text-blue-200 uppercase tracking-wider flex items-center justify-between">
+          <div className="bg-[#FAF6F0] p-4 rounded-2xl border border-[#EBE4D8] space-y-3 relative z-10">
+            <p className="text-xs font-bold text-stone-600 uppercase tracking-wider flex items-center justify-between">
               <span>Live Queue Progress Stepper</span>
               <span>Refreshes Automatically</span>
             </p>
 
             <div className="flex items-center justify-between gap-2 overflow-x-auto pb-1">
-              <div className="flex items-center gap-2 bg-blue-500/20 px-3 py-2 rounded-xl border border-blue-400/40 text-xs flex-shrink-0">
-                <span className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse" />
-                <span className="font-bold text-white">#{currentConsultingToken || '—'} Consulting</span>
+              <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-xl border border-[#EBE4D8] text-xs flex-shrink-0 shadow-sm">
+                <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
+                <span className="font-bold text-stone-900">#{currentConsultingToken || '—'} Consulting</span>
               </div>
 
-              <ChevronRight className="h-4 w-4 text-slate-500 flex-shrink-0" />
+              <ChevronRight className="h-4 w-4 text-stone-400 flex-shrink-0" />
 
-              <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-extrabold flex-shrink-0 ${
+              <div className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-extrabold flex-shrink-0 shadow-sm ${
                 Math.max(0, myToken.token - (currentConsultingToken || 0) - 1) === 0
-                  ? 'bg-emerald-500 text-white animate-bounce shadow-lg shadow-emerald-500/50'
-                  : 'bg-indigo-600 text-white'
+                  ? 'bg-emerald-600 text-white animate-bounce'
+                  : 'bg-gradient-to-r from-amber-400 to-yellow-500 text-white'
               }`}>
                 <Ticket className="h-3.5 w-3.5" />
                 <span>#{myToken.token} {Math.max(0, myToken.token - (currentConsultingToken || 0) - 1) === 0 ? 'YOU ARE NEXT!' : 'YOUR TOKEN'}</span>
@@ -283,19 +281,19 @@ export default function PatientDashboardView() {
           </div>
         </div>
       ) : (
-        <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 text-white rounded-3xl p-6 md:p-8 shadow-xl border border-blue-500/30 flex flex-col md:flex-row items-center justify-between gap-6">
+        <div className="bg-white text-stone-900 rounded-3xl p-6 md:p-8 shadow-xl shadow-stone-200/50 border border-[#EFE8DE] flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="space-y-2 text-center md:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 text-xs font-bold border border-blue-400/30">
-              <Ticket className="h-3.5 w-3.5 text-blue-400" /> OPD Queue Ready
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-bold border border-amber-200">
+              <Ticket className="h-3.5 w-3.5 text-amber-600" /> OPD Queue Ready
             </div>
-            <h2 className="text-2xl font-black">No Active OPD Token Booked</h2>
-            <p className="text-slate-300 text-sm max-w-xl">
+            <h2 className="text-2xl font-black text-stone-900">No Active OPD Token Booked</h2>
+            <p className="text-stone-600 text-sm max-w-xl">
               You haven&apos;t booked an appointment token for today yet. Book your OPD consultation token now to skip long physical queues and track live doctor consultation status.
             </p>
           </div>
           <button
             onClick={() => setShowBookingModal(true)}
-            className="px-6 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-black text-sm rounded-2xl shadow-lg transition-all flex items-center gap-2 shrink-0 hover:scale-105"
+            className="px-6 py-3.5 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-white font-black text-sm rounded-2xl shadow-md shadow-amber-500/20 transition-all flex items-center gap-2 shrink-0 hover:scale-105"
           >
             <Ticket className="h-4 w-4" />
             <span>Book OPD Queue Token</span>
@@ -362,26 +360,28 @@ export default function PatientDashboardView() {
 
           {/* If Doctor has issued Digital Prescription */}
           {activeJourney.prescription && (
-            <div className="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-2xl p-5 border border-indigo-400/30 space-y-4 shadow-lg">
-              <div className="flex items-center justify-between border-b border-white/10 pb-3">
+            <div className="bg-[#FAF7F2] text-stone-900 rounded-2xl p-5 border border-[#EFE8DE] space-y-4 shadow-sm">
+              <div className="flex items-center justify-between border-b border-[#EFE8DE] pb-3">
                 <div className="flex items-center gap-2.5">
-                  <FileText className="h-5 w-5 text-indigo-400" />
+                  <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                    <FileText className="h-4 w-4 text-amber-600" />
+                  </div>
                   <div>
-                    <h4 className="font-extrabold text-sm text-white">Digital Prescription Issued by {activeJourney.prescription.doctorName}</h4>
-                    <p className="text-[10px] text-indigo-200">Prescription ID: {activeJourney.prescription.id}</p>
+                    <h4 className="font-extrabold text-sm text-stone-900">Digital Prescription Issued by {activeJourney.prescription.doctorName}</h4>
+                    <p className="text-[10px] text-stone-500">Prescription ID: {activeJourney.prescription.id}</p>
                   </div>
                 </div>
-                <span className="text-[10px] font-black uppercase px-2.5 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full">
+                <span className="text-[10px] font-black uppercase px-2.5 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full">
                   {activeJourney.prescription.status.toUpperCase()}
                 </span>
               </div>
 
               <div className="text-xs space-y-1">
-                <p className="text-slate-300">
-                  <strong className="text-white">Clinical Diagnosis:</strong> {activeJourney.prescription.diagnosis}
+                <p className="text-stone-600">
+                  <strong className="text-stone-900">Clinical Diagnosis:</strong> {activeJourney.prescription.diagnosis}
                 </p>
                 {activeJourney.prescription.instructions && (
-                  <p className="text-indigo-200 italic">
+                  <p className="text-amber-800 italic bg-amber-50/50 p-2 rounded-lg border border-amber-100">
                     &ldquo;{activeJourney.prescription.instructions}&rdquo;
                   </p>
                 )}
@@ -389,16 +389,16 @@ export default function PatientDashboardView() {
 
               {activeJourney.prescription.medicines && activeJourney.prescription.medicines.length > 0 && (
                 <div className="space-y-2 pt-1">
-                  <p className="text-[10px] font-black uppercase tracking-wider text-slate-300">Prescribed Medications:</p>
+                  <p className="text-[10px] font-black uppercase tracking-wider text-stone-500">Prescribed Medications:</p>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {activeJourney.prescription.medicines.map((med, idx) => (
-                      <div key={idx} className="bg-white/10 backdrop-blur-sm p-3 rounded-xl border border-white/10 text-xs">
-                        <p className="font-extrabold text-white flex items-center gap-1.5">
-                          <Pill className="h-3.5 w-3.5 text-indigo-300" />
+                      <div key={idx} className="bg-white p-3 rounded-xl border border-[#EFE8DE] text-xs shadow-xs">
+                        <p className="font-extrabold text-stone-900 flex items-center gap-1.5">
+                          <Pill className="h-3.5 w-3.5 text-amber-500" />
                           {med.name}
                         </p>
-                        <p className="text-[10px] text-slate-300 mt-1">{med.dosage} • {med.frequency}</p>
-                        <p className="text-[10px] text-emerald-300 font-bold mt-0.5">{med.duration}</p>
+                        <p className="text-[10px] text-stone-500 mt-1">{med.dosage} • {med.frequency}</p>
+                        <p className="text-[10px] text-emerald-600 font-bold mt-0.5">{med.duration}</p>
                       </div>
                     ))}
                   </div>
@@ -429,19 +429,19 @@ export default function PatientDashboardView() {
               </span>
             </div>
 
-            <div className="bg-slate-900 text-white rounded-2xl p-4 space-y-3">
+            <div className="bg-[#FAF7F2] text-stone-900 rounded-2xl p-4 space-y-3 border border-[#EFE8DE]">
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400 font-bold">Vehicle: <span className="text-white">{activeAmbulanceStream.vehicleNo}</span></span>
-                <span className="text-slate-400 font-bold">Driver: <span className="text-white">{activeAmbulanceStream.driverName}</span></span>
+                <span className="text-stone-500 font-bold">Vehicle: <span className="text-stone-900">{activeAmbulanceStream.vehicleNo}</span></span>
+                <span className="text-stone-500 font-bold">Driver: <span className="text-stone-900">{activeAmbulanceStream.driverName}</span></span>
               </div>
-              <div className="flex items-center justify-between pt-1 border-t border-slate-800">
+              <div className="flex items-center justify-between pt-1 border-t border-[#EFE8DE]">
                 <div>
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">Status Stage</p>
-                  <p className="text-xs font-black text-emerald-400 uppercase">{activeAmbulanceStream.status.replace('_', ' ')}</p>
+                  <p className="text-[10px] font-bold text-stone-500 uppercase">Status Stage</p>
+                  <p className="text-xs font-black text-emerald-700 uppercase">{activeAmbulanceStream.status.replace('_', ' ')}</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase">Estimated Arrival</p>
-                  <p className="text-lg font-black text-amber-400 leading-none">{activeAmbulanceStream.eta} mins</p>
+                  <p className="text-[10px] font-bold text-stone-500 uppercase">Estimated Arrival</p>
+                  <p className="text-lg font-black text-amber-700 leading-none">{activeAmbulanceStream.eta} mins</p>
                 </div>
               </div>
             </div>
@@ -503,9 +503,9 @@ export default function PatientDashboardView() {
 
             <Link
               href="/dashboard/medicines"
-              className="w-full py-3 bg-slate-900 hover:bg-slate-800 text-white font-extrabold rounded-2xl text-xs shadow-md transition-all flex items-center justify-center gap-2"
+              className="w-full py-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-extrabold rounded-2xl text-xs shadow-md shadow-amber-500/20 transition-all flex items-center justify-center gap-2"
             >
-              <Pill className="h-4 w-4 text-blue-400" /> View Medicine Store →
+              <Pill className="h-4 w-4 text-white" /> View Medicine Store →
             </Link>
           </div>
         ) : (
@@ -761,7 +761,7 @@ export default function PatientDashboardView() {
 
       {/* Booking Modal with Payment Integration */}
       {showBookingModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl max-w-lg w-full p-6 md:p-8 shadow-2xl border border-slate-200 animate-in zoom-in-95 duration-200 space-y-6">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">

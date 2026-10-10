@@ -103,39 +103,39 @@ export default function AmbulanceDashboardView() {
     <div className="space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto pb-12">
 
       {/* Role Switch Banner */}
-      <div className="bg-rose-950 text-white rounded-3xl p-4 md:p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 border border-rose-800/50">
+      <div className="bg-[#FFFDF9] text-stone-900 rounded-3xl p-4 md:p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 border border-[#EFE8DE]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-rose-600 flex items-center justify-center font-bold text-white shadow-lg">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center font-bold text-white shadow-md shadow-amber-500/20">
             <Ambulance className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-widest font-bold text-rose-300">Current View</span>
-              <span className="text-[10px] bg-rose-500/20 text-rose-300 border border-rose-400/30 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
-                <Wifi className="h-3 w-3 text-emerald-400 animate-pulse" />
+              <span className="text-xs uppercase tracking-widest font-bold text-amber-800">Current View</span>
+              <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                <Wifi className="h-3 w-3 text-emerald-600 animate-pulse" />
                 Live Realtime Dispatch Console
               </span>
             </div>
-            <p className="text-sm text-rose-200 font-medium mt-0.5">Emergency Response · Real-Time GPS Tracking · Hospital Bed Routing</p>
+            <p className="text-sm text-stone-600 font-medium mt-0.5">Emergency Response · Real-Time GPS Tracking · Hospital Bed Routing</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <button onClick={() => setRole('patient')} className="px-4 py-2.5 bg-rose-900 hover:bg-rose-800 text-rose-200 rounded-xl text-xs font-bold transition-all border border-rose-700">Patient View</button>
-          <button onClick={() => setRole('doctor')} className="px-4 py-2.5 bg-rose-600 hover:bg-rose-500 text-white rounded-xl text-xs font-bold transition-all shadow-md">Doctor EHR</button>
+          <button onClick={() => setRole('patient')} className="px-4 py-2.5 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 rounded-xl text-xs font-bold transition-all border border-[#EFE8DE]">Patient View</button>
+          <button onClick={() => setRole('doctor')} className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-amber-500/20">Doctor EHR</button>
         </div>
       </div>
 
       {/* Live GPS Broadcast Console */}
-      <div className="bg-gradient-to-r from-slate-900 via-rose-950 to-slate-900 text-white rounded-3xl p-6 md:p-8 border border-rose-500/30 shadow-xl space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-rose-900/50 pb-6">
+      <div className="bg-white text-stone-900 rounded-3xl p-6 md:p-8 border border-[#EFE8DE] shadow-xl shadow-stone-200/50 space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#EFE8DE] pb-6">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 bg-rose-500/20 text-rose-300 border border-rose-400/30 rounded-full text-xs font-mono font-bold">
+              <span className="px-2.5 py-0.5 bg-rose-100 text-rose-800 border border-rose-200 rounded-full text-xs font-mono font-bold">
                 ID: {activeAmbulanceStream?.dispatchId || 'EMR-2026-0412'}
               </span>
-              <span className="text-xs text-slate-300 font-semibold">Vehicle: {activeAmbulanceStream?.vehicleNo || 'AP-39-AMB-108'}</span>
+              <span className="text-xs text-stone-500 font-semibold">Vehicle: {activeAmbulanceStream?.vehicleNo || 'AP-39-AMB-108'}</span>
             </div>
-            <h2 className="text-2xl font-black tracking-tight flex items-center gap-2">
+            <h2 className="text-2xl font-black text-stone-900 tracking-tight flex items-center gap-2">
               Live Ambulance Telemetry Broadcast
             </h2>
           </div>
@@ -143,9 +143,9 @@ export default function AmbulanceDashboardView() {
           <div className="flex items-center gap-3">
             <button
               onClick={handleToggleBroadcast}
-              className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-extrabold transition-all shadow-lg ${
+              className={`flex items-center gap-2 px-5 py-3 rounded-2xl text-xs font-extrabold transition-all shadow-md ${
                 isBroadcastingGps
-                  ? 'bg-rose-600 hover:bg-rose-700 text-white ring-4 ring-rose-500/30 animate-pulse'
+                  ? 'bg-rose-600 hover:bg-rose-700 text-white ring-4 ring-rose-500/20 animate-pulse'
                   : 'bg-emerald-600 hover:bg-emerald-500 text-white'
               }`}
             >
@@ -164,31 +164,31 @@ export default function AmbulanceDashboardView() {
 
         {/* Live Telemetry Display */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-2">
-          <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-1">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Current Lat / Lng</span>
-            <p className="font-mono text-sm font-bold text-rose-400">
+          <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE] space-y-1">
+            <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">Current Lat / Lng</span>
+            <p className="font-mono text-sm font-bold text-rose-600">
               {activeAmbulanceStream?.lat.toFixed(4)}, {activeAmbulanceStream?.lng.toFixed(4)}
             </p>
           </div>
-          <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-1">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Speed</span>
-            <p className="font-mono text-lg font-black text-emerald-400">{activeAmbulanceStream?.speed || 48} km/h</p>
+          <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE] space-y-1">
+            <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">Speed</span>
+            <p className="font-mono text-lg font-black text-emerald-600">{activeAmbulanceStream?.speed || 48} km/h</p>
           </div>
-          <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-1">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">ETA to Patient</span>
-            <p className="font-mono text-lg font-black text-amber-400">{activeAmbulanceStream?.eta || 4} mins</p>
+          <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE] space-y-1">
+            <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">ETA to Patient</span>
+            <p className="font-mono text-lg font-black text-amber-600">{activeAmbulanceStream?.eta || 4} mins</p>
           </div>
-          <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-1">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Dispatch Status</span>
-            <p className="font-extrabold text-sm uppercase tracking-wide text-cyan-400">
+          <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE] space-y-1">
+            <span className="text-[11px] font-bold text-stone-500 uppercase tracking-wider">Dispatch Status</span>
+            <p className="font-extrabold text-sm uppercase tracking-wide text-blue-600">
               {activeAmbulanceStream?.status.replace('_', ' ') || 'EN ROUTE'}
             </p>
           </div>
         </div>
 
         {/* Status Stage Switcher */}
-        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-slate-800">
-          <span className="text-xs font-bold text-slate-400 mr-2">Update Stage:</span>
+        <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-[#EFE8DE]">
+          <span className="text-xs font-bold text-stone-500 mr-2">Update Stage:</span>
           {[
             { id: 'en_route', label: '1. En Route' },
             { id: 'arrived_scene', label: '2. Arrived Scene' },

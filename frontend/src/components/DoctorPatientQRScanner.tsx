@@ -278,7 +278,7 @@ export default function DoctorPatientQRScanner({ onPatientUnlocked, className = 
           {!scannedPayload && (
             <div className="space-y-4">
               {scanMode === 'camera' && (
-                <div className="relative bg-slate-950 rounded-2xl overflow-hidden aspect-video max-w-lg mx-auto flex flex-col items-center justify-center border border-slate-800 shadow-inner">
+                <div className="relative bg-[#FAF7F2] rounded-2xl overflow-hidden aspect-video max-w-lg mx-auto flex flex-col items-center justify-center border border-[#EFE8DE] shadow-xs">
                   <video
                     ref={videoRef}
                     className={`w-full h-full object-cover ${cameraActive ? 'block' : 'hidden'}`}
@@ -288,13 +288,13 @@ export default function DoctorPatientQRScanner({ onPatientUnlocked, className = 
                   {/* Scanning Overlay Reticle */}
                   {cameraActive && (
                     <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                      <div className="w-56 h-56 border-2 border-indigo-400 rounded-3xl relative animate-pulse shadow-[0_0_20px_rgba(99,102,241,0.5)]">
-                        <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-indigo-400 rounded-tl-xl" />
-                        <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-indigo-400 rounded-tr-xl" />
-                        <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-indigo-400 rounded-bl-xl" />
-                        <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-indigo-400 rounded-br-xl" />
+                      <div className="w-56 h-56 border-2 border-amber-500 rounded-3xl relative animate-pulse shadow-[0_0_20px_rgba(245,158,11,0.4)]">
+                        <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-amber-500 rounded-tl-xl" />
+                        <div className="absolute -top-1 -right-1 w-6 h-6 border-t-4 border-r-4 border-amber-500 rounded-tr-xl" />
+                        <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-amber-500 rounded-bl-xl" />
+                        <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-amber-500 rounded-br-xl" />
                       </div>
-                      <p className="absolute bottom-4 text-xs font-bold text-white bg-slate-900/80 px-3 py-1 rounded-full border border-white/20">
+                      <p className="absolute bottom-4 text-xs font-bold text-stone-900 bg-[#FFFDF9]/95 px-3 py-1 rounded-full border border-[#EFE8DE] shadow-sm">
                         Align Patient QR Code within Frame
                       </p>
                     </div>
@@ -302,10 +302,10 @@ export default function DoctorPatientQRScanner({ onPatientUnlocked, className = 
 
                   {!cameraActive && (
                     <div className="p-6 text-center space-y-3">
-                      <Camera className="h-10 w-10 text-slate-500 mx-auto" />
+                      <Camera className="h-10 w-10 text-amber-500 mx-auto" />
                       <div>
-                        <p className="text-sm font-bold text-white">Camera is Ready</p>
-                        <p className="text-xs text-slate-400 mt-0.5">Click below to activate your webcam or phone camera.</p>
+                        <p className="text-sm font-bold text-stone-900">Camera is Ready</p>
+                        <p className="text-xs text-stone-500 mt-0.5">Click below to activate your webcam or phone camera.</p>
                       </div>
                       <button
                         onClick={startCamera}
@@ -367,22 +367,22 @@ export default function DoctorPatientQRScanner({ onPatientUnlocked, className = 
 
           {/* ── STEP 2: THE UNIQUE ID / 2FA CONSENT CHALLENGE (THE TRICK!) ───── */}
           {scannedPayload && (
-            <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-6 md:p-7 border border-indigo-500/40 space-y-6 animate-in zoom-in-95 duration-200">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+            <div className="bg-[#FFFDF9] text-stone-900 rounded-2xl p-6 md:p-7 border border-[#EFE8DE] space-y-6 shadow-sm animate-in zoom-in-95 duration-200">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#EFE8DE] pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-400">
+                  <div className="w-10 h-10 rounded-xl bg-emerald-100 border border-emerald-200 flex items-center justify-center text-emerald-700">
                     <CheckCircle2 className="h-5 w-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 px-2.5 py-0.5 rounded-full border border-emerald-400/30">
+                      <span className="text-[10px] font-black uppercase tracking-wider bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full border border-emerald-200">
                         QR Scanned Successfully
                       </span>
-                      <span className="text-xs text-amber-300 font-bold flex items-center gap-1">
+                      <span className="text-xs text-amber-700 font-bold flex items-center gap-1">
                         <Lock className="h-3 w-3" /> Locked by 2FA
                       </span>
                     </div>
-                    <h3 className="text-xl font-black text-white mt-0.5">
+                    <h3 className="text-xl font-black text-stone-900 mt-0.5">
                       {scannedPayload.patientName} ({scannedPayload.abhaId})
                     </h3>
                   </div>
@@ -390,7 +390,7 @@ export default function DoctorPatientQRScanner({ onPatientUnlocked, className = 
 
                 <button
                   onClick={handleResetScan}
-                  className="px-3 py-1.5 bg-white/10 hover:bg-white/20 text-slate-300 rounded-lg text-xs font-bold transition-all self-start sm:self-auto"
+                  className="px-3 py-1.5 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 border border-[#EFE8DE] rounded-lg text-xs font-bold transition-all self-start sm:self-auto"
                 >
                   ✕ Cancel Scan
                 </button>
@@ -398,12 +398,12 @@ export default function DoctorPatientQRScanner({ onPatientUnlocked, className = 
 
               {/* Security PIN Entry Box */}
               <div className="max-w-md mx-auto space-y-4 text-center">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-500/20 border border-indigo-400/30 flex items-center justify-center text-indigo-300 mx-auto">
+                <div className="w-12 h-12 rounded-2xl bg-amber-100 border border-amber-300 flex items-center justify-center text-amber-800 mx-auto">
                   <KeyRound className="h-6 w-6" />
                 </div>
                 <div>
-                  <h4 className="text-lg font-black text-white">Enter 6-Digit Patient Consent ID</h4>
-                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
+                  <h4 className="text-lg font-black text-stone-900">Enter 6-Digit Patient Consent ID</h4>
+                  <p className="text-xs text-stone-600 mt-1 leading-relaxed">
                     To comply with ABDM and patient privacy laws, ask the patient for the <strong>6-digit Unique Consent PIN</strong> displayed on their Medical Profile QR Card.
                   </p>
                 </div>
@@ -421,7 +421,7 @@ export default function DoctorPatientQRScanner({ onPatientUnlocked, className = 
                         value={digit}
                         onChange={(e) => handlePinChange(idx, e.target.value)}
                         onKeyDown={(e) => handleKeyDown(idx, e)}
-                        className="w-12 h-14 rounded-2xl bg-white/10 border-2 border-indigo-400/50 text-center text-2xl font-black text-white outline-none focus:border-indigo-400 focus:bg-white/20 focus:ring-2 focus:ring-indigo-400/30 transition-all shadow-inner font-mono"
+                        className="w-12 h-14 rounded-2xl bg-white border-2 border-amber-400 text-center text-2xl font-black text-amber-950 outline-none focus:border-amber-500 focus:bg-amber-50/30 focus:ring-2 focus:ring-amber-400/30 transition-all shadow-sm font-mono"
                       />
                     ))}
                   </div>
@@ -429,7 +429,7 @@ export default function DoctorPatientQRScanner({ onPatientUnlocked, className = 
                   <button
                     type="submit"
                     disabled={isVerifying || pinDigits.join('').length !== 6}
-                    className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-black shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-3.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white rounded-xl text-xs font-black shadow-md shadow-amber-500/20 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isVerifying ? (
                       <>
@@ -445,7 +445,7 @@ export default function DoctorPatientQRScanner({ onPatientUnlocked, className = 
                   </button>
                 </form>
 
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-stone-500">
                   Tip for testing: Look at the <strong>Health Passport QR</strong> tab on the patient&apos;s profile to find the 6-digit PIN.
                 </p>
               </div>
@@ -458,26 +458,26 @@ export default function DoctorPatientQRScanner({ onPatientUnlocked, className = 
       {unlockedDossier && (
         <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
           {/* Unlocked Top Header */}
-          <div className="bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-950 text-white rounded-3xl p-6 md:p-8 shadow-xl border border-emerald-500/30 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/15 pb-4">
+          <div className="bg-[#FFFDF9] text-stone-900 rounded-3xl p-6 md:p-8 shadow-sm border border-[#EFE8DE] space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EFE8DE] pb-4">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-500 text-white flex items-center justify-center font-black text-lg shadow-lg">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 text-white flex items-center justify-center font-black text-lg shadow-md shadow-amber-500/20">
                   ✓
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] uppercase font-black tracking-widest px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
+                    <span className="text-[10px] uppercase font-black tracking-widest px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
                       CONSENT VERIFIED & UNLOCKED
                     </span>
-                    <span className="text-xs text-emerald-300 font-mono">
+                    <span className="text-xs text-amber-800 font-mono">
                       {unlockedDossier.personal.abhaId}
                     </span>
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-black text-white mt-1">
+                  <h2 className="text-2xl md:text-3xl font-black text-stone-900 mt-1">
                     {unlockedDossier.personal.fullName}
                   </h2>
-                  <p className="text-xs text-slate-300 font-medium mt-0.5">
-                    {unlockedDossier.personal.age} yrs • {unlockedDossier.personal.gender} • Blood Group: <strong className="text-rose-400 font-extrabold">{unlockedDossier.personal.bloodGroup}</strong> • 📍 {unlockedDossier.personal.village}
+                  <p className="text-xs text-stone-600 font-medium mt-0.5">
+                    {unlockedDossier.personal.age} yrs • {unlockedDossier.personal.gender} • Blood Group: <strong className="text-rose-600 font-extrabold">{unlockedDossier.personal.bloodGroup}</strong> • 📍 {unlockedDossier.personal.village}
                   </p>
                 </div>
               </div>

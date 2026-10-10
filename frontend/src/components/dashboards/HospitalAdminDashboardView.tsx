@@ -551,21 +551,21 @@ function CareQueueSection() {
       style={{ background: CQ.paper, color: CQ.ink }}>
 
       {/* Header bar */}
-      <div className="px-6 py-4 bg-slate-900 flex flex-col md:flex-row md:items-center justify-between gap-3">
+      <div className="px-6 py-4 bg-[#FFFDF9] border-b border-[#EFE8DE] flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <div className="p-2 bg-indigo-600 rounded-xl"><Activity className="h-5 w-5 text-white" /></div>
+          <div className="p-2 bg-gradient-to-br from-amber-400 to-yellow-500 rounded-xl text-white shadow-md shadow-amber-500/20"><Activity className="h-5 w-5" /></div>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-lg font-black text-white tracking-tight">CareQueue</h2>
-              <span className="text-[10px] font-black bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full">
+              <h2 className="text-lg font-black text-stone-900 tracking-tight">CareQueue</h2>
+              <span className="text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full">
                 LIVE · Swarnandhra General
               </span>
             </div>
-            <p className="text-xs text-slate-400 font-medium">
+            <p className="text-xs text-stone-500 font-medium">
               {patients.length} active patients ·{' '}
               {String(8 + Math.floor(tick / 60)).padStart(2, '0')}:{String(tick % 60).padStart(2, '0')} hospital time
               {delayedCount > 0 && (
-                <span className="ml-2 text-red-400 font-bold">· ⚠ {delayedCount} delayed</span>
+                <span className="ml-2 text-red-500 font-bold">· ⚠ {delayedCount} delayed</span>
               )}
             </p>
           </div>
@@ -699,29 +699,29 @@ export default function HospitalAdminDashboardView() {
     <div className="space-y-8 animate-in fade-in duration-500 max-w-7xl mx-auto pb-16">
 
       {/* ── TOP BANNER ── */}
-      <div className="bg-slate-900 text-white rounded-3xl p-5 md:p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-800">
+      <div className="bg-[#FFFDF9] text-stone-900 rounded-3xl p-5 md:p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 border border-[#EFE8DE]">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-lg">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center text-white shadow-md shadow-amber-500/20">
             <Building2 className="h-6 w-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-widest font-bold text-indigo-400">Hospital Administration & Operations</span>
-              <span className="text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 px-2 py-0.5 rounded-full font-bold">Apollo Hospitals Network</span>
+              <span className="text-xs uppercase tracking-widest font-bold text-amber-800">Hospital Administration & Operations</span>
+              <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full font-bold">Apollo Hospitals Network</span>
             </div>
-            <p className="text-sm text-slate-300 font-medium mt-0.5">
+            <p className="text-sm text-stone-600 font-medium mt-0.5">
               CareQueue Live Board • Doctor Schedules • OPD Check-In • Revenue Analytics
             </p>
           </div>
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto flex-wrap">
           <Link href="/dashboard/hospital-management"
-            className="flex-1 md:flex-none px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5">
+            className="flex-1 md:flex-none px-4 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-amber-500/20 flex items-center gap-1.5">
             <BedDouble className="h-3.5 w-3.5" /> Inpatient Management
           </Link>
-          <button onClick={() => setRole('doctor')}   className="flex-1 md:flex-none px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md">Doctor EHR View</button>
-          <button onClick={() => setRole('pharmacy')} className="flex-1 md:flex-none px-4 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold transition-all shadow-md">Pharmacy View</button>
-          <button onClick={() => setRole('asha')}     className="flex-1 md:flex-none px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition-all border border-slate-700">ASHA View</button>
+          <button onClick={() => setRole('doctor')}   className="flex-1 md:flex-none px-4 py-2.5 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 rounded-xl text-xs font-bold transition-all border border-[#EFE8DE]">Doctor EHR View</button>
+          <button onClick={() => setRole('pharmacy')} className="flex-1 md:flex-none px-4 py-2.5 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 rounded-xl text-xs font-bold transition-all border border-[#EFE8DE]">Pharmacy View</button>
+          <button onClick={() => setRole('asha')}     className="flex-1 md:flex-none px-4 py-2.5 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 rounded-xl text-xs font-bold transition-all border border-[#EFE8DE]">ASHA View</button>
         </div>
       </div>
 
@@ -777,8 +777,8 @@ export default function HospitalAdminDashboardView() {
             </div>
             <p className="text-sm text-slate-500 font-medium mt-1">Verify incoming rural & urban patients, check them into doctor waiting queue with 1 click</p>
           </div>
-          <Link href="/dashboard/tracking" className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1.5">
-            <Navigation className="h-3.5 w-3.5 text-indigo-400" /><span>Full Realtime Radar</span>
+          <Link href="/dashboard/tracking" className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-amber-500/20 flex items-center gap-1.5">
+            <Navigation className="h-3.5 w-3.5 text-white" /><span>Full Realtime Radar</span>
           </Link>
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-3">
@@ -834,7 +834,7 @@ export default function HospitalAdminDashboardView() {
                     <tr key={j.id} className="hover:bg-indigo-50/30 transition-colors">
                       <td className="py-3.5 px-4 font-mono">
                         <div className="flex items-center gap-2">
-                          <span className="font-black text-sm px-2.5 py-1 bg-slate-900 text-white rounded-lg">#{j.tokenNumber}</span>
+                          <span className="font-black text-sm px-2.5 py-1 bg-amber-500 text-white rounded-lg shadow-sm">#{j.tokenNumber}</span>
                           <div><p className="font-bold text-slate-900">{j.id}</p><p className="text-[10px] text-slate-400">{j.appointmentId}</p></div>
                         </div>
                       </td>

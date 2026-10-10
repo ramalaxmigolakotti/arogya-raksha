@@ -324,7 +324,7 @@ export default function SettingsPage() {
             <div>
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">{t('email')}</label>
               <input value={user?.email || ''} disabled
-                className="w-full border border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-400 rounded-xl px-3 py-2.5 text-sm cursor-not-allowed" />
+                className="w-full border border-[#EFE8DE] bg-[#FAF7F2] text-stone-500 rounded-xl px-3 py-2.5 text-sm cursor-not-allowed" />
             </div>
             <div>
               <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 mb-1.5">{t('bio')}</label>
@@ -345,7 +345,7 @@ export default function SettingsPage() {
 
           {/* Medical Profile quick link */}
           <Link href="/dashboard/profile"
-            className="flex items-center justify-between bg-gradient-to-r from-indigo-50 to-violet-50 dark:from-indigo-950 dark:to-violet-950 rounded-2xl border border-indigo-200 dark:border-indigo-800 p-5 hover:shadow-md transition-all group">
+            className="flex items-center justify-between bg-[#FAF7F2] rounded-2xl border border-[#EFE8DE] p-5 hover:shadow-md transition-all group">
             <div className="flex items-center gap-3">
               <div className="p-2.5 rounded-xl bg-indigo-100 dark:bg-indigo-900">
                 <Heart className="h-5 w-5 text-indigo-600 dark:text-indigo-400" />
@@ -395,7 +395,7 @@ export default function SettingsPage() {
               ))}
             </div>
             <div className={`mt-5 p-4 rounded-xl border flex items-center gap-3 ${
-              resolvedTheme === 'dark' ? 'bg-slate-900 border-slate-700 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-700'
+              resolvedTheme === 'dark' ? 'bg-[#FAF7F2] border-[#EFE8DE] text-stone-800' : 'bg-slate-50 border-slate-200 text-slate-700'
             }`}>
               {resolvedTheme === 'dark' ? <Moon className="h-4 w-4 text-indigo-400" /> : <Sun className="h-4 w-4 text-amber-500" />}
               <div>
@@ -559,7 +559,7 @@ export default function SettingsPage() {
                     <span className="text-xs">Loading registered passkeys…</span>
                   </div>
                 ) : passkeys.length === 0 ? (
-                  <div className="p-6 rounded-xl border border-dashed border-slate-200 dark:border-slate-700 text-center space-y-2 bg-slate-50/50 dark:bg-slate-900/30">
+                  <div className="p-6 rounded-xl border border-dashed border-[#EFE8DE] text-center space-y-2 bg-[#FAF7F2]">
                     <div className="inline-flex p-3 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400">
                       <Key className="h-5 w-5" />
                     </div>
@@ -572,7 +572,7 @@ export default function SettingsPage() {
                   passkeys.map((pk) => (
                     <div
                       key={pk.id}
-                      className="p-4 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900/40 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-slate-300 dark:hover:border-slate-600"
+                      className="p-4 rounded-xl border border-[#EFE8DE] bg-[#FFFDF9] flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all hover:border-amber-300"
                     >
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">

@@ -802,7 +802,7 @@ export default function MedicalProfilePage() {
                     onClick={() => setHistoryFilter(tab.id)}
                     className={`text-xs font-bold px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 ${
                       isSelected
-                        ? 'bg-slate-900 dark:bg-indigo-600 text-white border-slate-900 dark:border-indigo-600 shadow-sm ring-2 ring-indigo-500/20'
+                        ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-stone-950 font-black border-amber-500 shadow-sm ring-2 ring-amber-400/20'
                         : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:border-indigo-300 dark:hover:border-slate-600'
                     }`}
                   >
@@ -904,14 +904,14 @@ export default function MedicalProfilePage() {
 
                     {/* Summary if available */}
                     {rec.summary && (
-                      <div className="text-xs text-slate-600 dark:text-slate-300 bg-slate-50/50 dark:bg-slate-900/30 p-2.5 rounded-xl border border-slate-100 dark:border-slate-800">
+                      <div className="text-xs text-stone-700 bg-[#FAF7F2] p-2.5 rounded-xl border border-[#EFE8DE]">
                         {rec.summary}
                       </div>
                     )}
 
                     {/* User Input / Symptoms Query */}
                     {rec.userQuery && (
-                      <div className="bg-slate-50 dark:bg-slate-900/60 rounded-xl p-3.5 border border-slate-100 dark:border-slate-800 text-xs">
+                      <div className="bg-[#FAF7F2] rounded-xl p-3.5 border border-[#EFE8DE] text-xs">
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                           What you asked / Input provided:
                         </span>
@@ -921,8 +921,8 @@ export default function MedicalProfilePage() {
 
                     {/* AI Response / Diagnosis / Output */}
                     {rec.aiResponse && (
-                      <div className="bg-gradient-to-br from-indigo-50/60 to-blue-50/40 dark:from-indigo-950/30 dark:to-blue-950/20 rounded-xl p-3.5 border border-indigo-100/60 dark:border-indigo-900/30 text-xs">
-                        <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wider block mb-1">
+                      <div className="bg-amber-50/40 rounded-xl p-3.5 border border-amber-200/60 text-xs">
+                        <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider block mb-1">
                           AI Doctor / Diagnosis & Clinical Output:
                         </span>
                         <p className="text-slate-800 dark:text-slate-100 font-medium whitespace-pre-wrap leading-relaxed">{rec.aiResponse}</p>

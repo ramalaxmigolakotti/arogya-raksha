@@ -152,84 +152,79 @@ export default function Sidebar() {
   const sidebarWidth = collapsed ? 'w-[72px]' : 'w-64';
   const languages = LANGUAGES;
 
-  // accent helpers
-  const accentActive = {
-    emerald: 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/30',
-    teal:    'bg-teal-500 text-white shadow-lg shadow-teal-500/30',
-    violet:  'bg-violet-600 text-white shadow-lg shadow-violet-500/30',
-    rose:    'bg-rose-600 text-white shadow-lg shadow-rose-500/30',
-  }[accentColor] ?? 'bg-emerald-500 text-white';
+  // accent helpers — warm amber gold palette matching reference image
+  const accentActive = 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-500 text-white font-bold shadow-lg shadow-amber-500/35 rounded-2xl';
 
-  const accentHover = 'text-slate-400 hover:bg-white/5 hover:text-white';
+  const accentHover = 'text-stone-700 hover:bg-[#F5EFE6] hover:text-stone-900 rounded-2xl transition-all duration-200';
 
   return (
     <>
       {/* Mobile Hamburger */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed top-4 left-4 z-50 lg:hidden bg-[#0f2027] text-white p-2.5 rounded-xl shadow-lg shadow-black/20"
+        className="fixed top-4 left-4 z-50 lg:hidden bg-[#FFFDF9] text-stone-800 p-2.5 rounded-2xl shadow-lg shadow-stone-300/40 border border-[#EFE8DE]"
         aria-label="Open menu"
       >
-        <Menu className="h-5 w-5" />
+        <Menu className="h-5 w-5 text-amber-600" />
       </button>
 
       {/* Mobile Overlay */}
       {mobileOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden" onClick={() => setMobileOpen(false)} />
+        <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40 lg:hidden" onClick={() => setMobileOpen(false)} />
       )}
 
       {/* Collapse Toggle */}
       <button
         onClick={() => setCollapsed(c => !c)}
-        className={`hidden lg:flex fixed z-[60] top-1/2 -translate-y-1/2 items-center justify-center w-7 h-14 rounded-r-2xl bg-gradient-to-b from-emerald-400 to-teal-500 shadow-lg shadow-emerald-500/40 hover:from-emerald-300 hover:to-teal-400 hover:w-8 transition-all duration-300 group ${collapsed ? 'left-[72px]' : 'left-64'}`}
+        className={`hidden lg:flex fixed z-[60] top-1/2 -translate-y-1/2 items-center justify-center w-7 h-14 rounded-r-2xl bg-gradient-to-b from-amber-400 to-yellow-500 shadow-lg shadow-amber-500/30 hover:from-amber-300 hover:to-yellow-400 hover:w-8 transition-all duration-300 group ${collapsed ? 'left-[72px]' : 'left-64'}`}
         title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
       >
         <span className="transition-transform duration-300 group-hover:scale-110">
           {collapsed ? <ChevronRight className="h-4 w-4 text-white" /> : <ChevronLeft className="h-4 w-4 text-white" />}
         </span>
-        <span className="absolute top-1.5 left-1/2 -translate-x-1/2 flex flex-col gap-0.5 opacity-50">
+        <span className="absolute top-1.5 left-1/2 -translate-x-1/2 flex flex-col gap-0.5 opacity-60">
           <span className="w-1 h-1 rounded-full bg-white" />
           <span className="w-1 h-1 rounded-full bg-white" />
           <span className="w-1 h-1 rounded-full bg-white" />
         </span>
       </button>
 
-      {/* ── Sidebar ── */}
-      <aside className={`fixed left-0 top-0 h-screen bg-[#0f2027] text-white flex flex-col shadow-2xl z-50 transition-all duration-300 ease-in-out ${sidebarWidth} ${mobileOpen ? 'translate-x-0 w-64' : collapsed ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} lg:translate-x-0 overflow-hidden`}>
+      {/* ── Sidebar (Warm Ivory Cream & Golden Amber matching reference) ── */}
+      <aside className={`fixed left-0 top-0 h-screen bg-[#FFFDF9] border-r border-[#EFE8DE] text-stone-800 flex flex-col shadow-xl shadow-stone-200/50 z-50 transition-all duration-300 ease-in-out ${sidebarWidth} ${mobileOpen ? 'translate-x-0 w-64' : collapsed ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'} lg:translate-x-0 overflow-hidden`}>
 
         {/* Brand */}
-        <div className={`px-4 py-5 flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
-          <div className="bg-gradient-to-br from-emerald-400 to-teal-500 p-2 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/30 flex-shrink-0">
-            <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="none" stroke="currentColor" strokeWidth="2.5">
+        <div className={`px-4 py-5 flex items-center gap-3 relative z-10 ${collapsed ? 'justify-center' : ''}`}>
+          <div className="bg-gradient-to-br from-amber-400 to-yellow-500 p-2.5 rounded-2xl flex items-center justify-center shadow-md shadow-amber-500/25 flex-shrink-0">
+            <svg viewBox="0 0 24 24" className="h-5 w-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.8">
               <path d="M22 12h-4l-3 9L9 3l-3 9H2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
           {!collapsed && (
             <div className="flex-1 overflow-hidden">
-              <h1 className="text-lg font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-emerald-300 to-cyan-300 whitespace-nowrap">
+              <h1 className="text-lg font-black tracking-tight text-stone-900 whitespace-nowrap">
                 Arogya Raksha
               </h1>
-              <p className="text-[10px] font-bold text-emerald-500 uppercase tracking-[0.2em]">आरोग्य रक्षा</p>
+              <p className="text-[10px] font-extrabold text-amber-600 uppercase tracking-[0.2em]">आरोग्य रक्षा</p>
             </div>
           )}
-          <button onClick={() => setMobileOpen(false)} className="lg:hidden text-slate-400 hover:text-white transition p-1">
+          <button onClick={() => setMobileOpen(false)} className="lg:hidden text-stone-400 hover:text-stone-800 transition p-1">
             <X className="h-5 w-5" />
           </button>
         </div>
 
-        {/* Active Authenticated Role Badge */}
+        {/* User Profile Card (Marcus Lee style from reference) */}
         {!collapsed && (
-          <div className="px-3 mb-2">
-            <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-white/5 border border-white/8">
-              <span className="text-base">{roleIcon}</span>
+          <div className="px-3 mb-3 relative z-10">
+            <div className="flex items-center gap-3 p-3 rounded-2xl bg-[#FAF6F0] border border-[#EBE4D8] shadow-sm">
+              <div className="w-10 h-10 rounded-full bg-amber-100 ring-2 ring-amber-300/80 flex items-center justify-center text-xl flex-shrink-0 shadow-inner">
+                {roleIcon}
+              </div>
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-extrabold text-white truncate">{user?.name || roleLabel}</p>
-                {user?.email && (
-                  <p className="text-[10px] text-slate-400 truncate leading-tight mt-0.5" title={user.email}>{user.email}</p>
-                )}
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <span className="text-[9px] text-emerald-400 font-mono font-black truncate">{user?.badgeId || role}</span>
-                  <span className="text-[9px] text-slate-500 font-medium">({role})</span>
+                <p className="text-sm font-extrabold text-stone-900 truncate tracking-tight">{user?.name || 'Marcus Lee'}</p>
+                <div className="mt-0.5">
+                  <span className="inline-block text-[10px] font-bold text-amber-800 bg-amber-100/90 border border-amber-200/80 px-2 py-0.5 rounded-full capitalize">
+                    {roleLabel || 'User Profile'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -237,17 +232,25 @@ export default function Sidebar() {
         )}
 
         {/* Nav Items */}
-        <div className="flex-1 overflow-y-auto pt-1 pb-4 px-2 overflow-x-hidden">
-          <ul className="space-y-0.5">
-            {menuItems.map((item, index) => {
-              const isActive = pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard');
-              const isCrisis  = (item as any).crisis;
-              const isProfile = (item as any).profile;
-              const badge     = (item as any).badge as string | undefined;
+        <div className="flex-1 overflow-y-auto pt-1 pb-4 px-3 overflow-x-hidden relative z-10">
+          <ul className="space-y-1">
+            {(() => {
+              // Find the single best matching active index (never multiple)
+              const activeIndex = menuItems.findIndex((item) => {
+                if (item.href === '/dashboard') {
+                  return pathname === '/dashboard';
+                }
+                return pathname === item.href || (pathname.startsWith(item.href) && item.href !== '/dashboard');
+              });
 
-              const baseClass = `flex items-center gap-3 rounded-xl transition-all duration-200 group relative overflow-hidden ${collapsed ? 'justify-center px-2 py-3' : 'px-3 py-2.5'}`;
+              return menuItems.map((item, index) => {
+                const isActive = index === activeIndex;
+                const isCrisis  = (item as any).crisis;
+                const badge     = (item as any).badge as string | undefined;
 
-              return (
+                const baseClass = `flex items-center gap-3.5 transition-all duration-200 group relative overflow-hidden ${collapsed ? 'justify-center px-2 py-3 rounded-2xl' : 'px-3.5 py-3 rounded-2xl'}`;
+
+                return (
                 <li key={index}>
                   <Link
                     href={item.href}
@@ -255,30 +258,25 @@ export default function Sidebar() {
                     className={`${baseClass} ${
                       isCrisis
                         ? isActive
-                          ? 'bg-gradient-to-r from-red-600 to-rose-600 text-white shadow-lg shadow-red-500/40 font-semibold'
-                          : 'bg-gradient-to-r from-red-500/10 to-rose-500/10 text-red-300 hover:from-red-500/20 border border-red-500/20 hover:border-red-500/40'
-                        : isProfile
-                        ? isActive
-                          ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/40 font-semibold'
-                          : 'bg-gradient-to-r from-indigo-500/10 to-violet-500/10 text-indigo-300 hover:from-indigo-500/20 border border-indigo-500/20 hover:border-indigo-500/40'
+                          ? 'bg-gradient-to-r from-red-500 to-rose-600 text-white shadow-lg shadow-red-500/30 font-bold'
+                          : 'text-rose-600 hover:bg-rose-50 hover:text-rose-700'
                         : isActive
                         ? accentActive
                         : accentHover
                     }`}
                   >
-                    <item.icon className={`h-5 w-5 flex-shrink-0 ${
+                    <item.icon className={`h-5 w-5 flex-shrink-0 transition-transform duration-200 group-hover:scale-105 ${
                       isActive ? 'text-white' :
-                      isCrisis ? 'text-red-400 animate-pulse' :
-                      isProfile ? 'text-indigo-400' :
-                      'text-slate-500 group-hover:text-emerald-400'
+                      isCrisis ? 'text-rose-500 animate-pulse' :
+                      'text-amber-600 group-hover:text-amber-700'
                     }`} />
 
                     {!collapsed && (
                       <>
-                        <span className="text-sm font-medium whitespace-nowrap overflow-hidden flex-1">{item.label}</span>
+                        <span className={`text-sm font-medium whitespace-nowrap overflow-hidden flex-1 ${isActive ? 'text-white font-bold' : 'text-stone-800 group-hover:text-stone-900'}`}>{item.label}</span>
                         {badge && !isActive && (
-                          <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-md uppercase tracking-wider ${
-                            isCrisis ? 'bg-red-500/20 text-red-400 animate-pulse' : 'bg-emerald-500/20 text-emerald-400'
+                          <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-wider ${
+                            isCrisis ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-800 border border-amber-200/80'
                           }`}>{badge}</span>
                         )}
                       </>
@@ -286,56 +284,57 @@ export default function Sidebar() {
                   </Link>
                 </li>
               );
-            })}
+            });
+          })()}
           </ul>
         </div>
 
-        {/* Language Selector + Logout */}
+        {/* Footer: Help Center & Sign Out matching reference */}
         {!collapsed ? (
-          <div className="px-3 pb-4 space-y-2 relative" ref={dropdownRef}>
+          <div className="px-4 pt-3 pb-5 border-t border-[#EFE8DE] bg-[#FAF6F0]/80 space-y-2 relative" ref={dropdownRef}>
             {/* Language picker */}
             {isLangOpen && (
-              <div className="absolute bottom-full left-3 right-3 mb-2 bg-[#1a2d35] border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-200">
+              <div className="absolute bottom-full left-3 right-3 mb-2 bg-[#FFFDF9] border border-[#EBE4D8] rounded-2xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-bottom-3 duration-200">
                 <div className="py-2 max-h-60 overflow-y-auto">
                   {languages.map((lang) => (
                     <button
                       key={lang.code}
                       onClick={() => { setLanguage(lang.code as Language); setIsLangOpen(false); }}
-                      className={`w-full flex items-center gap-3 px-4 py-2.5 text-sm transition-colors hover:bg-white/5 ${language === lang.code ? 'text-emerald-400 font-bold bg-white/5' : 'text-slate-300'}`}
+                      className={`w-full flex items-center gap-3 px-4 py-2 text-sm transition-colors hover:bg-amber-50 ${language === lang.code ? 'text-amber-700 font-bold bg-amber-50' : 'text-stone-700'}`}
                     >
                       <span>{lang.flag}</span>
                       <span className="flex-1 text-left">{lang.native}</span>
-                      <span className="text-xs text-slate-500">{lang.name}</span>
-                      {language === lang.code && <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />}
+                      <span className="text-xs text-stone-500">{lang.name}</span>
+                      {language === lang.code && <div className="w-1.5 h-1.5 rounded-full bg-amber-500" />}
                     </button>
                   ))}
                 </div>
               </div>
             )}
-            <button
-              onClick={() => setIsLangOpen(!isLangOpen)}
-              className={`flex items-center gap-2 text-slate-400 hover:text-white transition-all w-full px-4 py-2.5 rounded-xl hover:bg-white/5 border border-transparent ${isLangOpen ? 'border-white/10 bg-white/5 text-white' : ''}`}
-            >
-              <Globe className="h-4 w-4" />
-              <span className="text-sm font-medium">{languages.find(l => l.code === language)?.name || 'English'}</span>
-              <ChevronDown className={`h-3.5 w-3.5 ml-auto transition-transform duration-200 ${isLangOpen ? 'rotate-180' : ''}`} />
-            </button>
 
-            {/* Logout */}
-            <button
-              onClick={logout}
-              className="flex items-center gap-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all w-full px-4 py-2.5 rounded-xl border border-transparent hover:border-rose-500/20"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="text-sm font-medium">Logout / Switch Role</span>
-            </button>
+            <div className="flex items-center justify-between text-xs font-semibold text-amber-800/80 pt-1">
+              <button
+                onClick={() => setIsLangOpen(!isLangOpen)}
+                className="flex items-center gap-1.5 hover:text-amber-900 transition-colors py-1"
+              >
+                <Globe className="h-3.5 w-3.5 text-amber-600" />
+                <span>{languages.find(l => l.code === language)?.name || 'English'}</span>
+              </button>
+
+              <button
+                onClick={logout}
+                className="hover:text-red-600 transition-colors py-1 font-bold"
+              >
+                Sign Out
+              </button>
+            </div>
           </div>
         ) : (
-          <div className="pb-4 flex flex-col items-center gap-2">
-            <button onClick={() => setCollapsed(false)} title="Expand to change language" className="p-2.5 rounded-xl text-slate-400 hover:text-white hover:bg-white/5 transition-all">
+          <div className="pb-4 flex flex-col items-center gap-2 border-t border-[#EFE8DE] pt-3">
+            <button onClick={() => setCollapsed(false)} title="Language" className="p-2 rounded-xl text-amber-600 hover:bg-amber-50 transition-all">
               <Globe className="h-5 w-5" />
             </button>
-            <button onClick={logout} title="Logout" className="p-2.5 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-all">
+            <button onClick={logout} title="Sign Out" className="p-2 rounded-xl text-stone-500 hover:text-rose-600 hover:bg-rose-50 transition-all">
               <LogOut className="h-5 w-5" />
             </button>
           </div>

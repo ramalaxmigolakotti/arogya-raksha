@@ -235,7 +235,7 @@ export default function PersonalRiskCard() {
         )}
         <Link href="/dashboard/predictors"
           className={`py-2.5 text-sm font-bold rounded-xl transition-all flex items-center justify-center gap-2 ${
-            hasProfile ? 'flex-1 bg-slate-900 hover:bg-slate-800 text-white' : 'flex-none px-4 bg-slate-100 hover:bg-slate-200 text-slate-700'
+            hasProfile ? 'flex-1 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white shadow-md shadow-amber-500/20' : 'flex-none px-4 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'
           }`}>
           <TrendingUp className="h-4 w-4" />
           {hasProfile ? 'Full Health Analysis' : 'View Predictors'}

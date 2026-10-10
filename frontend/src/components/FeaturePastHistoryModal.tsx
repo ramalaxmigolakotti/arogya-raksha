@@ -127,13 +127,13 @@ export default function FeaturePastHistoryModal({
 
       {/* Slide-over Drawer / Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-end bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-end bg-stone-900/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div
-            className="w-full max-w-xl h-full bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 flex flex-col shadow-2xl animate-in slide-in-from-right duration-300 overflow-hidden"
+            className="w-full max-w-xl h-full bg-[#FFFDF9] border-l border-[#EFE8DE] flex flex-col shadow-2xl animate-in slide-in-from-right duration-300 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Drawer Header */}
-            <div className="p-5 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex items-start justify-between gap-4">
+            <div className="p-5 border-b border-[#EFE8DE] bg-[#FAF7F2] flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <span className="text-xl">{icon}</span>
@@ -173,7 +173,7 @@ export default function FeaturePastHistoryModal({
             </div>
 
             {/* Search Bar */}
-            <div className="p-4 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
+            <div className="p-4 border-b border-[#EFE8DE] bg-[#FFFDF9]">
               <div className="relative">
                 <Search className="h-4 w-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
                 <input
@@ -260,7 +260,7 @@ export default function FeaturePastHistoryModal({
                       {isExpanded && (
                         <div className="mt-3 pt-3 border-t border-slate-200/60 dark:border-slate-700/60 space-y-2.5 text-xs">
                           {rec.userQuery && (
-                            <div className="bg-slate-50 dark:bg-slate-900/70 p-3 rounded-xl border border-slate-100 dark:border-slate-800">
+                            <div className="bg-[#FAF7F2] p-3 rounded-xl border border-[#EFE8DE]">
                               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-1">
                                 Input / Query:
                               </span>
@@ -306,7 +306,7 @@ export default function FeaturePastHistoryModal({
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 text-[11px] text-slate-500 flex items-center justify-between">
+            <div className="p-4 border-t border-[#EFE8DE] bg-[#FAF7F2] text-[11px] text-stone-500 flex items-center justify-between">
               <span>Lifelong Medical Vault</span>
               <button
                 type="button"

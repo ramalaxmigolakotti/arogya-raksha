@@ -194,25 +194,23 @@ export default function AppointmentsCareFlowPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto pb-16">
       {/* ── Top Header Banner ────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-r from-blue-900 via-indigo-900 to-slate-950 text-white rounded-3xl p-6 md:p-8 shadow-xl border border-blue-500/30 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl pointer-events-none -mr-20 -mt-20" />
-
+      <div className="bg-[#FFFDF9] text-stone-900 rounded-3xl p-6 md:p-8 shadow-sm border border-[#EFE8DE] relative overflow-hidden">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
             <div className="flex items-center gap-2.5 flex-wrap">
-              <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-blue-500/20 text-blue-300 border border-blue-400/40 rounded-full flex items-center gap-1.5">
-                <Radio className="h-3 w-3 text-blue-400 animate-pulse" />
+              <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 bg-amber-100 text-amber-900 border border-amber-200 rounded-full flex items-center gap-1.5">
+                <Radio className="h-3 w-3 text-amber-600 animate-pulse" />
                 <span>REAL-TIME CARE STREAM</span>
               </span>
-              <span className="text-xs text-emerald-400 font-bold flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" /> Socket Connected • 0s Latency
+              <span className="text-xs text-emerald-700 font-bold flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" /> Socket Connected • 0s Latency
               </span>
             </div>
 
-            <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-white">
+            <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-stone-900">
               Appointments & Realtime Care Flow
             </h1>
-            <p className="text-slate-300 text-sm max-w-2xl font-medium leading-relaxed">
+            <p className="text-stone-600 text-sm max-w-2xl font-medium leading-relaxed">
               Every appointment, prescription, medicine order, and ambulance dispatch syncs here from end-to-end. 
               Track your complete healthcare journey live without manual refreshes.
             </p>
@@ -228,7 +226,7 @@ export default function AppointmentsCareFlowPage() {
 
             <button
               onClick={() => setShowBookingModal(true)}
-              className="flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl text-xs font-extrabold shadow-lg shadow-blue-600/30 transition-all hover:scale-105"
+              className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white rounded-2xl text-xs font-extrabold shadow-md shadow-amber-500/20 transition-all hover:scale-105"
             >
               <Plus className="h-4 w-4" />
               <span>Book OPD Appointment</span>
@@ -237,35 +235,35 @@ export default function AppointmentsCareFlowPage() {
         </div>
 
         {/* Real-time Status Ribbon */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-white/15 text-xs relative z-10">
-          <div className="bg-white/5 backdrop-blur-sm p-3 rounded-2xl border border-white/10">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Active OPD Token</span>
-            <p className="text-xl font-black text-white mt-0.5">#{activeTokenNumber}</p>
-            <p className="text-[10px] text-blue-300 font-medium">Room #4 • Apollo Clinic</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-5 border-t border-[#EFE8DE] text-xs relative z-10">
+          <div className="bg-[#FAF7F2] p-3 rounded-2xl border border-[#EFE8DE]">
+            <span className="text-[10px] uppercase font-bold text-stone-500">Active OPD Token</span>
+            <p className="text-xl font-black text-stone-900 mt-0.5">#{activeTokenNumber}</p>
+            <p className="text-[10px] text-amber-800 font-medium">Room #4 • Apollo Clinic</p>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-sm p-3 rounded-2xl border border-white/10">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Doctor Status</span>
-            <p className="text-xl font-black text-emerald-400 mt-0.5">#{curToken} Consulting</p>
-            <p className="text-[10px] text-emerald-300 font-medium">{patientsAhead} patients ahead ({estWaitMins})</p>
+          <div className="bg-[#FAF7F2] p-3 rounded-2xl border border-[#EFE8DE]">
+            <span className="text-[10px] uppercase font-bold text-stone-500">Doctor Status</span>
+            <p className="text-xl font-black text-emerald-600 mt-0.5">#{curToken} Consulting</p>
+            <p className="text-[10px] text-emerald-700 font-medium">{patientsAhead} patients ahead ({estWaitMins})</p>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-sm p-3 rounded-2xl border border-white/10">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Digital Prescription</span>
-            <p className="text-xl font-black text-indigo-300 mt-0.5">
+          <div className="bg-[#FAF7F2] p-3 rounded-2xl border border-[#EFE8DE]">
+            <span className="text-[10px] uppercase font-bold text-stone-500">Digital Prescription</span>
+            <p className="text-xl font-black text-stone-900 mt-0.5">
               {activeJourney?.prescription ? '1 Active Rx' : 'Pending Exam'}
             </p>
-            <p className="text-[10px] text-indigo-200 font-medium">
+            <p className="text-[10px] text-stone-500 font-medium">
               {activeJourney?.prescription ? `${activeJourney.prescription.medicines.length} Medicines` : 'Doctor reviewing'}
             </p>
           </div>
 
-          <div className="bg-white/5 backdrop-blur-sm p-3 rounded-2xl border border-white/10">
-            <span className="text-[10px] uppercase font-bold text-slate-400">Pharmacy Delivery</span>
-            <p className="text-xl font-black text-amber-300 mt-0.5">
+          <div className="bg-[#FAF7F2] p-3 rounded-2xl border border-[#EFE8DE]">
+            <span className="text-[10px] uppercase font-bold text-stone-500">Pharmacy Delivery</span>
+            <p className="text-xl font-black text-amber-600 mt-0.5">
               {orders && orders.length > 0 ? orders[0].status.replace('_', ' ').toUpperCase() : 'Ready'}
             </p>
-            <p className="text-[10px] text-amber-200 font-medium">
+            <p className="text-[10px] text-amber-800 font-medium">
               {orders && orders.length > 0 ? `ETA: ${orders[0].eta || '15 mins'}` : 'Counter Pickup Available'}
             </p>
           </div>
@@ -503,38 +501,38 @@ export default function AppointmentsCareFlowPage() {
             </div>
 
             {activeJourney?.prescription ? (
-              <div className="bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-950 text-white rounded-2xl p-6 border border-indigo-500/30 space-y-5 shadow-lg">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-white/10 pb-4">
+              <div className="bg-[#FAF7F2] text-stone-900 rounded-2xl p-6 border border-[#EFE8DE] space-y-5 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[#EFE8DE] pb-4">
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-indigo-300 font-mono">
+                    <span className="text-[10px] uppercase font-bold text-amber-800 font-mono">
                       RX ID: {activeJourney.prescription.id}
                     </span>
-                    <h4 className="text-base font-black text-white mt-0.5">
+                    <h4 className="text-base font-black text-stone-900 mt-0.5">
                       Diagnosis: {activeJourney.prescription.diagnosis}
                     </h4>
-                    <p className="text-xs text-slate-300 italic mt-0.5">
+                    <p className="text-xs text-stone-600 italic mt-0.5">
                       &ldquo;{activeJourney.prescription.instructions}&rdquo;
                     </p>
                   </div>
 
-                  <span className="text-xs font-black uppercase px-3 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 rounded-full self-start sm:self-auto">
+                  <span className="text-xs font-black uppercase px-3 py-1 bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-full self-start sm:self-auto">
                     Status: {activeJourney.prescription.status.toUpperCase()}
                   </span>
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-xs font-black uppercase tracking-wider text-indigo-200">
+                  <p className="text-xs font-black uppercase tracking-wider text-amber-900">
                     Prescribed Dosage & Regimen:
                   </p>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     {activeJourney.prescription.medicines.map((m, idx) => (
-                      <div key={idx} className="bg-white/10 backdrop-blur-sm p-3.5 rounded-xl border border-white/10 text-xs space-y-1">
-                        <p className="font-extrabold text-white flex items-center gap-1.5">
-                          <Pill className="h-3.5 w-3.5 text-indigo-300" />
+                      <div key={idx} className="bg-white p-3.5 rounded-xl border border-[#EFE8DE] text-xs space-y-1 shadow-sm">
+                        <p className="font-extrabold text-stone-900 flex items-center gap-1.5">
+                          <Pill className="h-3.5 w-3.5 text-amber-600" />
                           {m.name}
                         </p>
-                        <p className="text-[11px] text-slate-300 font-medium">{m.dosage} • {m.frequency}</p>
-                        <p className="text-[10px] text-emerald-300 font-bold">{m.duration}</p>
+                        <p className="text-[11px] text-stone-600 font-medium">{m.dosage} • {m.frequency}</p>
+                        <p className="text-[10px] text-amber-800 font-bold">{m.duration}</p>
                       </div>
                     ))}
                   </div>
@@ -669,20 +667,20 @@ export default function AppointmentsCareFlowPage() {
 
             {activeAmbulanceStream ? (
               <div className="space-y-4">
-                <div className="bg-slate-900 text-white rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="bg-[#FAF7F2] text-stone-900 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 border border-[#EFE8DE] shadow-xs">
                   <div>
-                    <span className="text-[10px] font-mono font-bold text-rose-400 uppercase">
+                    <span className="text-[10px] font-mono font-bold text-rose-600 uppercase">
                       DISPATCH #{activeAmbulanceStream.dispatchId}
                     </span>
-                    <h4 className="text-sm font-black text-white mt-0.5">
+                    <h4 className="text-sm font-black text-stone-900 mt-0.5">
                       Vehicle: {activeAmbulanceStream.vehicleNo} • Driver: {activeAmbulanceStream.driverName}
                     </h4>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] font-black uppercase px-2.5 py-1 bg-rose-500/20 text-rose-300 border border-rose-400/30 rounded-full">
+                    <span className="text-[10px] font-black uppercase px-2.5 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded-full">
                       {activeAmbulanceStream.status.replace('_', ' ').toUpperCase()}
                     </span>
-                    <p className="text-sm font-black text-amber-400 mt-1">ETA: {activeAmbulanceStream.eta} mins</p>
+                    <p className="text-sm font-black text-amber-700 mt-1">ETA: {activeAmbulanceStream.eta} mins</p>
                   </div>
                 </div>
 
@@ -703,7 +701,7 @@ export default function AppointmentsCareFlowPage() {
 
       {/* ── BOOKING MODAL (OPD TOKEN & DOCTOR APPOINTMENT) ───────────────── */}
       {showBookingModal && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 md:p-8 max-w-lg w-full shadow-2xl border border-slate-100 space-y-5 animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-2.5">

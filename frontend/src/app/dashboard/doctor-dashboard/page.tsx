@@ -683,7 +683,7 @@ export default function DoctorDashboardPage() {
 
                 {/* Expanded Medical Profile Card */}
                 {isExpanded && (
-                  <div className="border-t border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 p-4">
+                  <div className="border-t border-[#EFE8DE] bg-[#FAF7F2] p-4">
                     {loadingCard === appt.appointment_id ? (
                       <div className="flex items-center gap-2 py-4 justify-center">
                         <Loader2 className="h-5 w-5 animate-spin text-indigo-500" />

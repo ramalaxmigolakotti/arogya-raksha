@@ -78,19 +78,19 @@ export default function RealtimeTrackingPage() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto pb-16">
       {/* Top Role Switcher Header */}
-      <div className="bg-slate-900 text-white rounded-3xl p-5 md:p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-800">
+      <div className="bg-[#FFFDF9] text-stone-900 rounded-3xl p-5 md:p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 border border-[#EFE8DE]">
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center font-bold text-white shadow-md shadow-amber-500/20">
             <Navigation className="h-6 w-6" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-widest font-bold text-indigo-400">Hospital Realtime Tracking Radar</span>
-              <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" /> Socket Connected
+              <span className="text-xs uppercase tracking-widest font-bold text-amber-800">Hospital Realtime Tracking Radar</span>
+              <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-bold flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" /> Socket Connected
               </span>
             </div>
-            <p className="text-sm text-slate-300 font-medium mt-0.5">
+            <p className="text-sm text-stone-600 font-medium mt-0.5">
               Rural Healthcare Journey • Live Ambulance GPS • OPD Tokens • Pharmacy Orders
             </p>
           </div>
@@ -98,13 +98,13 @@ export default function RealtimeTrackingPage() {
         <div className="flex items-center gap-2">
           <Link
             href="/dashboard"
-            className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 rounded-xl text-xs font-bold transition-all border border-slate-700"
+            className="px-4 py-2.5 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 rounded-xl text-xs font-bold transition-all border border-[#EFE8DE]"
           >
             ← Back to Dashboard
           </Link>
           <button
             onClick={() => setRole('hospital_admin')}
-            className="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md"
+            className="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-amber-500/20"
           >
             Hospital Admin View
           </button>
@@ -211,45 +211,45 @@ export default function RealtimeTrackingPage() {
       {/* ── TAB: RURAL HEALTHCARE JOURNEY (9-STAGE PIPELINE) ─────────────── */}
       {activeTab === 'journey' && currentJourney && (
         <div className="space-y-6">
-          {/* Main Journey Card */}
-          <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 md:p-8 border border-indigo-500/30 shadow-2xl space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-indigo-900/50 pb-5">
+          {/* Main Journey Card — Clean Warm Luxury Medical Theme */}
+          <div className="bg-white text-stone-900 rounded-3xl p-6 md:p-8 border border-[#EFE8DE] shadow-xl shadow-stone-200/50 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EFE8DE] pb-5">
               <div className="flex items-center gap-3">
-                <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center text-white shadow-lg font-black text-xl">
+                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center text-white shadow-md shadow-amber-500/25 font-black text-xl">
                   #{currentJourney.tokenNumber}
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs uppercase tracking-widest font-mono font-bold text-indigo-300">
+                    <span className="text-xs uppercase tracking-widest font-mono font-bold text-amber-800">
                       JOURNEY ID: {currentJourney.id}
                     </span>
                     <button
                       onClick={() => copyText(currentJourney.id)}
-                      className="p-1 hover:bg-white/10 rounded-md transition-colors"
+                      className="p-1 hover:bg-stone-100 rounded-md transition-colors"
                       title="Copy ID"
                     >
                       {copiedId === currentJourney.id ? (
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
                       ) : (
-                        <Copy className="h-3.5 w-3.5 text-indigo-300" />
+                        <Copy className="h-3.5 w-3.5 text-stone-400" />
                       )}
                     </button>
-                    <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full font-bold">
+                    <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
                       {currentJourney.bookingSource === 'asha_assisted' ? 'ASHA Assisted' : 'Self-Booked'}
                     </span>
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-black mt-0.5">
+                  <h2 className="text-2xl md:text-3xl font-black text-stone-900 mt-0.5">
                     {currentJourney.patientName}
                   </h2>
-                  <p className="text-xs text-slate-300 font-medium mt-0.5">
+                  <p className="text-xs text-stone-500 font-medium mt-0.5">
                     {currentJourney.age} yrs • {currentJourney.gender} • 📍 {currentJourney.village}
                   </p>
                 </div>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <span className="px-3.5 py-1.5 bg-indigo-600 text-white rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-md">
-                  <Radio className="h-3.5 w-3.5 animate-pulse text-indigo-200" />
+                <span className="px-3.5 py-1.5 bg-gradient-to-r from-amber-400 to-yellow-500 text-white rounded-full text-xs font-black uppercase tracking-wider flex items-center gap-1.5 shadow-sm">
+                  <Radio className="h-3.5 w-3.5 animate-pulse text-white" />
                   <span>STEP: {currentJourney.currentStep.replace('_', ' ')}</span>
                 </span>
               </div>
@@ -257,7 +257,7 @@ export default function RealtimeTrackingPage() {
 
             {/* Quick Switcher of Journeys */}
             <div className="flex items-center gap-2 overflow-x-auto pb-1 text-xs">
-              <span className="text-slate-400 font-bold uppercase tracking-wider text-[10px] shrink-0">
+              <span className="text-stone-500 font-bold uppercase tracking-wider text-[10px] shrink-0">
                 Switch Patient:
               </span>
               {journeys.map((j) => (
@@ -266,8 +266,8 @@ export default function RealtimeTrackingPage() {
                   onClick={() => setActiveJourneyId(j.id)}
                   className={`px-3 py-1.5 rounded-xl font-bold transition-all shrink-0 ${
                     currentJourney.id === j.id
-                      ? 'bg-indigo-600 text-white shadow-md'
-                      : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700'
+                      ? 'bg-amber-500 text-white shadow-md'
+                      : 'bg-[#FAF6F0] text-stone-700 border border-[#EBE4D8] hover:bg-amber-50'
                   }`}
                 >
                   #{j.tokenNumber} {j.patientName.split(' ')[0]} ({j.currentStep.replace('_', ' ')})
@@ -276,23 +276,23 @@ export default function RealtimeTrackingPage() {
             </div>
 
             {/* Hospital & Doctor Metadata Strip */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-slate-800/60 p-4 rounded-2xl border border-slate-700/60 text-xs">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-[#FAF6F0] p-4 rounded-2xl border border-[#EBE4D8] text-xs">
               <div>
-                <span className="text-slate-400 text-[10px] uppercase font-bold">Hospital</span>
-                <p className="font-extrabold text-white mt-0.5">{currentJourney.hospitalName}</p>
+                <span className="text-stone-500 text-[10px] uppercase font-bold">Hospital</span>
+                <p className="font-extrabold text-stone-900 mt-0.5">{currentJourney.hospitalName}</p>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] uppercase font-bold">Consulting Doctor</span>
-                <p className="font-extrabold text-white mt-0.5">{currentJourney.doctorName}</p>
-                <p className="text-[10px] text-slate-400">{currentJourney.department}</p>
+                <span className="text-stone-500 text-[10px] uppercase font-bold">Consulting Doctor</span>
+                <p className="font-extrabold text-stone-900 mt-0.5">{currentJourney.doctorName}</p>
+                <p className="text-[10px] text-stone-500">{currentJourney.department}</p>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] uppercase font-bold">Slot Time</span>
-                <p className="font-extrabold text-indigo-300 mt-0.5">{currentJourney.slotTime}</p>
+                <span className="text-stone-500 text-[10px] uppercase font-bold">Slot Time</span>
+                <p className="font-extrabold text-amber-800 mt-0.5">{currentJourney.slotTime}</p>
               </div>
               <div>
-                <span className="text-slate-400 text-[10px] uppercase font-bold">Billing Status</span>
-                <p className="font-extrabold text-emerald-400 mt-0.5">
+                <span className="text-stone-500 text-[10px] uppercase font-bold">Billing Status</span>
+                <p className="font-extrabold text-emerald-700 mt-0.5">
                   {currentJourney.paymentStatus === 'free_bpl_aarogyasri'
                     ? 'AAROGYASRI FREE (₹0)'
                     : `₹${currentJourney.consultationFee || 500} PAID ${currentJourney.paymentId ? `• ${currentJourney.paymentId}` : '• Razorpay Verified'}`}
@@ -303,10 +303,10 @@ export default function RealtimeTrackingPage() {
             {/* 9-STAGE PROGRESSION TIMELINE */}
             <div className="space-y-4 pt-2">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-extrabold uppercase tracking-wider text-indigo-200">
+                <h3 className="text-sm font-extrabold uppercase tracking-wider text-stone-900">
                   End-to-End Healthcare Journey Timeline
                 </h3>
-                <span className="text-xs text-slate-400 font-medium italic">
+                <span className="text-xs text-stone-500 font-medium italic">
                   Live Status: "{currentJourney.statusNotes}"
                 </span>
               </div>
@@ -391,42 +391,42 @@ export default function RealtimeTrackingPage() {
                       key={item.step}
                       className={`p-4 rounded-2xl border transition-all space-y-2 ${
                         isCurrent
-                          ? 'bg-indigo-600/30 border-indigo-400 shadow-lg ring-1 ring-indigo-400'
+                          ? 'bg-amber-50/80 border-2 border-amber-400 shadow-md shadow-amber-500/10'
                           : isDone
-                          ? 'bg-slate-800/80 border-emerald-500/40 text-slate-200'
-                          : 'bg-slate-900/40 border-slate-800 text-slate-500'
+                          ? 'bg-emerald-50/60 border border-emerald-200 text-stone-800'
+                          : 'bg-[#FDFBF7] border border-[#EFE8DE] text-stone-400'
                       }`}
                     >
                       <div className="flex items-center justify-between">
                         <div
                           className={`w-8 h-8 rounded-xl flex items-center justify-center ${
                             isCurrent
-                              ? 'bg-indigo-500 text-white animate-pulse'
+                              ? 'bg-gradient-to-br from-amber-400 to-yellow-500 text-white shadow-sm'
                               : isDone
-                              ? 'bg-emerald-500/20 text-emerald-400'
-                              : 'bg-slate-800 text-slate-500'
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : 'bg-stone-100 text-stone-400'
                           }`}
                         >
                           <Icon className="h-4 w-4" />
                         </div>
                         {isDone ? (
-                          <span className="text-[10px] font-black text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full">
+                          <span className="text-[10px] font-black text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full">
                             COMPLETED
                           </span>
                         ) : isCurrent ? (
-                          <span className="text-[10px] font-black text-indigo-300 bg-indigo-500/20 px-2 py-0.5 rounded-full animate-pulse">
+                          <span className="text-[10px] font-black text-amber-900 bg-amber-200/80 px-2 py-0.5 rounded-full">
                             ACTIVE STAGE
                           </span>
                         ) : (
-                          <span className="text-[10px] font-bold text-slate-600">UPCOMING</span>
+                          <span className="text-[10px] font-bold text-stone-400">UPCOMING</span>
                         )}
                       </div>
 
                       <div>
-                        <p className={`font-extrabold text-xs ${isCurrent ? 'text-white' : isDone ? 'text-slate-200' : 'text-slate-500'}`}>
+                        <p className={`font-extrabold text-xs ${isCurrent ? 'text-stone-900 font-black' : isDone ? 'text-stone-900' : 'text-stone-400'}`}>
                           {item.title}
                         </p>
-                        <p className="text-[11px] text-slate-400 mt-0.5 leading-snug">
+                        <p className={`text-[11px] mt-0.5 leading-snug ${isCurrent ? 'text-stone-600' : isDone ? 'text-stone-600' : 'text-stone-400'}`}>
                           {item.desc}
                         </p>
                       </div>
@@ -438,36 +438,36 @@ export default function RealtimeTrackingPage() {
 
             {/* DIGITAL PRESCRIPTION ACCORDION (IF ISSUED) */}
             {currentJourney.prescription && (
-              <div className="bg-slate-800/90 rounded-2xl p-5 border border-indigo-500/30 space-y-3">
-                <div className="flex items-center justify-between border-b border-slate-700 pb-3">
+              <div className="bg-[#FAF7F2] rounded-2xl p-5 border border-[#EFE8DE] space-y-3">
+                <div className="flex items-center justify-between border-b border-[#EFE8DE] pb-3">
                   <div className="flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-indigo-400" />
-                    <h4 className="font-extrabold text-sm text-white">
+                    <FileText className="h-5 w-5 text-amber-600" />
+                    <h4 className="font-extrabold text-sm text-stone-900">
                       Digital Prescription ({currentJourney.prescription.id})
                     </h4>
                   </div>
-                  <span className="text-xs font-bold text-emerald-400 bg-emerald-500/20 px-2.5 py-0.5 rounded-md">
+                  <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-md">
                     Status: {currentJourney.prescription.status.toUpperCase()}
                   </span>
                 </div>
 
                 <div className="text-xs space-y-1">
-                  <p className="text-slate-300">
+                  <p className="text-stone-700">
                     <strong>Diagnosis:</strong> {currentJourney.prescription.diagnosis}
                   </p>
-                  <p className="text-slate-300 italic">
+                  <p className="text-stone-600 italic">
                     "{currentJourney.prescription.instructions}"
                   </p>
                 </div>
 
                 <div className="space-y-1.5 pt-1">
-                  <span className="text-[10px] font-bold uppercase text-slate-400">Prescribed Medications:</span>
+                  <span className="text-[10px] font-bold uppercase text-stone-500">Prescribed Medications:</span>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                     {currentJourney.prescription.medicines.map((m, idx) => (
-                      <div key={idx} className="p-2.5 rounded-xl bg-slate-900/80 border border-slate-700 text-xs">
-                        <p className="font-bold text-white">{m.name}</p>
-                        <p className="text-[10px] text-slate-400">{m.dosage} • {m.frequency}</p>
-                        <p className="text-[10px] text-indigo-300 mt-1">{m.duration}</p>
+                      <div key={idx} className="p-2.5 rounded-xl bg-white border border-[#EFE8DE] text-xs shadow-sm">
+                        <p className="font-bold text-stone-900">{m.name}</p>
+                        <p className="text-[10px] text-stone-500">{m.dosage} • {m.frequency}</p>
+                        <p className="text-[10px] text-amber-700 font-bold mt-1">{m.duration}</p>
                       </div>
                     ))}
                   </div>
@@ -476,7 +476,7 @@ export default function RealtimeTrackingPage() {
             )}
 
             {/* SIMULATOR QUICK ACTIONS (CROSS-ROLE CONTROLS) */}
-            <div className="border-t border-indigo-900/60 pt-4 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <div className="border-t border-[#EFE8DE] pt-4 flex flex-wrap items-center justify-between gap-3 text-xs">
               <span className="text-slate-400 font-medium">
                 Simulate Cross-Panel State Advance:
               </span>
@@ -538,35 +538,35 @@ export default function RealtimeTrackingPage() {
       {/* ── TAB 2: AMBULANCE LIVE GPS RADAR ─────────────────────────────────── */}
       {activeTab === 'ambulance' && (
         <div className="space-y-6">
-          <div className="bg-gradient-to-br from-slate-900 via-rose-950 to-slate-900 text-white rounded-3xl p-6 md:p-8 border border-rose-500/30 shadow-xl space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-rose-900/50 pb-5">
+          <div className="bg-white text-stone-900 rounded-3xl p-6 md:p-8 border border-[#EFE8DE] shadow-xl shadow-stone-200/50 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EFE8DE] pb-5">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-rose-600 flex items-center justify-center text-white shadow-lg">
+                <div className="w-12 h-12 rounded-2xl bg-rose-500 flex items-center justify-center text-white shadow-md shadow-rose-500/25">
                   <ShieldAlert className="h-6 w-6" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs uppercase tracking-widest font-mono font-bold text-rose-300">
+                    <span className="text-xs uppercase tracking-widest font-mono font-bold text-rose-700">
                       ID: {activeAmbulanceStream?.dispatchId || 'EMR-2026-0412'}
                     </span>
                     <button
                       onClick={() => copyText(activeAmbulanceStream?.dispatchId || 'EMR-2026-0412')}
-                      className="p-1 hover:bg-white/10 rounded-md transition-colors"
+                      className="p-1 hover:bg-stone-100 rounded-md transition-colors"
                       title="Copy ID"
                     >
                       {copiedId === (activeAmbulanceStream?.dispatchId || 'EMR-2026-0412') ? (
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
                       ) : (
-                        <Copy className="h-3.5 w-3.5 text-rose-300" />
+                        <Copy className="h-3.5 w-3.5 text-stone-400" />
                       )}
                     </button>
                   </div>
-                  <h2 className="text-2xl font-black mt-0.5">Emergency Ambulance Telemetry Radar</h2>
+                  <h2 className="text-2xl font-black text-stone-900 mt-0.5">Emergency Ambulance Telemetry Radar</h2>
                 </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="px-3 py-1 bg-rose-600 text-white rounded-full text-xs font-bold uppercase animate-pulse flex items-center gap-1.5">
+                <span className="px-3 py-1 bg-rose-600 text-white rounded-full text-xs font-bold uppercase animate-pulse flex items-center gap-1.5 shadow-sm">
                   <Radio className="h-3.5 w-3.5" /> LIVE GPS FEED
                 </span>
               </div>
@@ -574,45 +574,45 @@ export default function RealtimeTrackingPage() {
 
             {/* Vehicle & Telemetry Details */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-1">
-                <p className="text-[10px] uppercase font-bold text-slate-400">Ambulance Vehicle</p>
-                <p className="text-base font-mono font-black text-rose-400">{activeAmbulanceStream?.vehicleNo || 'AP-39-AMB-108'}</p>
-                <p className="text-[10px] text-slate-400">Driver: {activeAmbulanceStream?.driverName || 'Rajesh Kumar'}</p>
+              <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE] space-y-1">
+                <p className="text-[10px] uppercase font-bold text-stone-500">Ambulance Vehicle</p>
+                <p className="text-base font-mono font-black text-rose-600">{activeAmbulanceStream?.vehicleNo || 'AP-39-AMB-108'}</p>
+                <p className="text-[10px] text-stone-500">Driver: {activeAmbulanceStream?.driverName || 'Rajesh Kumar'}</p>
               </div>
 
-              <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-1">
-                <p className="text-[10px] uppercase font-bold text-slate-400">Estimated Arrival</p>
-                <p className="text-2xl font-black text-amber-400">{activeAmbulanceStream?.eta || 4} mins</p>
-                <p className="text-[10px] text-amber-200/80 font-medium">Distance ~1.2 km</p>
+              <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE] space-y-1">
+                <p className="text-[10px] uppercase font-bold text-stone-500">Estimated Arrival</p>
+                <p className="text-2xl font-black text-amber-600">{activeAmbulanceStream?.eta || 4} mins</p>
+                <p className="text-[10px] text-amber-700 font-medium">Distance ~1.2 km</p>
               </div>
 
-              <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-1">
-                <p className="text-[10px] uppercase font-bold text-slate-400">Current Speed</p>
-                <p className="text-2xl font-black text-emerald-400">{activeAmbulanceStream?.speed || 48} km/h</p>
-                <p className="text-[10px] text-emerald-200/80 font-medium">En route via NH-16</p>
+              <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE] space-y-1">
+                <p className="text-[10px] uppercase font-bold text-stone-500">Current Speed</p>
+                <p className="text-2xl font-black text-emerald-600">{activeAmbulanceStream?.speed || 48} km/h</p>
+                <p className="text-[10px] text-emerald-700 font-medium">En route via NH-16</p>
               </div>
 
-              <div className="bg-slate-900/80 p-4 rounded-2xl border border-slate-800 space-y-1">
-                <p className="text-[10px] uppercase font-bold text-slate-400">Dispatch Status</p>
-                <p className="text-sm font-black text-cyan-400 uppercase tracking-wide">
+              <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE] space-y-1">
+                <p className="text-[10px] uppercase font-bold text-stone-500">Dispatch Status</p>
+                <p className="text-sm font-black text-blue-600 uppercase tracking-wide">
                   {activeAmbulanceStream?.status.replace('_', ' ') || 'EN ROUTE'}
                 </p>
-                <p className="text-[10px] text-slate-400">Patient: {activeAmbulanceStream?.patientName || 'Emergency Patient'}</p>
+                <p className="text-[10px] text-stone-500">Patient: {activeAmbulanceStream?.patientName || 'Emergency Patient'}</p>
               </div>
             </div>
 
             {/* Live Map */}
-            <div className="bg-white rounded-2xl overflow-hidden p-2">
+            <div className="bg-[#FAF7F2] rounded-2xl overflow-hidden p-2 border border-[#EFE8DE]">
               <AmbulanceMap incidentId={activeAmbulanceStream?.dispatchId || 'EMR-2026-0412'} socket={socket} />
             </div>
 
             <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-              <span className="text-xs text-rose-200">
+              <span className="text-xs text-stone-500">
                 Ambulance is broadcasting live GPS telemetry directly to your device and Doctor Trauma Bay #2.
               </span>
               <button
                 onClick={() => triggerEmergencySos({ message: 'Urgent priority escalation from patient tracker' })}
-                className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl shadow-lg transition-all"
+                className="px-5 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs rounded-xl shadow-md transition-all"
               >
                 Send SOS Priority Alert
               </button>
@@ -624,88 +624,88 @@ export default function RealtimeTrackingPage() {
       {/* ── TAB 2: HOSPITAL APPOINTMENT & SMART QUEUE ───────────────────────── */}
       {activeTab === 'appointments' && (
         <div className="space-y-6">
-          <div className="bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-950 text-white rounded-3xl p-6 md:p-8 border border-blue-500/30 shadow-xl space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-blue-900/50 pb-5">
+          <div className="bg-white text-stone-900 rounded-3xl p-6 md:p-8 border border-[#EFE8DE] shadow-xl shadow-stone-200/50 space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EFE8DE] pb-5">
               <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white shadow-lg">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500 flex items-center justify-center text-white shadow-md shadow-amber-500/25">
                   <Ticket className="h-6 w-6" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs uppercase tracking-widest font-mono font-bold text-blue-300">
+                    <span className="text-xs uppercase tracking-widest font-mono font-bold text-amber-800">
                       {activeApptId}
                     </span>
                     <button
                       onClick={() => copyText(activeApptId)}
-                      className="p-1 hover:bg-white/10 rounded-md transition-colors"
+                      className="p-1 hover:bg-stone-100 rounded-md transition-colors"
                       title="Copy ID"
                     >
                       {copiedId === activeApptId ? (
-                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
                       ) : (
-                        <Copy className="h-3.5 w-3.5 text-blue-300" />
+                        <Copy className="h-3.5 w-3.5 text-stone-400" />
                       )}
                     </button>
-                    <span className="text-[10px] font-bold bg-blue-500/20 text-blue-200 border border-blue-400/30 px-2 py-0.5 rounded-full">
+                    <span className="text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full">
                       🏥 {activeHospital}
                     </span>
                   </div>
-                  <h2 className="text-2xl font-black mt-0.5">Hospital Appointment & Live Queue Token</h2>
+                  <h2 className="text-2xl font-black text-stone-900 mt-0.5">Hospital Appointment & Live Queue Token</h2>
                 </div>
               </div>
 
-              <span className="text-xs font-extrabold px-3 py-1 bg-emerald-500 text-white rounded-full uppercase">
+              <span className="text-xs font-extrabold px-3 py-1 bg-emerald-600 text-white rounded-full uppercase shadow-sm">
                 🟢 PAID ₹500
               </span>
             </div>
 
             {/* Queue Counter Cards */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15">
-                <p className="text-[10px] font-bold text-blue-200 uppercase">Your Token Number</p>
-                <p className="text-3xl font-black text-white mt-1">#{activeToken}</p>
-                <p className="text-[10px] text-blue-300 font-bold mt-0.5">Clinic Room #4</p>
+              <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE]">
+                <p className="text-[10px] font-bold text-stone-500 uppercase">Your Token Number</p>
+                <p className="text-3xl font-black text-stone-900 mt-1">#{activeToken}</p>
+                <p className="text-[10px] text-amber-800 font-bold mt-0.5">Clinic Room #4</p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15">
-                <p className="text-[10px] font-bold text-blue-200 uppercase">Currently Consulting</p>
-                <p className="text-3xl font-black text-emerald-400 mt-1">#{curConsulting}</p>
-                <p className="text-[10px] text-emerald-300 font-bold mt-0.5">Dr. Rajesh Varma</p>
+              <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE]">
+                <p className="text-[10px] font-bold text-stone-500 uppercase">Currently Consulting</p>
+                <p className="text-3xl font-black text-emerald-600 mt-1">#{curConsulting}</p>
+                <p className="text-[10px] text-emerald-700 font-bold mt-0.5">Dr. Rajesh Varma</p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15">
-                <p className="text-[10px] font-bold text-blue-200 uppercase">Patients Ahead</p>
-                <p className="text-3xl font-black text-amber-400 mt-1">{patientsAhead}</p>
-                <p className="text-[10px] text-amber-300 font-bold mt-0.5">
+              <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE]">
+                <p className="text-[10px] font-bold text-stone-500 uppercase">Patients Ahead</p>
+                <p className="text-3xl font-black text-amber-600 mt-1">{patientsAhead}</p>
+                <p className="text-[10px] text-amber-800 font-bold mt-0.5">
                   {patientsAhead === 0 ? 'YOU ARE NEXT!' : 'Waiting in Lobby'}
                 </p>
               </div>
 
-              <div className="bg-white/10 backdrop-blur-md p-4 rounded-2xl border border-white/15">
-                <p className="text-[10px] font-bold text-blue-200 uppercase">Estimated Wait Time</p>
-                <p className="text-2xl font-black text-white mt-1.5">~{Math.max(5, patientsAhead * 8)} mins</p>
-                <p className="text-[10px] text-blue-200 font-medium mt-0.5">~8 min / patient</p>
+              <div className="bg-[#FAF7F2] p-4 rounded-2xl border border-[#EFE8DE]">
+                <p className="text-[10px] font-bold text-stone-500 uppercase">Estimated Wait Time</p>
+                <p className="text-2xl font-black text-stone-900 mt-1.5">~{Math.max(5, patientsAhead * 8)} mins</p>
+                <p className="text-[10px] text-stone-500 font-medium mt-0.5">~8 min / patient</p>
               </div>
             </div>
 
             {/* Live Queue Progress Stepper */}
-            <div className="bg-slate-900/80 p-5 rounded-2xl border border-slate-800 space-y-3">
-              <p className="text-xs font-bold text-blue-200 uppercase tracking-wider flex items-center justify-between">
+            <div className="bg-[#FAF7F2] p-5 rounded-2xl border border-[#EFE8DE] space-y-3">
+              <p className="text-xs font-bold text-stone-700 uppercase tracking-wider flex items-center justify-between">
                 <span>Real-Time Calling Stepper (Doctor EHR Synced)</span>
-                <span className="text-emerald-400 font-bold">Auto-Updating</span>
+                <span className="text-emerald-700 font-bold">Auto-Updating</span>
               </p>
 
               <div className="flex items-center gap-2 overflow-x-auto pb-1">
-                <div className="flex items-center gap-2 bg-blue-600/30 border border-blue-400 px-3.5 py-2 rounded-xl text-xs font-bold flex-shrink-0">
-                  <span className="w-2.5 h-2.5 rounded-full bg-blue-400 animate-pulse" />
+                <div className="flex items-center gap-2 bg-amber-100 border border-amber-300 text-amber-900 px-3.5 py-2 rounded-xl text-xs font-bold flex-shrink-0">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse" />
                   <span>#{curConsulting} In Room #4</span>
                 </div>
-                <ArrowRight className="h-4 w-4 text-slate-500 flex-shrink-0" />
-                <div className="flex items-center gap-2 bg-white/10 px-3.5 py-2 rounded-xl text-xs font-bold text-slate-300 flex-shrink-0">
+                <ArrowRight className="h-4 w-4 text-stone-400 flex-shrink-0" />
+                <div className="flex items-center gap-2 bg-white border border-[#EFE8DE] px-3.5 py-2 rounded-xl text-xs font-bold text-stone-600 flex-shrink-0">
                   <span>#{curConsulting + 1} Next in Line</span>
                 </div>
-                <ArrowRight className="h-4 w-4 text-slate-500 flex-shrink-0" />
-                <div className="flex items-center gap-2 bg-emerald-600 text-white px-4 py-2 rounded-xl text-xs font-black flex-shrink-0 shadow-lg shadow-emerald-600/30">
+                <ArrowRight className="h-4 w-4 text-stone-400 flex-shrink-0" />
+                <div className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white px-4 py-2 rounded-xl text-xs font-black flex-shrink-0 shadow-md shadow-amber-500/20">
                   <Ticket className="h-4 w-4" />
                   <span>#{activeToken} YOUR TOKEN {patientsAhead === 0 ? '(NEXT!)' : ''}</span>
                 </div>

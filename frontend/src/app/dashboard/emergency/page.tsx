@@ -196,7 +196,7 @@ function AmbulanceTracker({ form, onClose }: { form: AmbulanceForm; onClose: () 
           </div>
 
           <button onClick={onClose}
-            className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl transition-colors">
+            className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white font-bold py-3.5 rounded-xl transition-all shadow-md shadow-amber-500/20">
             {currentStage === TRACKING_STAGES.length - 1 ? 'Done' : 'Close Tracker'}
           </button>
         </div>
@@ -526,7 +526,7 @@ export default function Emergency() {
                         <span className={`text-xs font-bold px-2.5 py-1 rounded-lg ${er.busy === 'Low Traffic' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                            {er.busy}
                         </span>
-                        <button className="w-full sm:w-auto px-4 py-2 bg-slate-900 text-white font-bold text-sm rounded-xl hover:bg-slate-800 transition-colors">
+                        <button className="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-amber-500 to-yellow-500 text-white font-bold text-sm rounded-xl hover:from-amber-600 hover:to-yellow-600 transition-all shadow-sm">
                            Navigate
                         </button>
                      </div>

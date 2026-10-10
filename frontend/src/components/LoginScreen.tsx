@@ -227,35 +227,35 @@ export default function LoginScreen() {
   };
 
   return (
-    <div className="min-h-screen bg-[#060d18] flex flex-col items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-[#FAF7F2] flex flex-col items-center justify-center p-4 relative overflow-hidden">
       {/* Background glow orbs */}
-      <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] rounded-full bg-blue-600/10 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] rounded-full bg-emerald-600/10 blur-[100px] pointer-events-none" />
+      <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] rounded-full bg-amber-500/10 blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[400px] h-[400px] rounded-full bg-yellow-600/10 blur-[100px] pointer-events-none" />
 
       <div className="w-full max-w-xl relative z-10">
 
         {/* Logo & Header */}
         <div className="text-center mb-8 space-y-2">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-700 shadow-lg shadow-blue-500/30 text-3xl mb-1">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-yellow-600 shadow-lg shadow-amber-500/30 text-3xl mb-1">
             🏥
           </div>
-          <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-black text-stone-900 tracking-tight">
             Arogya Raksha
           </h1>
-          <p className="text-slate-400 text-xs sm:text-sm font-medium max-w-md mx-auto leading-relaxed">
+          <p className="text-stone-600 text-xs sm:text-sm font-medium max-w-md mx-auto leading-relaxed">
             AI-Powered Smart Healthcare Platform · Direct Supabase Realtime Authentication
           </p>
         </div>
 
         {/* Auth Mode Tabs */}
-        <div className="flex bg-slate-900/80 p-1.5 rounded-2xl border border-white/10 mb-6 shadow-xl backdrop-blur-md">
+        <div className="flex bg-[#FFFDF9] p-1.5 rounded-2xl border border-[#EFE8DE] mb-6 shadow-sm">
           <button
             type="button"
             onClick={() => { setAuthMode('signin'); setError(''); setSuccessMsg(''); }}
             className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
               authMode === 'signin'
-                ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-stone-950 shadow-md'
+                : 'text-stone-600 hover:text-stone-900'
             }`}
           >
             <span>🔐</span>
@@ -266,8 +266,8 @@ export default function LoginScreen() {
             onClick={() => { setAuthMode('signup'); setError(''); setSuccessMsg(''); }}
             className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
               authMode === 'signup'
-                ? 'bg-emerald-600 text-white shadow-lg shadow-emerald-600/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-stone-950 shadow-md'
+                : 'text-stone-600 hover:text-stone-900'
             }`}
           >
             <span>✨</span>
@@ -278,8 +278,8 @@ export default function LoginScreen() {
             onClick={() => { setAuthMode('quick_pass'); setError(''); setSuccessMsg(''); }}
             className={`flex-1 py-2.5 rounded-xl text-xs font-black transition-all flex items-center justify-center gap-1.5 ${
               authMode === 'quick_pass'
-                ? 'bg-violet-600 text-white shadow-lg shadow-violet-600/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-gradient-to-r from-amber-500 to-yellow-600 text-stone-950 shadow-md'
+                : 'text-stone-600 hover:text-stone-900'
             }`}
           >
             <span>⚡</span>
@@ -289,13 +289,13 @@ export default function LoginScreen() {
 
         {/* Feedback alerts */}
         {error && (
-          <div className="mb-5 flex items-start gap-2.5 text-rose-400 text-xs font-bold bg-rose-500/10 border border-rose-500/25 rounded-xl p-3.5 animate-in fade-in leading-relaxed">
+          <div className="mb-5 flex items-start gap-2.5 text-rose-700 text-xs font-bold bg-rose-50 border border-rose-200 rounded-xl p-3.5 animate-in fade-in leading-relaxed">
             <span className="shrink-0 mt-0.5 text-sm">⚠️</span>
             <span className="break-words flex-1">{error}</span>
           </div>
         )}
         {successMsg && (
-          <div className="mb-5 flex items-center gap-2 text-emerald-400 text-xs font-bold bg-emerald-500/10 border border-emerald-500/25 rounded-xl p-3.5 animate-in fade-in">
+          <div className="mb-5 flex items-center gap-2 text-emerald-800 text-xs font-bold bg-emerald-50 border border-emerald-200 rounded-xl p-3.5 animate-in fade-in">
             <span>✅</span>
             <span>{successMsg}</span>
           </div>
@@ -303,17 +303,17 @@ export default function LoginScreen() {
 
         {/* TAB 1: SIGN IN */}
         {authMode === 'signin' && (
-          <form onSubmit={handleSignIn} className="bg-white/5 border border-white/10 rounded-2xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-4">
+          <form onSubmit={handleSignIn} className="bg-[#FFFDF9] border border-[#EFE8DE] rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
             {/* Supabase Google OAuth Button */}
             <button
               type="button"
               onClick={handleGoogleSignIn}
               disabled={googleLoading || loading}
-              className="w-full py-3.5 px-4 bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm rounded-xl border border-slate-200 shadow-md flex items-center justify-center gap-3 transition-all hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-60"
+              className="w-full py-3.5 px-4 bg-white hover:bg-stone-50 text-stone-900 font-bold text-sm rounded-xl border border-[#EFE8DE] shadow-xs flex items-center justify-center gap-3 transition-all hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-60"
             >
               {googleLoading ? (
                 <>
-                  <svg className="animate-spin h-4 w-4 text-slate-700" viewBox="0 0 24 24" fill="none">
+                  <svg className="animate-spin h-4 w-4 text-stone-700" viewBox="0 0 24 24" fill="none">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                   </svg>
@@ -337,11 +337,11 @@ export default function LoginScreen() {
               type="button"
               onClick={handlePasskeySignIn}
               disabled={passkeyLoading || loading || googleLoading}
-              className="w-full py-3.5 px-4 bg-gradient-to-r from-emerald-500/15 via-teal-500/20 to-cyan-500/15 hover:from-emerald-500/25 hover:via-teal-500/30 hover:to-cyan-500/25 text-white font-bold text-sm rounded-xl border border-teal-500/40 shadow-lg shadow-teal-500/10 flex items-center justify-center gap-2.5 transition-all hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-60"
+              className="w-full py-3.5 px-4 bg-amber-50 hover:bg-amber-100 text-stone-900 font-bold text-sm rounded-xl border border-amber-200 shadow-xs flex items-center justify-center gap-2.5 transition-all hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-60"
             >
               {passkeyLoading ? (
                 <>
-                  <svg className="animate-spin h-4 w-4 text-teal-300" viewBox="0 0 24 24" fill="none">
+                  <svg className="animate-spin h-4 w-4 text-amber-600" viewBox="0 0 24 24" fill="none">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                   </svg>
@@ -356,13 +356,13 @@ export default function LoginScreen() {
             </button>
 
             <div className="flex items-center gap-3 my-3">
-              <div className="flex-1 h-px bg-white/15"></div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">or sign in with email</span>
-              <div className="flex-1 h-px bg-white/15"></div>
+              <div className="flex-1 h-px bg-[#EFE8DE]"></div>
+              <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">or sign in with email</span>
+              <div className="flex-1 h-px bg-[#EFE8DE]"></div>
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-2">
                 Email Address
               </label>
               <input
@@ -371,12 +371,12 @@ export default function LoginScreen() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="you@example.com"
-                className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all placeholder-slate-500"
+                className="w-full bg-[#FAF7F2] border border-[#EFE8DE] rounded-xl px-4 py-3 text-stone-900 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all placeholder-stone-400"
               />
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-2">
                 Password
               </label>
               <input
@@ -385,18 +385,18 @@ export default function LoginScreen() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all placeholder-slate-500"
+                className="w-full bg-[#FAF7F2] border border-[#EFE8DE] rounded-xl px-4 py-3 text-stone-900 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all placeholder-stone-400"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3.5 rounded-xl font-black text-sm text-white shadow-lg bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+              className="w-full mt-2 py-3.5 rounded-xl font-black text-sm text-stone-950 shadow-md bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-60"
             >
               {loading ? (
                 <>
-                  <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none">
+                  <svg className="animate-spin h-4 w-4 text-stone-950" viewBox="0 0 24 24" fill="none">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                   </svg>
@@ -407,12 +407,12 @@ export default function LoginScreen() {
               )}
             </button>
 
-            <div className="pt-2 text-center text-xs text-slate-400">
+            <div className="pt-2 text-center text-xs text-stone-500">
               Don't have an account yet?{' '}
               <button
                 type="button"
                 onClick={() => setAuthMode('signup')}
-                className="text-blue-400 hover:underline font-bold"
+                className="text-amber-700 hover:underline font-bold"
               >
                 Create Account
               </button>
@@ -422,11 +422,11 @@ export default function LoginScreen() {
 
         {/* TAB 2: CREATE ACCOUNT (SIGN UP) */}
         {authMode === 'signup' && (
-          <form onSubmit={handleSignUp} className="bg-white/5 border border-white/10 rounded-2xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-4">
+          <form onSubmit={handleSignUp} className="bg-[#FFFDF9] border border-[#EFE8DE] rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
             
             {/* Role Selection */}
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-2">
                 Select Your Role / Portal
               </label>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -437,8 +437,8 @@ export default function LoginScreen() {
                     onClick={() => setSelectedRole(r.id)}
                     className={`p-2.5 rounded-xl border text-left transition-all text-xs flex items-center gap-2 ${
                       selectedRole === r.id
-                        ? 'border-emerald-500 bg-emerald-500/20 text-white font-bold ring-1 ring-emerald-500/50'
-                        : 'border-white/10 bg-black/30 text-slate-400 hover:text-white'
+                        ? 'border-amber-500 bg-amber-50 text-stone-950 font-black ring-1 ring-amber-400'
+                        : 'border-[#EFE8DE] bg-[#FAF7F2] text-stone-600 hover:text-stone-900'
                     }`}
                   >
                     <span>{r.icon}</span>
@@ -453,11 +453,11 @@ export default function LoginScreen() {
               type="button"
               onClick={handleGoogleSignIn}
               disabled={googleLoading || loading}
-              className="w-full py-3.5 px-4 bg-white hover:bg-slate-100 text-slate-900 font-bold text-sm rounded-xl border border-slate-200 shadow-md flex items-center justify-center gap-3 transition-all hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-60"
+              className="w-full py-3.5 px-4 bg-white hover:bg-stone-50 text-stone-900 font-bold text-sm rounded-xl border border-[#EFE8DE] shadow-xs flex items-center justify-center gap-3 transition-all hover:-translate-y-0.5 active:scale-[0.99] disabled:opacity-60"
             >
               {googleLoading ? (
                 <>
-                  <svg className="animate-spin h-4 w-4 text-slate-700" viewBox="0 0 24 24" fill="none">
+                  <svg className="animate-spin h-4 w-4 text-stone-700" viewBox="0 0 24 24" fill="none">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                   </svg>
@@ -477,13 +477,13 @@ export default function LoginScreen() {
             </button>
 
             <div className="flex items-center gap-3 my-3">
-              <div className="flex-1 h-px bg-white/15"></div>
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">or register with email</span>
-              <div className="flex-1 h-px bg-white/15"></div>
+              <div className="flex-1 h-px bg-[#EFE8DE]"></div>
+              <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider">or register with email</span>
+              <div className="flex-1 h-px bg-[#EFE8DE]"></div>
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-2">
                 Full Name (మీ పేరు) *
               </label>
               <input
@@ -492,13 +492,13 @@ export default function LoginScreen() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g. Rahul Sharma"
-                className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all placeholder-slate-500"
+                className="w-full bg-[#FAF7F2] border border-[#EFE8DE] rounded-xl px-4 py-3 text-stone-900 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all placeholder-stone-400"
               />
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-2">
                   Email Address *
                 </label>
                 <input
@@ -507,12 +507,12 @@ export default function LoginScreen() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="rahul@example.com"
-                  className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all placeholder-slate-500"
+                  className="w-full bg-[#FAF7F2] border border-[#EFE8DE] rounded-xl px-4 py-3 text-stone-900 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all placeholder-stone-400"
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+                <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-2">
                   Mobile Number (Optional)
                 </label>
                 <input
@@ -520,13 +520,13 @@ export default function LoginScreen() {
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="+91 98480 12345"
-                  className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all placeholder-slate-500"
+                  className="w-full bg-[#FAF7F2] border border-[#EFE8DE] rounded-xl px-4 py-3 text-stone-900 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all placeholder-stone-400"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
+              <label className="block text-[11px] font-bold text-stone-600 uppercase tracking-wider mb-2">
                 Password (min 6 chars) *
               </label>
               <input
@@ -535,18 +535,18 @@ export default function LoginScreen() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Create a strong password"
-                className="w-full bg-black/40 border border-white/15 rounded-xl px-4 py-3 text-white text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 transition-all placeholder-slate-500"
+                className="w-full bg-[#FAF7F2] border border-[#EFE8DE] rounded-xl px-4 py-3 text-stone-900 text-sm outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all placeholder-stone-400"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-2 py-3.5 rounded-xl font-black text-sm text-white shadow-lg bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-500 hover:to-teal-600 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-60"
+              className="w-full mt-2 py-3.5 rounded-xl font-black text-sm text-stone-950 shadow-md bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-60"
             >
               {loading ? (
                 <>
-                  <svg className="animate-spin h-4 w-4 text-white" viewBox="0 0 24 24" fill="none">
+                  <svg className="animate-spin h-4 w-4 text-stone-950" viewBox="0 0 24 24" fill="none">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
                   </svg>
@@ -557,12 +557,12 @@ export default function LoginScreen() {
               )}
             </button>
 
-            <div className="pt-2 text-center text-xs text-slate-400">
+            <div className="pt-2 text-center text-xs text-stone-500">
               Already have an account?{' '}
               <button
                 type="button"
                 onClick={() => setAuthMode('signin')}
-                className="text-emerald-400 hover:underline font-bold"
+                className="text-amber-700 hover:underline font-bold"
               >
                 Sign In
               </button>
@@ -572,8 +572,8 @@ export default function LoginScreen() {
 
         {/* TAB 3: 1-CLICK DEMO ACCESS (Fast testing across all 6 roles) */}
         {authMode === 'quick_pass' && (
-          <div className="bg-white/5 border border-white/10 rounded-2xl p-6 sm:p-8 backdrop-blur-xl shadow-2xl space-y-4">
-            <p className="text-slate-300 text-xs font-medium">
+          <div className="bg-[#FFFDF9] border border-[#EFE8DE] rounded-3xl p-6 sm:p-8 shadow-sm space-y-4">
+            <p className="text-stone-600 text-xs font-medium">
               Click any panel below for instant 1-click evaluator access without entering credentials:
             </p>
 
@@ -582,20 +582,20 @@ export default function LoginScreen() {
                 <div
                   key={r.id}
                   onClick={() => handleQuickLogin(r.id)}
-                  className={`p-4 rounded-xl border border-white/10 bg-black/40 hover:bg-white/5 transition-all cursor-pointer flex items-center gap-3.5 group hover:border-violet-500/50`}
+                  className={`p-4 rounded-xl border border-[#EFE8DE] bg-[#FAF7F2] hover:bg-amber-50/50 hover:border-amber-300 transition-all cursor-pointer flex items-center gap-3.5 group shadow-xs`}
                 >
                   <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${r.color} flex items-center justify-center text-xl shadow-md flex-shrink-0`}>
                     {r.icon}
                   </div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-white text-xs font-extrabold group-hover:text-violet-300 transition-colors">
+                    <p className="text-stone-900 text-xs font-extrabold group-hover:text-amber-700 transition-colors">
                       {r.label}
                     </p>
-                    <p className="text-slate-400 text-[11px] truncate">
+                    <p className="text-stone-500 text-[11px] truncate">
                       {r.demoUser.name} · {r.demoUser.badgeId}
                     </p>
                   </div>
-                  <span className="text-slate-500 group-hover:text-white transition-colors text-xs">→</span>
+                  <span className="text-stone-400 group-hover:text-amber-600 transition-colors text-xs font-bold">→</span>
                 </div>
               ))}
             </div>
@@ -603,21 +603,21 @@ export default function LoginScreen() {
         )}
 
         {/* Global Reset Utility */}
-        <div className="mt-8 pt-5 border-t border-white/10 flex flex-col items-center justify-center gap-2 text-center">
+        <div className="mt-8 pt-5 border-t border-[#EFE8DE] flex flex-col items-center justify-center gap-2 text-center">
           <button
             onClick={handleResetData}
             disabled={resetting}
-            className="px-4 py-2 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 hover:text-rose-200 border border-rose-800/40 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
+            className="px-4 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5"
           >
             <span>🧹</span>
             <span>{resetting ? 'Wiping Cache...' : 'Wipe All Test Data & Reset to Zero'}</span>
           </button>
-          <p className="text-slate-500 text-[10px]">
+          <p className="text-stone-500 text-[10px]">
             Clears local storage journeys, resets the backend OPD queue to Token #1, and empties medical histories.
           </p>
         </div>
 
-        <p className="text-center text-slate-600 text-[10px] font-medium mt-6">
+        <p className="text-center text-stone-500 text-[10px] font-medium mt-6">
           Arogya Raksha · Powered by Supabase Realtime & PostgreSQL RLS · Google Gemini Hackathon 2026
         </p>
 

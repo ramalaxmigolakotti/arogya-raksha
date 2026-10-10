@@ -99,7 +99,7 @@ function BookTestModal({ test, onClose }: { test: { name: string; price: number;
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
       <div className="bg-white rounded-[2rem] w-full max-w-lg shadow-2xl relative overflow-hidden max-h-[90vh] overflow-y-auto">
         <button onClick={onClose} className="absolute top-5 right-5 p-2 rounded-full hover:bg-slate-100 z-10"><X className="h-5 w-5 text-slate-400" /></button>
 
@@ -191,7 +191,7 @@ function BookTestModal({ test, onClose }: { test: { name: string; price: number;
                 <p className="text-violet-600">👤 {name} • 📱 {phone}</p>
                 <p className="text-violet-600">💰 ₹{test.price} — Paid ✅</p>
               </div>
-              <button onClick={onClose} className="w-full bg-slate-900 text-white font-bold py-3 rounded-2xl">Done</button>
+              <button onClick={onClose} className="w-full bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-stone-950 font-black py-3 rounded-2xl shadow-md transition-all">Done</button>
             </div>
           )}
         </div>

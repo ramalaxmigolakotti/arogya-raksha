@@ -120,29 +120,29 @@ export default function AshaDashboardView() {
   return (
     <div className="space-y-8 animate-in fade-in duration-500 max-w-6xl mx-auto pb-12">
       {/* Role Switch Banner */}
-      <div className="bg-slate-900 text-white rounded-3xl p-4 md:p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+      <div className="bg-[#FFFDF9] text-stone-900 rounded-3xl p-4 md:p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4 border border-[#EFE8DE]">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-blue-600 flex items-center justify-center font-bold text-white">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center font-bold text-white shadow-md shadow-amber-500/20">
             <Users className="h-5 w-5" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs uppercase tracking-widest font-bold text-blue-400">Current View</span>
-              <span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-400/30 px-2 py-0.5 rounded-full font-bold">ASHA Field Desk & Village Queue</span>
+              <span className="text-xs uppercase tracking-widest font-bold text-amber-800">Current View</span>
+              <span className="text-[10px] bg-amber-100 text-amber-900 border border-amber-200 px-2 py-0.5 rounded-full font-bold">ASHA Field Desk & Village Queue</span>
             </div>
-            <p className="text-sm text-slate-300 font-medium mt-0.5">Community Field Operations • Village Appointment Queue Tracker • Doorstep Screening</p>
+            <p className="text-sm text-stone-600 font-medium mt-0.5">Community Field Operations • Village Appointment Queue Tracker • Doorstep Screening</p>
           </div>
         </div>
         <div className="flex items-center gap-2 w-full md:w-auto">
           <button
             onClick={() => setRole('patient')}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white rounded-xl text-xs font-bold transition-all border border-slate-700"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-[#FAF7F2] hover:bg-stone-100 text-stone-700 rounded-xl text-xs font-bold transition-all border border-[#EFE8DE]"
           >
             Switch to Patient
           </button>
           <button
             onClick={() => setRole('doctor')}
-            className="flex-1 md:flex-none px-4 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-all shadow-md"
+            className="flex-1 md:flex-none px-4 py-2.5 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white rounded-xl text-xs font-bold transition-all shadow-md shadow-amber-500/20"
           >
             Switch to Doctor EHR
           </button>
@@ -181,9 +181,9 @@ export default function AshaDashboardView() {
 
           <Link
             href="/dashboard/tracking"
-            className="px-4 py-3 bg-slate-900 hover:bg-slate-800 text-white rounded-2xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5"
+            className="px-4 py-3 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white rounded-2xl text-xs font-bold transition-all shadow-md shadow-amber-500/20 flex items-center gap-1.5"
           >
-            <Navigation className="h-3.5 w-3.5 text-blue-400" />
+            <Navigation className="h-3.5 w-3.5 text-white" />
             <span>Live Radar</span>
           </Link>
 
@@ -206,28 +206,28 @@ export default function AshaDashboardView() {
       </div>
 
       {/* 🌾 KILLER FEATURE: RURAL HEALTHCARE JOURNEY REALTIME RADAR ────────────────── */}
-      <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white rounded-3xl p-6 md:p-8 border border-indigo-500/30 shadow-xl space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-indigo-900/50 pb-5">
+      <div className="bg-[#FFFDF9] text-stone-900 rounded-3xl p-6 md:p-8 border border-[#EFE8DE] shadow-xl space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EFE8DE] pb-5">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg">
+            <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center font-bold text-white shadow-md shadow-amber-500/20">
               <Navigation className="h-6 w-6" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs uppercase tracking-widest font-mono font-bold text-indigo-300">
+                <span className="text-xs uppercase tracking-widest font-mono font-bold text-amber-800">
                   Rural Healthcare Journey Radar
                 </span>
-                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-2 py-0.5 rounded-full font-bold">
+                <span className="text-[10px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded-full font-bold">
                   9-Stage Live Pipeline
                 </span>
               </div>
-              <h2 className="text-2xl font-black mt-0.5">Village Patients Healthcare Tracking</h2>
+              <h2 className="text-2xl font-black text-stone-900 mt-0.5">Village Patients Healthcare Tracking</h2>
             </div>
           </div>
 
           <div className="flex items-center gap-2 text-xs">
-            <span className="text-slate-300">ASHA Assisted Bridge:</span>
-            <strong className="text-emerald-400">Lakshmi Devi (Ward 14)</strong>
+            <span className="text-stone-500">ASHA Assisted Bridge:</span>
+            <strong className="text-emerald-700">Lakshmi Devi (Ward 14)</strong>
           </div>
         </div>
 
@@ -250,35 +250,35 @@ export default function AshaDashboardView() {
             return (
               <div
                 key={j.id}
-                className="bg-slate-800/80 rounded-2xl p-5 border border-slate-700/80 space-y-4 hover:border-indigo-400/60 transition-all"
+                className="bg-[#FAF7F2] rounded-2xl p-5 border border-[#EFE8DE] space-y-4 hover:border-amber-400 transition-all shadow-sm"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-black font-mono px-2.5 py-0.5 rounded-lg bg-indigo-600 text-white">
+                    <span className="text-xs font-black font-mono px-2.5 py-0.5 rounded-lg bg-amber-500 text-white shadow-sm">
                       Token #{j.tokenNumber}
                     </span>
-                    <span className="text-xs text-indigo-300 font-mono font-bold">{j.id}</span>
+                    <span className="text-xs text-amber-800 font-mono font-bold">{j.id}</span>
                   </div>
-                  <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <span className="text-[10px] font-black uppercase px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200">
                     {j.currentStep.replace('_', ' ')}
                   </span>
                 </div>
 
                 <div>
-                  <h4 className="font-extrabold text-white text-base">
+                  <h4 className="font-extrabold text-stone-900 text-base">
                     {j.patientName} ({j.age} yrs • {j.gender})
                   </h4>
-                  <p className="text-xs text-slate-300 mt-0.5">
+                  <p className="text-xs text-stone-600 mt-0.5">
                     🏥 {j.hospitalName} • {j.doctorName} ({j.department})
                   </p>
-                  <p className="text-xs text-indigo-300 mt-1 font-medium italic">
+                  <p className="text-xs text-amber-800 mt-1 font-medium italic">
                     "{j.statusNotes}"
                   </p>
                 </div>
 
                 {/* Progress Bar (9 Stages) */}
                 <div className="space-y-1.5">
-                  <div className="flex justify-between text-[10px] text-slate-400 font-bold uppercase">
+                  <div className="flex justify-between text-[10px] text-stone-500 font-bold uppercase">
                     <span>Booked</span>
                     <span>Transit</span>
                     <span>OPD</span>
@@ -286,9 +286,9 @@ export default function AshaDashboardView() {
                     <span>Pharmacy</span>
                     <span>Dispensed</span>
                   </div>
-                  <div className="w-full bg-slate-900 rounded-full h-2 overflow-hidden border border-slate-700">
+                  <div className="w-full bg-stone-200 rounded-full h-2 overflow-hidden border border-stone-300">
                     <div
-                      className="bg-gradient-to-r from-blue-500 via-indigo-500 to-emerald-400 h-2 rounded-full transition-all duration-700"
+                      className="bg-gradient-to-r from-amber-400 via-amber-500 to-emerald-500 h-2 rounded-full transition-all duration-700"
                       style={{
                         width: `${Math.min(100, Math.max(12, ((currentStepIdx + 1) / stepOrder.length) * 100))}%`,
                       }}
@@ -322,7 +322,7 @@ export default function AshaDashboardView() {
 
       {/* 5-STEP ASHA ASSISTED BOOKING MODAL (WIZARD) ────────────────── */}
       {bookWizardOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-sm animate-in fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-stone-900/40 backdrop-blur-sm animate-in fade-in">
           <div className="bg-white rounded-3xl p-6 md:p-8 max-w-xl w-full border border-slate-200 shadow-2xl space-y-6 relative">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div className="flex items-center gap-3">
@@ -635,7 +635,7 @@ export default function AshaDashboardView() {
                   </button>
                   <button
                     onClick={() => setBookWizardOpen(false)}
-                    className="flex-1 py-3 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs rounded-xl shadow-md"
+                    className="flex-1 py-3 bg-gradient-to-r from-amber-500 to-yellow-600 hover:from-amber-600 hover:to-yellow-700 text-stone-950 font-black text-xs rounded-xl shadow-md"
                   >
                     Done
                   </button>
@@ -670,7 +670,7 @@ export default function AshaDashboardView() {
               className="p-4 rounded-2xl border border-slate-200/80 bg-slate-50/50 hover:bg-blue-50/50 transition-all space-y-2"
             >
               <div className="flex items-center justify-between">
-                <span className="text-xs font-black px-2.5 py-0.5 rounded-lg bg-slate-900 text-white">
+                <span className="text-xs font-black px-2.5 py-0.5 rounded-lg bg-amber-500 text-stone-950">
                   Token #{item.token}
                 </span>
                 <span
@@ -837,7 +837,7 @@ export default function AshaDashboardView() {
 
       {/* Action Modals */}
       {activeModal === 'household' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-md w-full space-y-4 border border-slate-200 shadow-2xl">
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
               <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center">
@@ -896,7 +896,7 @@ export default function AshaDashboardView() {
       )}
 
       {activeModal === 'risk' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-md w-full space-y-4 border border-slate-200 shadow-2xl">
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
               <div className="w-10 h-10 rounded-2xl bg-rose-50 flex items-center justify-center">
@@ -920,7 +920,7 @@ export default function AshaDashboardView() {
       )}
 
       {activeModal === 'vaccine' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-md w-full space-y-4 border border-slate-200 shadow-2xl">
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
               <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center">
@@ -952,7 +952,7 @@ export default function AshaDashboardView() {
       )}
 
       {activeModal === 'voice' && (
-        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-stone-900/40 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-white rounded-3xl p-6 max-w-md w-full space-y-5 border border-slate-200 shadow-2xl">
             <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
               <div className={`w-10 h-10 rounded-2xl flex items-center justify-center ${isRecording ? 'bg-rose-600 animate-pulse' : 'bg-blue-50'}`}>

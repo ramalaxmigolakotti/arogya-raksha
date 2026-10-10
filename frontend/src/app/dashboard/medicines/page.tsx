@@ -586,7 +586,7 @@ export default function Medicines() {
             icon="💊"
             buttonLabel="Past Orders"
           />
-          <button className="flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white px-5 py-2.5 rounded-xl font-bold shadow-lg shadow-slate-900/20 transition-all hover:-translate-y-0.5">
+          <button className="flex items-center gap-2 bg-gradient-to-r from-amber-500 to-yellow-500 hover:from-amber-600 hover:to-yellow-600 text-white px-5 py-2.5 rounded-xl font-bold shadow-md shadow-amber-500/20 transition-all hover:-translate-y-0.5">
             <PlusSquare className="h-5 w-5" />
             Add Prescription
           </button>

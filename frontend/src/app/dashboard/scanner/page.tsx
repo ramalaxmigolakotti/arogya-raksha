@@ -497,12 +497,12 @@ export default function MedicineScanner() {
               </div>
             ) : (
               <div className="space-y-3">
-                <div className="relative rounded-2xl overflow-hidden bg-slate-900 border border-slate-200">
-                  <img src={imagePreview} alt="Medicine" className="w-full h-64 object-contain bg-slate-950" />
+                <div className="relative rounded-2xl overflow-hidden bg-[#FAF7F2] border border-[#EFE8DE] shadow-xs">
+                  <img src={imagePreview} alt="Medicine" className="w-full h-64 object-contain bg-[#FAF7F2]" />
                   
                   {/* Status overlay badge */}
-                  <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-slate-900/80 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-white text-xs font-bold">
-                    <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping"></span>
+                  <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-[#FFFDF9]/95 backdrop-blur-md px-3 py-1.5 rounded-xl border border-[#EFE8DE] text-stone-900 text-xs font-bold shadow-sm">
+                    <span className="h-2 w-2 rounded-full bg-emerald-500 animate-ping"></span>
                     <span>{enhancing ? 'Enhancing…' : (showEnhanced ? '⚡ Sharpened & De-Blurred' : 'Original Raw Photo')}</span>
                   </div>
 
@@ -658,13 +658,13 @@ export default function MedicineScanner() {
 
               {/* Forensic Telemetry Card */}
               {result.forensicAnalysis && (
-                <div className="bg-gradient-to-r from-slate-900 to-indigo-950 text-white rounded-2xl p-4 border border-indigo-500/30 shadow-md">
+                <div className="bg-[#FFFDF9] text-stone-900 rounded-2xl p-4 border border-[#EFE8DE] shadow-sm">
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">🔬</span>
                       <div>
-                        <p className="text-xs font-black tracking-wide uppercase text-indigo-300">Forensic Vision & Dataset Match</p>
-                        <p className="text-[11px] text-slate-300">
+                        <p className="text-xs font-black tracking-wide uppercase text-amber-800">Forensic Vision & Dataset Match</p>
+                        <p className="text-[11px] text-stone-600">
                           {result.forensicAnalysis.forensicReconstructed || result.forensicAnalysis.isBlurry
                             ? 'Reconstructed through packaging blur & reflective silver blister foil'
                             : 'High-fidelity visual OCR & 253K Indian Medicines match'}
@@ -673,8 +673,8 @@ export default function MedicineScanner() {
                     </div>
                     <span className={`text-[10px] font-black uppercase px-2.5 py-1 rounded-full border ${
                       result.forensicAnalysis.confidence === 'high'
-                        ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40'
-                        : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40'
+                        ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                        : 'bg-amber-100 text-amber-800 border-amber-200'
                     }`}>
                       {result.forensicAnalysis.confidence || 'Verified'}
                     </span>

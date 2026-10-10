@@ -58,14 +58,14 @@ export default function Header() {
   );
 
   return (
-    <header className="h-20 bg-white/90 dark:bg-slate-900/90 backdrop-blur-xl border-b border-slate-200/60 dark:border-slate-700/60 fixed top-0 right-0 left-0 lg:left-64 z-30 flex items-center justify-between px-4 md:px-8 shadow-sm transition-colors duration-300">
+    <header className="h-20 bg-[#FFFDF9]/95 backdrop-blur-xl border-b border-[#EFE8DE] fixed top-0 right-0 left-0 lg:left-64 z-30 flex items-center justify-between px-4 md:px-8 shadow-xs transition-colors duration-300">
       {/* Search Bar */}
       <div className="relative flex-1 max-w-xl group ml-12 lg:ml-0">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-emerald-500 transition-colors" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-stone-400 group-focus-within:text-amber-500 transition-colors" />
         <input
           type="text"
           placeholder={t('searchPlaceholder')}
-          className="w-full pl-12 pr-5 py-3 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 focus:bg-white dark:focus:bg-slate-700 focus:border-emerald-400 focus:ring-4 focus:ring-emerald-500/10 rounded-xl text-sm text-slate-700 dark:text-slate-200 placeholder:text-slate-400 transition-all outline-none font-medium"
+          className="w-full pl-12 pr-5 py-3 bg-[#FAF7F2] border border-[#EFE8DE] focus:bg-white focus:border-amber-400 focus:ring-4 focus:ring-amber-500/10 rounded-xl text-sm text-stone-800 placeholder:text-stone-400 transition-all outline-none font-medium"
         />
       </div>
 
@@ -148,11 +148,11 @@ export default function Header() {
 
           {/* 6-Role Dropdown Menu */}
           {isRoleOpen && (
-            <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 p-2 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-              <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div className="absolute right-0 mt-2 w-72 sm:w-80 bg-[#FFFDF9] border border-[#EFE8DE] rounded-2xl shadow-xl z-50 p-2 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+              <div className="px-3 py-2 border-b border-[#EFE8DE] flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-black text-slate-900 dark:text-white">Switch Role & View</p>
-                  <p className="text-[10px] text-slate-400 font-medium">Instantly updates the page to selected role</p>
+                  <p className="text-xs font-black text-stone-900">Switch Role & View</p>
+                  <p className="text-[10px] text-stone-500 font-medium">Instantly updates the page to selected role</p>
                 </div>
                 <span className="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold">
                   6 Roles
@@ -211,8 +211,8 @@ export default function Header() {
           </button>
 
           {isLangOpen && (
-            <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-2xl z-50 p-2 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
-              <div className="p-2 border-b border-slate-100 dark:border-slate-800">
+            <div className="absolute right-0 mt-2 w-64 bg-[#FFFDF9] border border-[#EFE8DE] rounded-2xl shadow-xl z-50 p-2 overflow-hidden animate-in fade-in zoom-in-95 duration-150">
+              <div className="p-2 border-b border-[#EFE8DE]">
                 <input
                   type="text"
                   placeholder="Search language..."

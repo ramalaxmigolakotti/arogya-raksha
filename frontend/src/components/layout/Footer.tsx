@@ -136,8 +136,8 @@ export default function Footer() {
         {/* Bottom Bar with Sarvam Branding */}
         <div className="mt-10 pt-6 border-t border-slate-200">
           {/* Sarvam AI Stack Banner */}
-          <div className="flex flex-wrap items-center justify-center gap-2 mb-5 p-4 bg-gradient-to-r from-slate-900 to-slate-800 rounded-2xl">
-            <span className="text-xs font-bold text-slate-400 mr-1">🤖 AI Powered by</span>
+          <div className="flex flex-wrap items-center justify-center gap-2 mb-5 p-4 bg-[#FAF7F2] border border-[#EFE8DE] rounded-2xl shadow-sm">
+            <span className="text-xs font-bold text-stone-600 mr-1">🤖 AI Powered by</span>
             {[
               { label: '✦ Sarvam AI', gradient: 'from-blue-400 via-violet-500 to-pink-500' },
               { label: '⚡ Sarvam Models', gradient: 'from-amber-400 via-orange-500 to-rose-500' },
