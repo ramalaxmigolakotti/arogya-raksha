@@ -60,6 +60,9 @@ Comprehensive Indian pharmaceutical directory with price comparisons, dosage ind
 ### 📊 9 Clinical ML Health Predictors
 Trained statistical/ML inference for Diabetes, Heart Disease, Dengue Fever, Kidney (CKD), Liver, Lung, Cancer, Asthma, and Mental Health.
 
+### 📈 AI Health Analytics & Epidemiological Surveillance
+Interactive longitudinal patient vitals telemetry (BP, Heart Rate, SpO2, Glucose) paired with automated AI disease cluster outbreak early warning system.
+
 </td>
 <td width="50%">
 

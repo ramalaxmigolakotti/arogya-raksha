@@ -64,6 +64,7 @@ export default function Sidebar() {
     { icon: LayoutDashboard, label: t('dashboard'),        href: '/dashboard' },
     { icon: Navigation,      label: 'Live Tracking',       href: '/dashboard/tracking', badge: 'LIVE' },
     { icon: Calendar,        label: 'Appointments & Flow', href: '/dashboard/appointments', badge: 'SYNC' },
+    { icon: Activity,        label: 'Health Analytics',    href: '/dashboard/analytics', badge: 'AI' },
     { icon: Heart,           label: t('myMedicalProfile'), href: '/dashboard/profile', profile: true },
     { icon: Bot,             label: t('askAIDoctor'),       href: '/dashboard/ai' },
     { icon: Stethoscope,     label: t('symptomChecker'),    href: '/dashboard/symptoms' },
@@ -95,6 +96,7 @@ export default function Sidebar() {
   const doctorNav: NavItem[] = [
     { icon: LayoutDashboard,    label: 'Doctor Dashboard',    href: '/dashboard' },
     { icon: Navigation,         label: 'Live Queue Radar',    href: '/dashboard/tracking', badge: 'Live' },
+    { icon: Activity,           label: 'Clinical Analytics',  href: '/dashboard/analytics', badge: 'AI' },
     { icon: ClipboardList,      label: 'Patient Queue',       href: '/dashboard', badge: 'Live' },
     { icon: BriefcaseMedical,   label: 'EHR / Records',       href: '/dashboard/doctor-dashboard' },
     { icon: Calendar,           label: 'Appointments',        href: '/dashboard' },
@@ -109,6 +111,8 @@ export default function Sidebar() {
 
   const hospitalAdminNav: NavItem[] = [
     { icon: LayoutDashboard, label: 'Hospital Operations', href: '/dashboard' },
+    { icon: BedDouble,       label: 'Ward & Inpatient Ops', href: '/dashboard/hospital-management', badge: 'Live' },
+    { icon: Activity,        label: 'Command Analytics',   href: '/dashboard/analytics', badge: 'AI' },
     { icon: Navigation,      label: 'Live Journey Radar',  href: '/dashboard/tracking', badge: 'Live' },
     { icon: UserCheck,       label: 'OPD Check-In Desk',   href: '/dashboard' },
     { icon: Stethoscope,     label: 'Doctor Availability', href: '/dashboard' },
